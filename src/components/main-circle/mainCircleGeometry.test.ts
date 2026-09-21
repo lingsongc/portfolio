@@ -10,7 +10,7 @@ import {
 
 const layout: MainCircleSceneLayout = {
     viewportWidth: 1440, viewportHeight: 900, homeCircleWidth: 352,
-    experienceCenter: { top: 602, left: 1047 }, navigationRailLeft: 1320,
+    experienceCenter: { top: 602, left: 1047 },
 };
 
 // Verifies responsive endpoints and direct travel without rendering the page.
@@ -26,7 +26,7 @@ describe("main circle geometry", () => {
         expect(projectCircleSize(1440, 900)).toBeCloseTo(489.6);
         expect(projectCircleSize(768, 900)).toBeCloseTo(442.368);
         expect(skillsCircleSize(1440, 900)).toBe(810);
-        expect(skillsCircleLeft(1440, 900, 1320)).toBe(870);
+        expect(skillsCircleLeft(1440, 900)).toBe(981);
         expect(contactCircleSize(1440, 900)).toBeCloseTo(504);
     });
 
@@ -37,17 +37,17 @@ describe("main circle geometry", () => {
             about: { width: 1440, top: 450, left: -144 },
             experience: { width: 621, top: 602, left: 1047 },
             projects: { width: 489.6, top: 450, left: 720 },
-            skills: { width: 810, top: 450, left: 870 },
+            skills: { width: 810, top: 450, left: 981 },
             contact: { top: 450, left: 720 },
         });
         expect(endpoints.contact.width).toBeCloseTo(504);
     });
 
     it("uses current measured layout inputs", () => {
-        const measured = { ...layout, homeCircleWidth: 300, experienceCenter: { top: 540, left: 980 }, navigationRailLeft: 1260 };
+        const measured = { ...layout, homeCircleWidth: 300, experienceCenter: { top: 540, left: 980 } };
         expect(resolveMainCircleSceneEndpoint("home", measured).width).toBe(300);
         expect(resolveMainCircleSceneEndpoint("experience", measured)).toMatchObject({ top: 540, left: 980 });
-        expect(resolveMainCircleSceneEndpoint("skills", measured).left).toBe(810);
+        expect(resolveMainCircleSceneEndpoint("skills", measured).left).toBe(981);
     });
 
     it("interpolates one-second travel with shared clamped easing", () => {

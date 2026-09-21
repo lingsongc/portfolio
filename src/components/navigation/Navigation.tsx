@@ -1,4 +1,4 @@
-import { type CSSProperties, type KeyboardEvent, type MouseEvent, type RefObject } from "react";
+import { type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import { sceneOrder, type SceneId, type ScenePhase } from "../../types/scene";
 import { navigationSections } from "./navigationSections";
 
@@ -12,13 +12,11 @@ export type NavigationSceneControl = {
 };
 
 type NavigationProps = {
-    railRef: RefObject<HTMLDivElement | null>;
     sceneControl: NavigationSceneControl;
 };
 
 // Renders the persistent section navigation and its matching visual rail.
 export function Navigation({
-    railRef,
     sceneControl,
 }: NavigationProps) {
     const currentYear = new Date().getFullYear();
@@ -57,7 +55,7 @@ export function Navigation({
 
     return (
         <>
-            <div ref={railRef} className="navigation-rail">
+            <div className="navigation-rail">
                 <span className="navigation-rail-slot" aria-hidden="true" />
 
                 <small className={`navigation-copyright${copyrightClasses}`}>

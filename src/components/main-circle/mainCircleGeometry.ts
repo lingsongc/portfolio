@@ -9,7 +9,6 @@ export type MainCircleSceneLayout = {
     viewportHeight: number;
     homeCircleWidth: number;
     experienceCenter: { top: number; left: number };
-    navigationRailLeft: number;
 };
 
 // Mirrors the CSS clamp used for the Home circle at the current root font size.
@@ -41,9 +40,10 @@ export function skillsCircleSize(viewportWidth: number, viewportHeight: number) 
     return Math.min(viewportWidth, viewportHeight) * 0.9;
 }
 
-export function skillsCircleLeft(viewportWidth: number, viewportHeight: number, railLeft: number) {
+// Places the circle's left edge at 40 percent of the viewport and lets its right side clip naturally.
+export function skillsCircleLeft(viewportWidth: number, viewportHeight: number) {
     const circleSize = skillsCircleSize(viewportWidth, viewportHeight);
-    return railLeft - (viewportHeight - circleSize) / 2 - circleSize / 2;
+    return viewportWidth * 0.4 + circleSize / 2;
 }
 
 export function contactCircleSize(viewportWidth: number, viewportHeight: number) {
@@ -63,7 +63,7 @@ export function resolveMainCircleSceneEndpoint(sceneId: SceneId, layout: MainCir
         case "projects":
             return { width: projectCircleSize(viewportWidth, viewportHeight), top: viewportHeight / 2, left: viewportWidth / 2 };
         case "skills":
-            return { width: skillsCircleSize(viewportWidth, viewportHeight), top: viewportHeight / 2, left: skillsCircleLeft(viewportWidth, viewportHeight, layout.navigationRailLeft) };
+            return { width: skillsCircleSize(viewportWidth, viewportHeight), top: viewportHeight / 2, left: skillsCircleLeft(viewportWidth, viewportHeight) };
         case "contact":
             return { width: contactCircleSize(viewportWidth, viewportHeight), top: viewportHeight / 2, left: viewportWidth / 2 };
         default:

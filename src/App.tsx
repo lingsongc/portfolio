@@ -31,7 +31,6 @@ export default function App() {
     const activeSceneScrollerRef = useRef<HTMLDivElement>(null);
     const backgroundGridRef = useRef<BackgroundGridHandle>(null);
     const experienceOrbitRef = useRef<HTMLElement>(null);
-    const navigationRailRef = useRef<HTMLDivElement>(null);
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
@@ -56,7 +55,6 @@ export default function App() {
     // Measures the current viewport-owned inputs needed by a requested endpoint.
     const resolveCircleEndpoint = useCallback((sceneId: SceneId) => {
         const experienceBounds = experienceOrbitRef.current?.getBoundingClientRect();
-        const navigationBounds = navigationRailRef.current?.getBoundingClientRect();
         const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
         return resolveMainCircleSceneEndpoint(sceneId, {
             viewportWidth: window.innerWidth,
@@ -68,7 +66,6 @@ export default function App() {
                     left: experienceBounds.left + experienceBounds.width / 2,
                 }
                 : { top: window.innerHeight * 0.64, left: window.innerWidth / 2 },
-            navigationRailLeft: navigationBounds?.left ?? window.innerWidth,
         });
     }, []);
 
@@ -128,7 +125,6 @@ export default function App() {
             <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} />
 
             <Navigation
-                railRef={navigationRailRef}
                 sceneControl={{
                     busy: slideshow.busy,
                     currentSceneId: slideshow.currentSceneId,
