@@ -127,7 +127,7 @@ function SkillMarquee({
 // Keeps differently sized sequences moving at a similar reading speed and slows the dense first row.
 function skillMarqueeDuration(sequence: typeof skills, firstRow: boolean) {
     const sequenceWeight = sequence.reduce((weight, skill) => weight + skill.name.length + 10, 0);
-    const normalizedDuration = Math.max(36, sequenceWeight * 0.26);
+    const normalizedDuration = Math.max(72, sequenceWeight * 0.52);
     return Math.round(normalizedDuration * (firstRow ? 1.15 : 1));
 }
 
