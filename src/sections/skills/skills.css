@@ -1,17 +1,212 @@
-/* Skills uses a minimal lifecycle fade until its final composition is approved. */
+/* Skills balances a quiet introduction with angled, circle-clipped marquee rows. */
 
-.skill-container-lifecycle {
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 500ms ease, visibility 0s linear 500ms;
+.skill-container {
+    position: relative;
 }
 
-.skill-container-lifecycle.skill-content-visible {
+.skill-introduction {
+    position: relative;
+    z-index: 4;
+    display: grid;
+    width: min(24rem, 30vw);
+    gap: 1.5rem;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-1.5rem);
+    transition: opacity 500ms ease, transform 500ms ease, visibility 0s linear 500ms;
+}
+
+.skill-content-visible .skill-introduction {
     visibility: visible;
     opacity: 1;
+    transform: translateX(0);
     transition-delay: 0s;
 }
 
+.skill-description {
+    color: var(--colour-text);
+    font-size: var(--text-body);
+    font-weight: var(--body-font-weight);
+    line-height: var(--body-line-height);
+}
+
+.skill-category-list {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    color: var(--colour-text-muted);
+    font-size: var(--text-small);
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    list-style: none;
+    text-transform: uppercase;
+}
+
+.skill-category-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.skill-category-list li::before {
+    width: 1.5rem;
+    height: 0.125rem;
+    background-color: var(--colour-accent);
+    content: "";
+}
+
+.skill-circle {
+    position: fixed;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    width: min(90vw, 90vh);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    color: var(--colour-background);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+    transition: opacity 500ms ease, transform 500ms ease;
+    pointer-events: auto;
+    container-type: size;
+}
+
+.skill-content-visible .skill-circle {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.skill-marquee-stack {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    width: 150%;
+    height: 80%;
+    align-content: space-between;
+    transform: translate(-50%, -50%) rotate(-5deg);
+}
+
+.skill-marquee {
+    overflow: hidden;
+    padding-block: 1cqb;
+}
+
+.skill-marquee-track {
+    display: flex;
+    width: max-content;
+    animation-duration: var(--skill-marquee-duration, 30s);
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    animation-play-state: paused;
+    will-change: transform;
+}
+
+.skill-content-visible .skill-marquee-left .skill-marquee-track {
+    animation-name: skill-marquee-left;
+    animation-play-state: running;
+}
+
+.skill-content-visible .skill-marquee-right .skill-marquee-track {
+    animation-name: skill-marquee-right;
+    animation-play-state: running;
+}
+
+.skill-marquee:is(:hover, :focus) .skill-marquee-track { animation-play-state: paused; }
+
+.skill-marquee:focus-visible {
+    outline: 0.125rem solid var(--colour-accent);
+    outline-offset: -0.125rem;
+}
+
+.skill-marquee-sequence {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: clamp(1.6rem, 4cqi, 4rem);
+    margin: 0;
+    padding: 0 clamp(0.8rem, 2cqi, 2rem);
+    list-style: none;
+}
+
+.skill-marquee-item {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: clamp(0.65rem, 1.2cqi, 1.1rem);
+    font-family: var(--font-title);
+    font-size: clamp(1.1rem, 3.2cqi, 2.8rem);
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.skill-marquee-item::after {
+    width: 0.32rem;
+    aspect-ratio: 1;
+    margin-left: clamp(0.9rem, 2cqi, 2rem);
+    border-radius: 50%;
+    background-color: currentColor;
+    content: "";
+}
+
+.skill-marquee-logo {
+    width: clamp(1.6rem, 4.4cqi, 3.75rem);
+    height: clamp(1.6rem, 4.4cqi, 3.75rem);
+    flex: none;
+}
+
+@keyframes skill-marquee-left {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+@keyframes skill-marquee-right {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
+}
+
+@media (max-width: 64rem) {
+    .skill-introduction {
+        align-self: start;
+        width: min(30rem, calc(100vw - 2 * var(--section-padding-inline) - 4rem));
+    }
+
+    .skill-description { max-width: 24rem; }
+}
+
+@media (max-width: 48rem) {
+    .skill-container { align-items: start; }
+
+    .skill-introduction {
+        width: calc(100% - 3.5rem);
+        gap: 0.75rem;
+    }
+
+    .skill-category-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 1rem;
+    }
+
+    .skill-category-list li::before { width: 0.75rem; }
+
+    .skill-marquee-stack {
+        width: 190%;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .skill-container-lifecycle { transition: none; }
+    .skill-introduction,
+    .skill-circle { transition: none; }
+
+    .skill-marquee-track {
+        animation: none !important;
+        transform: translateX(-12%);
+        will-change: auto;
+    }
 }

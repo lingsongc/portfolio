@@ -198,7 +198,10 @@ export default function App() {
                     headingFocusTargetId="skill-title"
                     overflowRef={activeSceneScrollerRef}
                 >
-                    <Skills lifecycle={slideshow.lifecycleFor("skills")} />
+                    <Skills
+                        circleGeometry={mainCircle.geometry}
+                        lifecycle={slideshow.lifecycleFor("skills")}
+                    />
                 </ScenePanel>
 
                 <ScenePanel
