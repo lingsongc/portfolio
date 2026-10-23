@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 
 export type ScenePanelProps = {
     active: boolean;
+    interactive?: boolean;
     children: ReactNode;
     headingFocusTargetId: string;
     overflowRef?: RefObject<HTMLDivElement | null>;
@@ -12,6 +13,7 @@ export type ScenePanelProps = {
 // Provides one stacked scene with active semantics and local overflow ownership.
 export function ScenePanel({
     active,
+    interactive = active,
     children,
     headingFocusTargetId,
     overflowRef,
@@ -39,7 +41,7 @@ export function ScenePanel({
         <div
             className={`scene-panel${active ? " scene-panel-active" : ""}${scrollable ? " scene-panel-scrollable" : ""}`}
             aria-hidden={!active}
-            inert={!active}
+            inert={!active || !interactive}
         >
             <ScenePanelOverlayContext value={overlayHost}>
                 <div ref={localOverflowRef} className="scene-panel-overflow" aria-labelledby={headingFocusTargetId}>

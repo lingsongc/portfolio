@@ -65,7 +65,8 @@
     aspect-ratio: 1;
     overflow: hidden;
     border-radius: 50%;
-    color: var(--colour-background);
+    color: var(--colour-text);
+    background-color: rgb(18 8 24 / 58%);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.96);
     transition: opacity 500ms ease, transform 500ms ease;
@@ -104,17 +105,17 @@
     will-change: transform;
 }
 
-.skill-content-visible .skill-marquee-left .skill-marquee-track {
+.skill-marquee-left .skill-marquee-track {
     animation-name: skill-marquee-left;
-    animation-play-state: running;
 }
 
-.skill-content-visible .skill-marquee-right .skill-marquee-track {
+.skill-marquee-right .skill-marquee-track {
     animation-name: skill-marquee-right;
-    animation-play-state: running;
 }
 
-.skill-marquee:is(:hover, :focus) .skill-marquee-track { animation-play-state: paused; }
+.skill-motion-active .skill-marquee-track { animation-play-state: running; }
+
+.skill-motion-active .skill-marquee:is(:hover, :focus-within) .skill-marquee-track { animation-play-state: paused; }
 
 .skill-marquee:focus-visible {
     outline: 0.125rem solid var(--colour-accent);

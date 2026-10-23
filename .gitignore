@@ -21,3 +21,5 @@ node_modules/
 dist/
 
 references/
+docs/superpowers
+*ASSETS.md

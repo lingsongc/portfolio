@@ -7,13 +7,12 @@
 
 .contact-orbit {
     position: absolute;
-    z-index: 3;
-    top: 50%;
-    left: 50%;
+    /* Leave stacking to the blob and label layers so the moon sits between them. */
+    top: calc(50% - min(56vw, 56vh) / 2);
+    left: calc(50% - min(56vw, 56vh) / 2);
     width: min(56vw, 56vh);
     border-radius: 50%;
     aspect-ratio: 1;
-    transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
@@ -25,14 +24,21 @@
     justify-items: center;
     gap: 0.75rem;
     text-align: center;
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+    background-color: rgb(18 8 24 / 78%);
+    opacity: 0;
+    transition: opacity 500ms ease;
 }
 
+.contact-content-visible .contact-content { opacity: 1; }
+
 .contact-description {
-    color: var(--colour-background);
+    color: var(--colour-text);
 }
 
 .contact-action {
-    color: var(--colour-background);
+    color: var(--colour-text);
     font-weight: 700;
     text-underline-offset: 0.25rem;
 }
@@ -40,7 +46,6 @@
 .contact-blob-layer,
 .contact-link-layer {
     position: absolute;
-    z-index: 2;
     inset: 0;
     opacity: 0;
     visibility: hidden;
@@ -49,8 +54,11 @@
 }
 
 .contact-blob-layer {
+    z-index: 1;
     filter: url("#contact-goo");
 }
+
+.contact-link-layer { z-index: 3; }
 
 .contact-blob-center,
 .contact-satellite {
@@ -63,7 +71,7 @@
     z-index: 1;
 }
 
-.contact-blob-center { inset: 0; }
+.contact-blob-center { inset: 2px; }
 
 .contact-satellite,
 .contact-link {
@@ -112,5 +120,6 @@
     .contact-blob-layer,
     .contact-link-layer,
     .contact-satellite,
-    .contact-link { transition: none; }
+    .contact-link,
+    .contact-content { transition: none; }
 }

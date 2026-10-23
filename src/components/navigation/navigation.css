@@ -297,3 +297,7 @@
 
     .navigation-copyright-visible { transition: none; }
 }
+/* Reserve compact viewports for the scene controls and meaningful content. */
+@media (max-width: 48rem), (max-height: 32rem) {
+    .navigation-copyright { display: none; }
+}

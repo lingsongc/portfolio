@@ -174,7 +174,10 @@
 .experience-highlight-marker::after {
     border: 2px solid var(--colour-accent);
     animation: experience-highlight-pulse 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    animation-play-state: paused;
 }
+
+.experience-motion-active .experience-highlight-marker::after { animation-play-state: running; }
 
 .experience-highlights li:nth-child(2) .experience-highlight-marker::after { animation-delay: 900ms; }
 .experience-highlights li:nth-child(3) .experience-highlight-marker::after { animation-delay: 1800ms; }
@@ -341,7 +344,10 @@
 .experience-orbit-scroll-indicator-visible {
     opacity: 1;
     animation: experience-orbit-scroll-indicator 1.6s ease-in-out infinite;
+    animation-play-state: paused;
 }
+
+.experience-motion-active .experience-orbit-scroll-indicator-visible { animation-play-state: running; }
 
 @keyframes experience-orbit-scroll-indicator {
     0%,

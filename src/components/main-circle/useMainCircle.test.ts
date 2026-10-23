@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ImageDescriptor } from "../../types/images";
-import { resolveImageState } from "./useMainCircle";
+import { resolveImageState, updateSceneImage } from "./useMainCircle";
 
 const about: ImageDescriptor = { src: "/about.jpg", alt: "" };
 const experience: ImageDescriptor = { src: "/experience.jpg", alt: "" };
@@ -13,10 +13,27 @@ describe("main circle controller", () => {
         })).toEqual({ image: about, imageVisible: false });
     });
 
-    it("stages the destination invisibly while moving", () => {
+    it("retains the hidden outgoing image throughout movement", () => {
         expect(resolveImageState({ about, experience }, {
             currentSceneId: "about", requestedSceneId: "experience", phase: "moving",
-        })).toEqual({ image: experience, imageVisible: false });
+        })).toEqual({ image: about, imageVisible: false });
+    });
+
+    it("leaves image-free scenes on the persistent moon", () => {
+        for (const currentSceneId of ["skills", "contact"] as const) {
+            for (const phase of ["opening", "idle"] as const) {
+                expect(resolveImageState({ about }, {
+                    currentSceneId, requestedSceneId: null, phase,
+                })).toEqual({ image: null, imageVisible: false });
+            }
+        }
+    });
+
+    it("clears a withdrawn image without removing other scene images", () => {
+        const registry = { about, experience };
+        expect(updateSceneImage(registry, "about", null)).toEqual({ experience });
+        expect(registry.about).toBe(about);
+        expect(updateSceneImage(registry, "about", about)).toBe(registry);
     });
 
     it("reveals the current image while opening and idle", () => {

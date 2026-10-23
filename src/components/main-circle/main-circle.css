@@ -10,6 +10,7 @@
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
+    box-shadow: 1.5rem 2rem 3rem rgb(0 0 0 / 35%);
 }
 
 .main-circle-mask {
@@ -20,18 +21,58 @@
     background-color: var(--colour-image-blank);
 }
 
-.main-circle-image {
+.main-circle-fallback,
+.main-circle-image,
+.main-circle-photo {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* The NASA frame includes a small black margin around its lunar disk. */
+.main-circle-fallback {
+    filter: grayscale(1);
+    transform: scale(1.06);
+}
+
+.main-circle-image {
+    overflow: hidden;
+    border-radius: inherit;
+    background-color: var(--colour-image-blank);
     opacity: 0;
     transition: opacity 500ms ease;
 }
 
 .main-circle-image-visible { opacity: 1; }
 
+.circle-lighting {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    opacity: 0.82;
+    pointer-events: none;
+}
+
+.circle-lighting-subtle { opacity: 0.38; }
+
+.main-circle-rim {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    pointer-events: none;
+}
+
+.main-circle-rim-visible { opacity: 1; }
+
 @media (prefers-reduced-motion: reduce) {
-    .main-circle-image { transition: none; }
+    .main-circle-image,
+    .main-circle-rim { transition: none; }
 }

@@ -38,7 +38,7 @@ export function Contact({ lifecycle }: ContactProps) {
     }, []);
 
     return (
-        <section id="contact" className="contact-container" aria-labelledby="contact-title">
+        <section id="contact" className={`contact-container${visible ? " contact-content-visible" : ""}`} aria-labelledby="contact-title">
             <div ref={orbitRef} className={`contact-orbit${visible ? " contact-split-visible" : ""}`}>
                 <svg width="0" height="0" aria-hidden="true">
                     <defs>

@@ -31,6 +31,14 @@
     white-space: nowrap;
 }
 
+.project-title,
+.project-detail-link {
+    opacity: 0;
+    transition: opacity 500ms ease;
+}
+
+.project-copy-visible :is(.project-title, .project-detail-link) { opacity: 1; }
+
 .project-ring {
     --project-stage-one-size: var(--project-ring-1-size);
     --project-stage-two-size: var(--project-ring-1-size);
@@ -210,6 +218,7 @@
 }
 
 .project-link {
+    position: relative;
     display: grid;
     width: var(--project-planet-size);
     aspect-ratio: 1;
@@ -251,7 +260,7 @@
     aspect-ratio: 1;
     opacity: 0;
     transform: translate(-50%, -50%);
-    transition: opacity 0s linear 500ms;
+    transition: opacity 500ms ease;
     pointer-events: none;
 }
 
@@ -312,7 +321,18 @@
     .project-title { font-size: clamp(2.5rem, 12vw, 4rem); }
 }
 
+@media (max-height: 32rem) {
+    .project-title {
+        top: 1rem;
+        font-size: clamp(2rem, 8vh, 3rem);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .project-title,
+    .project-detail-link,
+    .project-selected-content { transition: none; }
+
     .project-content-visible .project-ring::before,
     .project-content-visible .project-item,
     .project-content-exiting .project-ring::before,

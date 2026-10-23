@@ -32,7 +32,7 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
 
     return (
         <section
-            className="project-container"
+            className={`project-container${transitionState === "visible" ? " project-copy-visible" : ""}`}
             aria-labelledby="project-title"
         >
             <h2 id="project-title" className="project-title" tabIndex={-1}>Projects</h2>

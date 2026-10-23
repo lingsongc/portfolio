@@ -144,6 +144,7 @@ export default function App() {
 
                 <ScenePanel
                     active={slideshow.activeSceneId === "home"}
+                    interactive={!slideshow.busy}
                     headingFocusTargetId="home-title"
                     overflowRef={activeSceneScrollerRef}
                 >
@@ -155,6 +156,7 @@ export default function App() {
 
                 <ScenePanel
                     active={slideshow.activeSceneId === "about"}
+                    interactive={!slideshow.busy}
                     headingFocusTargetId="about-title"
                     overflowRef={activeSceneScrollerRef}
                 >
@@ -166,6 +168,7 @@ export default function App() {
 
                 <ScenePanel
                     active={slideshow.activeSceneId === "experience"}
+                    interactive={!slideshow.busy}
                     headingFocusTargetId="experience-title"
                     overflowRef={activeSceneScrollerRef}
                     scrollable={false}
@@ -179,6 +182,7 @@ export default function App() {
 
                 <ScenePanel
                     active={slideshow.activeSceneId === "projects"}
+                    interactive={!slideshow.busy}
                     headingFocusTargetId="project-title"
                     overflowRef={activeSceneScrollerRef}
                     scrollable={false}
@@ -191,6 +195,7 @@ export default function App() {
 
                 <ScenePanel
                     active={slideshow.activeSceneId === "skills"}
+                    interactive={!slideshow.busy}
                     headingFocusTargetId="skill-title"
                     overflowRef={activeSceneScrollerRef}
                 >
@@ -202,6 +207,7 @@ export default function App() {
 
                 <ScenePanel
                     active={slideshow.activeSceneId === "contact"}
+                    interactive={!slideshow.busy}
                     headingFocusTargetId="contact-title"
                     overflowRef={activeSceneScrollerRef}
                 >
