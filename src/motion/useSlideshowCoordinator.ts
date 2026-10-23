@@ -149,6 +149,7 @@ export function useSlideshowCoordinator() {
     return { ...state, activeSceneId: state.phase === "moving" ? null : state.currentSceneId, busy: state.phase !== "idle", lifecycleFor, reducedMotion, requestScene };
 }
 
+// Creates the completed scene state used by initialization and recovery.
 export function createSceneTransitionState(currentSceneId: SceneId): SceneTransitionState {
     return { currentSceneId, direction: null, phase: "idle", requestedSceneId: null };
 }
@@ -171,6 +172,7 @@ export function requestSceneTransition(state: SceneTransitionState, request: Sce
     return { result, state: { currentSceneId: state.currentSceneId, direction, phase: "closing" as const, requestedSceneId: destinationSceneId } };
 }
 
+// Advances one completed phase without activating intermediate scenes.
 export function advanceSceneTransition(state: SceneTransitionState): SceneTransitionState {
     if (state.phase === "closing") return { ...state, phase: "moving" };
     if (state.phase === "moving") return { ...state, currentSceneId: state.requestedSceneId, phase: "opening" };
@@ -178,7 +180,11 @@ export function advanceSceneTransition(state: SceneTransitionState): SceneTransi
     return state;
 }
 
+// Accepts only known scene hashes so callers can recover invalid URLs safely.
 export function sceneIdFromHash(hash: string): SceneId | null { const candidate = hash.replace(/^#/, ""); return sceneOrder.find((sceneId) => sceneId === candidate) ?? null; }
+// Initializes missing or invalid hashes to the completed Home scene.
 export function initialSceneIdFromHash(hash: string): SceneId { return sceneIdFromHash(hash) ?? "home"; }
+// Changes the scene hash while preserving the current route and query string.
 export function sceneUrl(sceneId: SceneId, location: Pick<Location, "pathname" | "search">) { return `${location.pathname}${location.search}#${sceneId}`; }
+// Bounds clock progress so delayed frames cannot overshoot the destination.
 function clamp(value: number, minimum: number, maximum: number) { return Math.min(Math.max(value, minimum), maximum); }

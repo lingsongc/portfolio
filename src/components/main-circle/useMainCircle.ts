@@ -1,4 +1,5 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { preload } from "react-dom";
 import type { ImageDescriptor } from "../../types/images";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
 import type { SceneId, ScenePhase } from "../../types/scene";
@@ -62,9 +63,15 @@ export function useMainCircle({
         setImages((current) => updateSceneImage(current, sceneId, image));
     }, []);
 
+    // Starts the destination download during closing without exposing it over the moon.
+    useEffect(() => {
+        const requestedImage = requestedSceneId ? images[requestedSceneId] : null;
+        if (requestedImage) preload(requestedImage.src, { as: "image" });
+    }, [images, requestedSceneId]);
+
     const imageState = useMemo(() => resolveImageState(images, {
-        currentSceneId, requestedSceneId, phase,
-    }), [currentSceneId, images, phase, requestedSceneId]);
+        currentSceneId, phase,
+    }), [currentSceneId, images, phase]);
 
     return { geometry, easedTravelProgress, ...imageState, publishSceneImage };
 }
@@ -72,7 +79,7 @@ export function useMainCircle({
 // Retains outgoing content invisibly over the moon until the destination opens.
 export function resolveImageState(
     images: SceneImageRegistry,
-    state: Pick<MainCircleOptions, "currentSceneId" | "requestedSceneId" | "phase">,
+    state: Pick<MainCircleOptions, "currentSceneId" | "phase">,
 ) {
     const image = images[state.currentSceneId] ?? null;
     return { image, imageVisible: image !== null && (state.phase === "idle" || state.phase === "opening") };

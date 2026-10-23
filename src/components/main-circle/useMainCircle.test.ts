@@ -9,13 +9,13 @@ const experience: ImageDescriptor = { src: "/experience.jpg", alt: "" };
 describe("main circle controller", () => {
     it("hides the outgoing image while closing", () => {
         expect(resolveImageState({ about }, {
-            currentSceneId: "about", requestedSceneId: "experience", phase: "closing",
+            currentSceneId: "about", phase: "closing",
         })).toEqual({ image: about, imageVisible: false });
     });
 
     it("retains the hidden outgoing image throughout movement", () => {
         expect(resolveImageState({ about, experience }, {
-            currentSceneId: "about", requestedSceneId: "experience", phase: "moving",
+            currentSceneId: "about", phase: "moving",
         })).toEqual({ image: about, imageVisible: false });
     });
 
@@ -23,7 +23,7 @@ describe("main circle controller", () => {
         for (const currentSceneId of ["skills", "contact"] as const) {
             for (const phase of ["opening", "idle"] as const) {
                 expect(resolveImageState({ about }, {
-                    currentSceneId, requestedSceneId: null, phase,
+                    currentSceneId, phase,
                 })).toEqual({ image: null, imageVisible: false });
             }
         }
@@ -38,10 +38,10 @@ describe("main circle controller", () => {
 
     it("reveals the current image while opening and idle", () => {
         expect(resolveImageState({ experience }, {
-            currentSceneId: "experience", requestedSceneId: "experience", phase: "opening",
+            currentSceneId: "experience", phase: "opening",
         })).toEqual({ image: experience, imageVisible: true });
         expect(resolveImageState({ experience }, {
-            currentSceneId: "experience", requestedSceneId: null, phase: "idle",
+            currentSceneId: "experience", phase: "idle",
         })).toEqual({ image: experience, imageVisible: true });
     });
 });

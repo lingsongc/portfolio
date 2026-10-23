@@ -1,8 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { ImageDescriptor } from "../../types/images";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
-import { CircleLighting } from "./CircleLighting";
-import { CircleRim } from "./CircleRim";
+import { CircleLighting, CircleRim } from "./CirclePresentation";
 
 type MainCircleProps = {
     geometry: MainCircleEndpoint | null;

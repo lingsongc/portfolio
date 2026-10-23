@@ -128,6 +128,7 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                 imagePath={(id) => eventImagePath(experienceType, id)}
                 interactive={lifecycle.active && lifecycle.phase === "idle"}
                 label={experienceType}
+                motionActive={motionActive}
                 orbitRef={orbitRef}
                 onEntrySelect={activateEvent}
                 reducedMotion={lifecycle.reducedMotion}

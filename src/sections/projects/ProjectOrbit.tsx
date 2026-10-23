@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import type { Project } from "../../data/projects";
-import { CircleLighting } from "../../components/main-circle/CircleLighting";
+import { CircleLighting } from "../../components/main-circle/CirclePresentation";
 import {
     fitProjectAngleToViewport,
     projectOrbitAngle,
