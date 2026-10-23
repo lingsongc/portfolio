@@ -18,10 +18,9 @@
     inset: 0;
     overflow: hidden;
     border-radius: inherit;
-    background-color: var(--colour-image-blank);
+    background-color: var(--colour-circle-void);
 }
 
-.main-circle-fallback,
 .main-circle-image,
 .main-circle-photo {
     position: absolute;
@@ -29,12 +28,6 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-}
-
-/* The NASA frame includes a small black margin around its lunar disk. */
-.main-circle-fallback {
-    filter: grayscale(1);
-    transform: scale(1.06);
 }
 
 .main-circle-image {

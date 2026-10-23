@@ -7,7 +7,7 @@
 
 .contact-orbit {
     position: absolute;
-    /* Leave stacking to the blob and label layers so the moon sits between them. */
+    /* Leave stacking to the blob and label layers so the persistent circle sits between them. */
     top: calc(50% - min(56vw, 56vh) / 2);
     left: calc(50% - min(56vw, 56vh) / 2);
     width: min(56vw, 56vh);
@@ -26,7 +26,6 @@
     text-align: center;
     padding: 1.25rem;
     border-radius: 1.5rem;
-    background-color: rgb(18 8 24 / 78%);
     opacity: 0;
     transition: opacity 500ms ease;
 }

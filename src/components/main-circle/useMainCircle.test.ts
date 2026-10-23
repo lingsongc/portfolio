@@ -19,7 +19,7 @@ describe("main circle controller", () => {
         })).toEqual({ image: about, imageVisible: false });
     });
 
-    it("leaves image-free scenes on the persistent moon", () => {
+    it("leaves image-free scenes on the persistent void", () => {
         for (const currentSceneId of ["skills", "contact"] as const) {
             for (const phase of ["opening", "idle"] as const) {
                 expect(resolveImageState({ about }, {

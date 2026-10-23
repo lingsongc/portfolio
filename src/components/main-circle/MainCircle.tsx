@@ -19,7 +19,7 @@ export function MainCircle({
     const [readySource, setReadySource] = useState<string | null>(null);
     const contentReady = image !== null && readySource === image.src;
 
-    // A failed or late image leaves the already loaded moon visible underneath.
+    // A failed or late image leaves the opaque void visible underneath.
     useLayoutEffect(() => {
         const element = imageRef.current;
         if (!element || !image) return;
@@ -36,7 +36,6 @@ export function MainCircle({
     return (
         <div className="main-circle-container" style={geometry ?? undefined}>
             <div className="main-circle-mask">
-                <img className="main-circle-fallback" src="/shared/moon.jpg" alt="" fetchPriority="high" />
                 {image && (
                     <div className={`main-circle-image${imageVisible && contentReady ? " main-circle-image-visible" : ""}`}>
                         <img
@@ -50,9 +49,9 @@ export function MainCircle({
                                 transform: image.transform,
                             }}
                         />
+                        <CircleLighting />
                     </div>
                 )}
-                <CircleLighting />
             </div>
             {image?.presentation?.rim && (
                 <CircleRim rim={image.presentation.rim} visible={imageVisible && contentReady} />

@@ -66,7 +66,6 @@
     overflow: hidden;
     border-radius: 50%;
     color: var(--colour-text);
-    background-color: rgb(18 8 24 / 58%);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.96);
     transition: opacity 500ms ease, transform 500ms ease;

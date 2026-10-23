@@ -63,7 +63,7 @@ export function useMainCircle({
         setImages((current) => updateSceneImage(current, sceneId, image));
     }, []);
 
-    // Starts the destination download during closing without exposing it over the moon.
+    // Starts the destination download during closing without exposing it over the void.
     useEffect(() => {
         const requestedImage = requestedSceneId ? images[requestedSceneId] : null;
         if (requestedImage) preload(requestedImage.src, { as: "image" });
@@ -76,7 +76,7 @@ export function useMainCircle({
     return { geometry, easedTravelProgress, ...imageState, publishSceneImage };
 }
 
-// Retains outgoing content invisibly over the moon until the destination opens.
+// Retains outgoing content invisibly over the void until the destination opens.
 export function resolveImageState(
     images: SceneImageRegistry,
     state: Pick<MainCircleOptions, "currentSceneId" | "phase">,
