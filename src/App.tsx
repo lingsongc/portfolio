@@ -124,18 +124,18 @@ export default function App() {
         <>
             <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} />
 
-            <Navigation
-                sceneControl={{
-                    busy: slideshow.busy,
-                    currentSceneId: slideshow.currentSceneId,
-                    destinationSceneId: slideshow.requestedSceneId,
-                    onSceneRequest: requestScene,
-                    phase: slideshow.phase,
-                    travelProgress: mainCircle.easedTravelProgress,
-                }}
-            />
-
             <main className="slideshow-stage">
+                <Navigation
+                    sceneControl={{
+                        busy: slideshow.busy,
+                        currentSceneId: slideshow.currentSceneId,
+                        destinationSceneId: slideshow.requestedSceneId,
+                        onSceneRequest: requestScene,
+                        phase: slideshow.phase,
+                        travelProgress: mainCircle.easedTravelProgress,
+                    }}
+                />
+
                 <MainCircle
                     geometry={mainCircle.geometry}
                     image={mainCircle.image}

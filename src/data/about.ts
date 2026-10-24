@@ -31,7 +31,7 @@ const name: Name = {
 
 export const homeDetails: HomeDetails = {
     name: name,
-    introduction: "Currently surviving in NUS CS"
+    introduction: "Software Engineer"
 }
 
 const aboutStatistics: AboutStatistics[] = [

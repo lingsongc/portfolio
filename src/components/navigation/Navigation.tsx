@@ -116,6 +116,7 @@ function controlledNavigationClasses(sceneControl: NavigationSceneControl) {
             return " navigation-docked navigation-rail-departing";
         }
         if (phase === "opening") return " navigation-home-entering";
+        if (phase === "closing") return " navigation-home-exiting";
         return " navigation-home-ready";
     }
     if (phase === "moving" && destinationSceneId === "home") {
