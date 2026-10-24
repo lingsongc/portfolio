@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { sceneOrder } from "../../types/scene";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
+import { contactFittedFinalOffset, contactProfileDiameter } from "../../sections/contact/contactGeometry";
 import {
     aboutCircleLeft, aboutCircleSize, contactCircleSize, experienceCircleSize,
     homeCircleSize, MAIN_CIRCLE_TRAVEL_DURATION_MS, mainCircleTravelAtTime,
@@ -27,7 +28,7 @@ describe("main circle geometry", () => {
         expect(projectCircleSize(768, 900)).toBeCloseTo(442.368);
         expect(skillsCircleSize(1440, 900)).toBe(810);
         expect(skillsCircleLeft(1440, 900)).toBe(981);
-        expect(contactCircleSize(1440, 900)).toBeCloseTo(504);
+        expect(contactCircleSize(1440, 900)).toBeCloseTo(720);
     });
 
     it("resolves all six laptop endpoints", () => {
@@ -40,8 +41,45 @@ describe("main circle geometry", () => {
             skills: { width: 810, top: 450, left: 981 },
             contact: { top: 450, left: 720 },
         });
-        expect(endpoints.contact.width).toBeCloseTo(504);
+        expect(endpoints.contact.width).toBeCloseTo(720);
     });
+
+    it("gives the Contact form usable phone width and a larger laptop surface", () => {
+        expect(contactCircleSize(390, 844)).toBeCloseTo(335.4);
+        expect(contactCircleSize(320, 568)).toBeCloseTo(275.2);
+        expect(contactCircleSize(1440, 900)).toBeCloseTo(720);
+    });
+
+    it.each([[768, 1024], [768, 900], [768, 400], [390, 844], [320, 568]])(
+        "keeps the largest mobile Contact ball detached at %i by %i",
+        (width, height) => {
+            const size = contactCircleSize(width, height);
+            const diameterRatio = 7 / 15;
+            const offset = [-0.28, 0.84] as const;
+            const x = contactFittedFinalOffset(offset, diameterRatio, size, width, height, 0, 48);
+            const y = contactFittedFinalOffset(offset, diameterRatio, size, width, height, 1);
+            expect(Math.hypot(x, y) - size * (1 + diameterRatio) / 2).toBeGreaterThan(4);
+        },
+    );
+
+    it.each([[1024, 768], [1280, 1024], [900, 900], [769, 512]])(
+        "keeps every Contact ball detached in a compact %i by %i window",
+        (width, height) => {
+            const size = contactCircleSize(width, height);
+            const profiles = [
+                { offset: [-0.28, -0.84], ratio: 1 / 3 },
+                { offset: [0.28, -0.84], ratio: 5 / 12 },
+                { offset: [-0.28, 0.84], ratio: 7 / 15 },
+                { offset: [0.28, 0.84], ratio: 0.3 },
+            ] as const;
+            for (const profile of profiles) {
+                const diameter = contactProfileDiameter(profile.ratio, size, width, height);
+                const x = contactFittedFinalOffset(profile.offset, diameter / size, size, width, height, 0, 48);
+                const y = contactFittedFinalOffset(profile.offset, diameter / size, size, width, height, 1);
+                expect(Math.hypot(x, y) - (size + diameter) / 2).toBeGreaterThan(4);
+            }
+        },
+    );
 
     it("uses current measured layout inputs", () => {
         const measured = { ...layout, homeCircleWidth: 300, experienceCenter: { top: 540, left: 980 } };

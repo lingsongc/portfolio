@@ -1,5 +1,6 @@
 import type { MainCircleEndpoint } from "../../types/mainCircle";
 import type { SceneId } from "../../types/scene";
+import { contactUsesStackedLayout } from "../../sections/contact/contactGeometry";
 
 const MOBILE_BREAKPOINT = 768;
 export const MAIN_CIRCLE_TRAVEL_DURATION_MS = 1000;
@@ -46,8 +47,11 @@ export function skillsCircleLeft(viewportWidth: number, viewportHeight: number) 
     return viewportWidth * 0.4 + circleSize / 2;
 }
 
+// Enlarges the laptop form while keeping room for detached satellite rows on phones.
 export function contactCircleSize(viewportWidth: number, viewportHeight: number) {
-    return Math.min(viewportWidth, viewportHeight) * 0.56;
+    return contactUsesStackedLayout(viewportWidth, viewportHeight)
+        ? Math.min(viewportWidth * 0.86, viewportHeight * 0.52)
+        : Math.min(viewportWidth, viewportHeight) * 0.8;
 }
 
 // Resolves one scene endpoint from the current viewport and measured layout snapshot.

@@ -1,9 +1,15 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import type { SceneLifecycleControl } from "../../types/scene";
-import { contactFittedFinalOffset, contactInitialOffset } from "./contactGeometry";
+import { contactProfiles, type ContactProfile } from "../../data/contact";
+import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, contactUsesStackedLayout, type ContactOffset } from "./contactGeometry";
+import { ContactForm } from "./ContactForm";
 
 type ContactProps = { lifecycle: SceneLifecycleControl };
-type ContactProfile = typeof contactProfiles[number];
+type ContactProfileLayout = {
+    offset: ContactOffset;
+    mobileOffset: ContactOffset;
+    diameterRatio: number;
+};
 type ProfileStyle = CSSProperties & {
     "--contact-initial-x": string;
     "--contact-initial-y": string;
@@ -11,13 +17,14 @@ type ProfileStyle = CSSProperties & {
     "--contact-final-y": string;
 };
 
-const contactProfiles = [
-    { id: "github", label: "GitHub", href: "https://github.com/lingsongc", offset: [-0.78, 0.26], diameterRatio: 0.36 },
-    { id: "instagram", label: "Instagram", href: "https://www.instagram.com/lingsongc/", offset: [-0.62, -0.58], diameterRatio: 0.28 },
-    { id: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/lingsongc/", offset: [0.78, -0.28], diameterRatio: 0.31 },
-] as const;
+const contactProfileLayouts: Record<ContactProfile["id"], ContactProfileLayout> = {
+    github: { offset: [-0.62, -0.54], mobileOffset: [-0.28, -0.84], diameterRatio: 1 / 3 },
+    instagram: { offset: [-0.73, 0.12], mobileOffset: [0.28, -0.84], diameterRatio: 5 / 12 },
+    linkedin: { offset: [0.68, 0.4], mobileOffset: [-0.28, 0.84], diameterRatio: 7 / 15 },
+    email: { offset: [0.7, -0.32], mobileOffset: [0.28, 0.84], diameterRatio: 0.3 },
+};
 
-// Renders Contact with measured CSS offsets for its gooey profile split.
+// Coordinates the circular prototype form and measured four-profile split.
 export function Contact({ lifecycle }: ContactProps) {
     const orbitRef = useRef<HTMLDivElement>(null);
     const [layout, setLayout] = useState({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0 });
@@ -33,8 +40,13 @@ export function Contact({ lifecycle }: ContactProps) {
         });
         const observer = new ResizeObserver(measure);
         observer.observe(orbit);
+        // Phone height changes can move the viewport bounds without resizing the orbit.
+        window.addEventListener("resize", measure);
         measure();
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            window.removeEventListener("resize", measure);
+        };
     }, []);
 
     return (
@@ -52,22 +64,19 @@ export function Contact({ lifecycle }: ContactProps) {
                 <div className="contact-blob-layer" aria-hidden="true">
                     <span className="contact-blob-center" />
                     {contactProfiles.map((profile) => (
-                        <span className="contact-satellite" style={profileStyle(profile, layout)} key={profile.id} />
+                        <span className="contact-satellite" data-profile={profile.id} style={profileStyle(profile, layout)} key={profile.id} />
                     ))}
                 </div>
-                <nav className="contact-link-layer" aria-label="Social profiles">
+                <nav className="contact-link-layer" aria-label="Contact links">
                     {contactProfiles.map((profile) => (
-                        <a className="contact-link" href={profile.href} style={profileStyle(profile, layout)} key={profile.id}>
-                            {profile.label}
+                        <a className="contact-link" data-profile={profile.id} href={profile.href} aria-label={profile.label} style={profileStyle(profile, layout)} key={profile.id}>
+                            <img className="contact-social-icon" src={profile.image} alt="" />
+                            <span className="contact-social-label">{profile.label}</span>
                         </a>
                     ))}
                 </nav>
             </div>
-            <div className="contact-content">
-                <h2 id="contact-title" tabIndex={-1}>Contact</h2>
-                <p className="contact-description">Have a project in mind?</p>
-                <a className="contact-action" href="mailto:lingsong.c4@gmail.com">Send me an email</a>
-            </div>
+            <ContactForm />
         </section>
     );
 }
@@ -75,11 +84,17 @@ export function Contact({ lifecycle }: ContactProps) {
 // Publishes the measured start and fitted endpoint as CSS variables.
 function profileStyle(profile: ContactProfile, layout: { orbitSize: number; viewportWidth: number; viewportHeight: number }): ProfileStyle {
     const { orbitSize, viewportWidth, viewportHeight } = layout;
+    const placement = contactProfileLayouts[profile.id];
+    // Use two rows wherever the viewport has insufficient space beside the form.
+    const stacked = contactUsesStackedLayout(viewportWidth, viewportHeight);
+    const offset = stacked ? placement.mobileOffset : placement.offset;
+    const diameter = contactProfileDiameter(placement.diameterRatio, orbitSize, viewportWidth, viewportHeight);
+    const diameterRatio = orbitSize > 0 ? diameter / orbitSize : placement.diameterRatio;
     return {
-        width: `${profile.diameterRatio * 100}%`,
-        "--contact-initial-x": `${contactInitialOffset(profile.offset, profile.diameterRatio, orbitSize, 0)}px`,
-        "--contact-initial-y": `${contactInitialOffset(profile.offset, profile.diameterRatio, orbitSize, 1)}px`,
-        "--contact-final-x": `${contactFittedFinalOffset(profile.offset, profile.diameterRatio, orbitSize, viewportWidth, viewportHeight, 0)}px`,
-        "--contact-final-y": `${contactFittedFinalOffset(profile.offset, profile.diameterRatio, orbitSize, viewportWidth, viewportHeight, 1)}px`,
+        width: `${diameter}px`,
+        "--contact-initial-x": `${contactInitialOffset(offset, diameterRatio, orbitSize, 0)}px`,
+        "--contact-initial-y": `${contactInitialOffset(offset, diameterRatio, orbitSize, 1)}px`,
+        "--contact-final-x": `${contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 0, stacked ? 48 : 64)}px`,
+        "--contact-final-y": `${contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 1, stacked ? 4 : 24)}px`,
     };
 }

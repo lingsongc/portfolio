@@ -1,11 +1,24 @@
 export type ContactOffset = readonly [number, number];
 
+// Mirrors the CSS fallback when side-by-side balls would collide with a large form.
+export function contactUsesStackedLayout(viewportWidth: number, viewportHeight: number) {
+    return viewportWidth <= 768 || viewportWidth <= viewportHeight * 1.55;
+}
+
+// Keeps desktop balls at their original scale while the main form grows independently.
+export function contactProfileDiameter(diameterRatio: number, orbitSize: number, viewportWidth: number, viewportHeight: number) {
+    const baseSize = contactUsesStackedLayout(viewportWidth, viewportHeight)
+        ? orbitSize
+        : Math.min(viewportWidth, viewportHeight) * 0.56;
+    return diameterRatio * baseSize;
+}
+
 // Calculates a Contact profile's final offset from the orbit center.
 export function contactFinalOffset(offset: ContactOffset, orbitSize: number, axis: 0 | 1) {
     return offset[axis] * orbitSize;
 }
 
-// Keeps a final profile circle inside the current viewport without changing its direction.
+// Fits a profile within viewport edges, including any reserved navigation space.
 export function contactFittedFinalOffset(
     offset: ContactOffset,
     diameterRatio: number,
@@ -13,10 +26,11 @@ export function contactFittedFinalOffset(
     viewportWidth: number,
     viewportHeight: number,
     axis: 0 | 1,
+    edgeInset = 4,
 ) {
     const requestedOffset = contactFinalOffset(offset, orbitSize, axis);
     const viewportSize = axis === 0 ? viewportWidth : viewportHeight;
-    const availableOffset = Math.max(0, viewportSize / 2 - diameterRatio * orbitSize / 2 - 4);
+    const availableOffset = Math.max(0, viewportSize / 2 - diameterRatio * orbitSize / 2 - edgeInset);
     return Math.min(Math.max(requestedOffset, -availableOffset), availableOffset);
 }
 

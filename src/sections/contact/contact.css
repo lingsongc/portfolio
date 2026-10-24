@@ -1,6 +1,8 @@
 /* contact */
 
 .contact-container {
+    --contact-circle-size: min(80vw, 80vh);
+
     position: relative;
     place-items: center;
 }
@@ -8,38 +10,111 @@
 .contact-orbit {
     position: absolute;
     /* Leave stacking to the blob and label layers so the persistent circle sits between them. */
-    top: calc(50% - min(56vw, 56vh) / 2);
-    left: calc(50% - min(56vw, 56vh) / 2);
-    width: min(56vw, 56vh);
+    top: calc(50% - var(--contact-circle-size) / 2);
+    left: calc(50% - var(--contact-circle-size) / 2);
+    width: var(--contact-circle-size);
     border-radius: 50%;
     aspect-ratio: 1;
     pointer-events: none;
 }
 
 .contact-content {
-    position: relative;
+    position: absolute;
     z-index: 4;
-    display: grid;
-    max-width: min(24rem, 70vw);
-    justify-items: center;
-    gap: 0.75rem;
+    top: 50%;
+    left: 50%;
+    width: var(--contact-circle-size);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    background-color: var(--colour-surface);
     text-align: center;
-    padding: 1.25rem;
-    border-radius: 1.5rem;
     opacity: 0;
-    transition: opacity 500ms ease;
+    transform: translate(-50%, -50%);
+    transition: opacity 500ms ease-in-out, box-shadow 200ms ease;
 }
 
 .contact-content-visible .contact-content { opacity: 1; }
+.contact-content:is(:hover, :focus-within) { box-shadow: inset 0 0 0 4px var(--colour-text); }
 
-.contact-description {
-    color: var(--colour-text);
+.contact-content h2 {
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    font-size: min(var(--text-section-title), calc(var(--contact-circle-size) * 0.135));
+    transform: translateX(-50%);
 }
 
-.contact-action {
+.contact-form {
+    --contact-form-gap: calc(var(--contact-circle-size) * 0.035);
+    --contact-field-height: max(2.75rem, calc(var(--contact-circle-size) * 0.065));
+    --contact-field-radius: calc(var(--contact-field-height) / 2);
+
+    position: absolute;
+    top: 25%;
+    left: 16.667%;
+    display: grid;
+    width: 66.666%;
+    height: 68%;
+    grid-template-rows: auto minmax(3rem, 1fr) auto auto;
+    gap: var(--contact-form-gap);
+}
+
+.contact-form-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--contact-form-gap);
+}
+
+.contact-form-field {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--colour-text);
+    border-radius: var(--contact-field-radius);
+    outline: none;
+    background: transparent;
+    color: var(--colour-text);
+    font: 500 clamp(0.875rem, 1.8vmin, 1.125rem) / 1.5 var(--font-text);
+    opacity: 0.5;
+    transition: opacity 200ms ease;
+}
+
+.contact-form-field::placeholder { color: inherit; }
+.contact-form-field:is(:hover, :focus) { opacity: 1; }
+input.contact-form-field { height: var(--contact-field-height); }
+textarea.contact-form-field { resize: none; }
+
+.contact-form-send {
+    position: relative;
+    display: grid;
+    width: 46%;
+    min-width: 8rem;
+    max-width: 100%;
+    min-height: 2.75rem;
+    justify-self: center;
+    place-items: center;
+    padding: 0.5rem 1.25rem;
+    border: 2px solid var(--colour-text);
+    border-radius: 999px;
+    background: transparent;
     color: var(--colour-text);
     font-weight: 700;
-    text-underline-offset: 0.25rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 200ms ease;
+}
+
+.contact-form-send:is(:hover, :focus-visible) { opacity: 1; }
+.contact-form-send:focus-visible { outline: 2px solid var(--colour-accent); outline-offset: 4px; }
+
+.contact-form-status {
+    min-height: 2.8em;
+    color: var(--colour-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.4;
 }
 
 .contact-blob-layer,
@@ -57,20 +132,32 @@
     filter: url("#contact-goo");
 }
 
-.contact-link-layer { z-index: 3; }
+.contact-link-layer {
+    z-index: 3;
+    /* Mirror the last 120ms of entry by fading surfaces during the first 120ms of exit. */
+    transition: opacity 120ms linear, visibility 0s linear 500ms;
+}
 
 .contact-blob-center,
 .contact-satellite {
     position: absolute;
     border-radius: 50%;
-    background-color: var(--colour-image-blank);
 }
 
 .contact-satellite {
     z-index: 1;
 }
 
-.contact-blob-center { inset: 2px; }
+.contact-blob-center { inset: 2px; background-color: var(--colour-surface); }
+
+/* Inset the filtered silhouette so its expanded edge cannot form a coloured rim. */
+.contact-satellite::before {
+    position: absolute;
+    inset: 4px;
+    border-radius: inherit;
+    background-color: var(--colour-surface);
+    content: "";
+}
 
 .contact-satellite,
 .contact-link {
@@ -102,16 +189,68 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    color: var(--colour-background);
-    font-size: clamp(0.625rem, 1.2vmin, 0.875rem);
+    color: #fff;
+    font-size: clamp(0.75rem, 1.6vmin, 1.125rem);
     font-weight: 700;
     text-decoration: none;
     pointer-events: auto;
+    transition: transform 500ms ease-in-out, box-shadow 200ms ease;
 }
+
+.contact-satellite[data-profile="github"]::before, .contact-link[data-profile="github"] { background-color: #24292e; }
+.contact-satellite[data-profile="linkedin"]::before, .contact-link[data-profile="linkedin"] { background-color: #0076b5; }
+.contact-satellite[data-profile="email"]::before, .contact-link[data-profile="email"] { background-color: #ea4335; }
+.contact-satellite[data-profile="instagram"]::before { background-color: #c92bb7; }
+
+/* The Instagram brand surface is the approved exception to the gradient rule. */
+.contact-link[data-profile="instagram"] {
+    background:
+        radial-gradient(circle farthest-corner at 28% 100%, #fcdf8f 0%, #fbd377 10%, #fa8e37 22%, #f73344 35%, transparent 65%),
+        linear-gradient(145deg, #3051f1 10%, #c92bb7 70%);
+}
+
+.contact-link:is(:hover, :focus-visible) { box-shadow: inset 0 0 0 4px #fff; }
+
+.contact-social-icon {
+    width: 50%;
+    height: 50%;
+    object-fit: contain;
+    opacity: 0.8;
+    transition: opacity 200ms ease;
+}
+
+.contact-link:is(:hover, :focus-visible) .contact-social-icon { opacity: 1; }
+
+.contact-social-label {
+    position: absolute;
+    top: 72.5%;
+    opacity: 0;
+    transition: opacity 200ms ease;
+}
+
+.contact-link:is(:hover, :focus-visible) .contact-social-label { opacity: 1; }
 
 .contact-link:focus-visible {
     outline: 0.2rem solid var(--colour-accent);
     outline-offset: 0.2rem;
+}
+
+@media (max-width: 48rem), (max-aspect-ratio: 31/20) {
+    .contact-container { --contact-circle-size: min(86vw, 52vh); }
+    .contact-form { --contact-form-gap: calc(var(--contact-circle-size) * 0.03); }
+    .contact-form-field { font-size: 1rem; }
+    .contact-form-status { font-size: 0.6875rem; }
+}
+
+@media (max-height: 28rem) {
+    /* Keep every control reachable when a landscape viewport compresses the circle. */
+    .contact-form {
+        left: 14%;
+        width: 72%;
+        overflow-y: auto;
+        padding: 6px;
+        scrollbar-width: thin;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -120,5 +259,10 @@
     .contact-link-layer,
     .contact-satellite,
     .contact-link,
+    .contact-social-icon,
+    .contact-social-label,
+    .contact-form-field,
+    .contact-form-send,
     .contact-content { transition: none; }
+
 }
