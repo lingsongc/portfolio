@@ -271,16 +271,38 @@
 
 .project-selected-summary {
     position: absolute;
-    right: 15%;
-    bottom: 15%;
-    left: 15%;
-    padding: clamp(0.5rem, 1.2vmin, 1rem);
-    border-radius: 0.75rem;
-    background-color: rgb(18 8 24 / 78%);
+    top: 50%;
+    right: 0;
+    left: 0;
+    box-sizing: border-box;
+    height: 44%;
+    padding: clamp(0.75rem, 2vmin, 1.25rem);
     color: var(--colour-text);
-    font-size: clamp(0.625rem, 1.8vmin, 1rem);
+    font-size: clamp(0.75rem, 1.7vmin, 0.95rem);
     line-height: 1.5;
     text-align: center;
+}
+
+/* Floated shapes narrow each successive line without clipping the text itself. */
+.project-selected-summary p {
+    padding-top: var(--project-summary-offset, 0px);
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.project-summary-edge {
+    width: 27%;
+    height: 100%;
+}
+
+.project-summary-edge-left {
+    float: left;
+    shape-outside: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.project-summary-edge-right {
+    float: right;
+    shape-outside: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 .project-detail-link {
@@ -317,6 +339,8 @@
 @media (max-width: 48rem) {
     .project-container,
     .project-selected-content { --project-circle-size: 57.6vw; }
+
+    .project-selected-summary { font-size: clamp(0.625rem, 1.8vmin, 1rem); }
 
     .project-title { font-size: clamp(2.5rem, 12vw, 4rem); }
 }
