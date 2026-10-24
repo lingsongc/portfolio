@@ -10,7 +10,6 @@
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    box-shadow: 1.5rem 2rem 3rem rgb(0 0 0 / 35%);
 }
 
 .main-circle-mask {
@@ -40,32 +39,14 @@
 
 .main-circle-image-visible { opacity: 1; }
 
-.circle-lighting {
+.main-circle-shade {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    border-radius: inherit;
-    opacity: 0.82;
     pointer-events: none;
 }
-
-.circle-lighting-subtle { opacity: 0.38; }
-
-.main-circle-rim {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    opacity: 0;
-    transition: opacity 500ms ease;
-    pointer-events: none;
-}
-
-.main-circle-rim-visible { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
-    .main-circle-image,
-    .main-circle-rim { transition: none; }
+    .main-circle-image { transition: none; }
 }

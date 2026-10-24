@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
 import type { Project } from "../../data/projects";
-import { CircleLighting } from "../../components/main-circle/CirclePresentation";
 import {
     fitProjectAngleToViewport,
     projectOrbitAngle,
@@ -101,7 +100,6 @@ export function ProjectOrbit({
                                 onClick={() => onProjectSelect(project)}
                             >
                                 <img className="project-image" src={`/projects/${project.id}.png`} alt="" />
-                                <CircleLighting subtle />
                                 <h3 className="visually-hidden">{project.name}</h3>
                                 <p className="visually-hidden">{project.summary}</p>
                             </button>

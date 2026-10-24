@@ -63,30 +63,24 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                 <header className="experience-header">
                     <div className="experience-header-content">
                         <h2 id="experience-title" className="experience-title" tabIndex={-1}>
-                            {experienceType === "experience" ? "Experience" : "Education"}
-                        </h2>
-                        <div
-                            className="experience-type-toggle"
-                            data-active-type={experienceType}
-                            role="group"
-                            aria-label="Timeline type"
-                        >
                             {(["experience", "education"] as const).map((type) => (
-                                <button
-                                    className={`experience-type-button${experienceType === type ? " experience-type-button-active" : ""}`}
-                                    type="button"
-                                    aria-pressed={experienceType === type}
-                                    disabled={!contentVisible}
-                                    onClick={() => {
-                                        if (type === experienceType) return;
-                                        setExperienceType(type);
-                                    }}
-                                    key={type}
-                                >
-                                    {type[0].toUpperCase() + type.slice(1)}
-                                </button>
+                                <span className="experience-title-option" key={type}>
+                                    {type === "education" && <span className="experience-title-divider" aria-hidden="true">|</span>}
+                                    <button
+                                        className={`experience-type-button${experienceType === type ? " experience-type-button-active" : ""}`}
+                                        type="button"
+                                        aria-pressed={experienceType === type}
+                                        disabled={!contentVisible}
+                                        onClick={() => {
+                                            if (type === experienceType) return;
+                                            setExperienceType(type);
+                                        }}
+                                    >
+                                        {type[0].toUpperCase() + type.slice(1)}
+                                    </button>
+                                </span>
                             ))}
-                        </div>
+                        </h2>
                     </div>
                 </header>
                 
@@ -98,25 +92,27 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                         aria-label={`${activeEvent.title} details`}
                     >
                         <h3 className="experience-event-title">{activeEvent.title}</h3>
-                        <div className="experience-event-metadata">
-                            <p className="experience-metadata-item">
-                                <EventTypeIcon className="experience-metadata-icon" aria-hidden="true" />
-                                {activeEvent.subtitle}
-                            </p>
-                            <p className="experience-metadata-item">
-                                <IconCalendar className="experience-metadata-icon" aria-hidden="true" />
-                                {activeEvent.startDate} to {activeEvent.endDate}
-                            </p>
+                        <div className="experience-event-details">
+                            <div className="experience-event-metadata">
+                                <p className="experience-metadata-item">
+                                    <EventTypeIcon className="experience-metadata-icon" aria-hidden="true" />
+                                    {activeEvent.subtitle}
+                                </p>
+                                <p className="experience-metadata-item">
+                                    <IconCalendar className="experience-metadata-icon" aria-hidden="true" />
+                                    {activeEvent.startDate} to {activeEvent.endDate}
+                                </p>
+                            </div>
+                            <p className="experience-description">{activeEvent.description}</p>
+                            <ul className="experience-highlights body-copy">
+                                {activeEvent.highlights.map((highlight) => (
+                                    <li key={highlight}>
+                                        <span className="experience-highlight-marker" aria-hidden="true" />
+                                        <span>{highlight}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
-                        <p className="experience-description">{activeEvent.description}</p>
-                        <ul className="experience-highlights body-copy">
-                            {activeEvent.highlights.map((highlight) => (
-                                <li key={highlight}>
-                                    <span className="experience-highlight-marker" aria-hidden="true" />
-                                    <span>{highlight}</span>
-                                </li>
-                            ))}
-                        </ul>
                     </article>
                 </div>
             </div>

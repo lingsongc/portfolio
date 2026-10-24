@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { IconMouse } from "@tabler/icons-react";
-import { CircleLighting } from "../../components/main-circle/CirclePresentation";
 import { ScenePanelOverlay } from "../../components/scene-panel/ScenePanel";
 import {
     createExperienceWheelBoundaryState,
@@ -142,7 +141,6 @@ export function ExperienceOrbit({
                         <li className={`experience-event-orbit-item${visible ? "" : " experience-event-orbit-item-hidden"}`} style={experienceOrbitPoint(angle)} key={entry.id}>
                             <button className="experience-event-button" type="button" aria-label={entry.title} aria-pressed={activeEntryId === entry.id} tabIndex={visible && interactive ? 0 : -1} onClick={() => selectEntry(index)}>
                                 <img className="experience-event-image" src={imagePath(entry.id)} alt="" />
-                                <CircleLighting subtle />
                             </button>
                         </li>
                     );

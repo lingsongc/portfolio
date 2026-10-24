@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { ImageDescriptor } from "../../types/images";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
-import { CircleLighting, CircleRim } from "./CirclePresentation";
+import { CircleShade } from "./CirclePresentation";
 
 type MainCircleProps = {
     geometry: MainCircleEndpoint | null;
@@ -49,13 +49,10 @@ export function MainCircle({
                                 transform: image.transform,
                             }}
                         />
-                        <CircleLighting />
+                        <CircleShade variant={image.presentation?.shade} />
                     </div>
                 )}
             </div>
-            {image?.presentation?.rim && (
-                <CircleRim rim={image.presentation.rim} visible={imageVisible && contentReady} />
-            )}
         </div>
     );
 }

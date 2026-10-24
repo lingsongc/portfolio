@@ -8,7 +8,7 @@ const aboutImage: ImageDescriptor = {
     alt: "",
     objectPosition: "center",
     transform: "translate(21%, -20%) scale(1.15)",
-    presentation: { rim: { colour: "#f0fbff", bloomColour: "#9bd5e5" } },
+    presentation: { shade: "horizon" },
 };
 
 type AboutProps = {
