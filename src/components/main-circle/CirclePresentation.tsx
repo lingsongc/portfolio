@@ -2,24 +2,31 @@ import type { ImageShade } from "../../types/images";
 
 type CircleShadeProps = { variant?: ImageShade };
 
-// Offset circular cutouts match the reference's broad light face and two lower-right bands.
+// Traced lower-right arcs retain the reference's broad middle and thin outer band without an upper rim.
 const shadeBands = [
-    { path: "M 50 0 A 50 50 0 1 1 50 100 A 50 50 0 1 1 50 0 Z M 81 31 A 50 50 0 1 1 -19 31 A 50 50 0 1 1 81 31 Z", opacity: 0.28 },
-    { path: "M 50 0 A 50 50 0 1 1 50 100 A 50 50 0 1 1 50 0 Z M 91.5 41.5 A 50 50 0 1 1 -8.5 41.5 A 50 50 0 1 1 91.5 41.5 Z", opacity: 0.28 },
+    { path: "M 60 1.0102 C 78 4 86 24 78.5 46 C 72 64 55 78 34 79 C 15 80 1 68 0 50 A 50 50 0 1 0 60 1.0102 Z", opacity: 0.36 },
+    { path: "M 70 4.1742 C 88 13 98 31 95 50 C 94 73 78 91 56 95 C 39 99 25 95 14 84.6987 A 50 50 0 1 0 70 4.1742 Z", opacity: 0.36 },
 ];
 
 // One restrained interior shadow leaves the exposed horizon edge unshaded.
 const horizonBands = [
-    { path: "M 50 0 A 22 50 0 0 1 50 100 A 50 50 0 0 1 50 0 Z", opacity: 0.25 },
+    { path: "M 50 0 A 22 50 0 0 1 50 100 A 50 50 0 0 1 50 0 Z", opacity: 0.48 },
 ];
 
-// Renders flat spherical or horizon shadows inside the fading image layer.
+// A curved upper cap leaves the reference's three lower bands as one dark region.
+const capBands = [
+    { path: "M 6.699 25 C 6.699 54 93.301 54 93.301 25 A 50 50 0 1 1 6.699 25 Z", opacity: 0.72 },
+];
+
+const bandsByVariant = { sphere: shadeBands, horizon: horizonBands, cap: capBands };
+
+// Renders flat image shadows inside the fading image layer.
 export function CircleShade({ variant = "sphere" }: CircleShadeProps) {
-    const bands = variant === "horizon" ? horizonBands : shadeBands;
+    const bands = bandsByVariant[variant];
     return (
         <svg className="main-circle-shade" viewBox="0 0 100 100" aria-hidden="true">
             {bands.map(({ path, opacity }) => (
-                <path d={path} fill="black" fillRule="evenodd" opacity={opacity} key={path} />
+                <path d={path} fill="var(--colour-background)" fillRule="evenodd" opacity={opacity} key={path} />
             ))}
         </svg>
     );
