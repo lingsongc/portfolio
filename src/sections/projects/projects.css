@@ -6,8 +6,9 @@
 }
 
 .project-container {
-    --project-planet-size: clamp(3.75rem, 9vmin, 7.5rem);
-    --project-ring-gap: clamp(6rem, 16.5vw, 15rem);
+    /* Preserve the approved circle, planet, and ring proportions as one composition. */
+    --project-planet-size: calc(var(--project-circle-size) * 0.16);
+    --project-ring-gap: calc(var(--project-circle-size) * 0.36);
     --project-ring-step: calc(var(--project-ring-gap) + var(--project-ring-gap));
     --project-ring-1-size: calc(var(--project-circle-size) + var(--project-ring-step));
     --project-ring-2-size: calc(var(--project-circle-size) + var(--project-ring-step) + var(--project-ring-step));
