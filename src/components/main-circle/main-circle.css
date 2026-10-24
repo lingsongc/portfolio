@@ -17,20 +17,35 @@
     inset: 0;
     overflow: hidden;
     border-radius: inherit;
-    background-color: var(--colour-image-blank);
+    background-color: var(--colour-circle-void);
 }
 
-.main-circle-image {
+.main-circle-image,
+.main-circle-photo {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.main-circle-image {
+    overflow: hidden;
+    border-radius: inherit;
+    background-color: var(--colour-image-blank);
     opacity: 0;
     transition: opacity 500ms ease;
 }
 
 .main-circle-image-visible { opacity: 1; }
+
+.main-circle-shade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
     .main-circle-image { transition: none; }

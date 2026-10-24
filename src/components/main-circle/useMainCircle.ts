@@ -1,4 +1,5 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { preload } from "react-dom";
 import type { ImageDescriptor } from "../../types/images";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
 import type { SceneId, ScenePhase } from "../../types/scene";
@@ -59,29 +60,41 @@ export function useMainCircle({
     }, [currentSceneId, layoutVersion, phase, requestedSceneId, resolveEndpoint, travelProgress]);
 
     const publishSceneImage = useCallback((sceneId: SceneId, image: ImageDescriptor | null) => {
-        if (!image) return;
-        setImages((current) => current[sceneId] === image ? current : { ...current, [sceneId]: image });
+        setImages((current) => updateSceneImage(current, sceneId, image));
     }, []);
 
+    // Starts the destination download during closing without exposing it over the void.
+    useEffect(() => {
+        const requestedImage = requestedSceneId ? images[requestedSceneId] : null;
+        if (requestedImage) preload(requestedImage.src, { as: "image" });
+    }, [images, requestedSceneId]);
+
     const imageState = useMemo(() => resolveImageState(images, {
-        currentSceneId, requestedSceneId, phase,
-    }), [currentSceneId, images, phase, requestedSceneId]);
+        currentSceneId, phase,
+    }), [currentSceneId, images, phase]);
 
     return { geometry, easedTravelProgress, ...imageState, publishSceneImage };
 }
 
-// Keeps travel blank while staging the destination descriptor for opening.
+// Retains outgoing content invisibly over the void until the destination opens.
 export function resolveImageState(
     images: SceneImageRegistry,
-    state: Pick<MainCircleOptions, "currentSceneId" | "requestedSceneId" | "phase">,
+    state: Pick<MainCircleOptions, "currentSceneId" | "phase">,
 ) {
-    const stagedSceneId = state.phase === "moving"
-        ? state.requestedSceneId ?? state.currentSceneId
-        : state.currentSceneId;
-    const image = images[stagedSceneId] ?? null;
+    const image = images[state.currentSceneId] ?? null;
     return { image, imageVisible: image !== null && (state.phase === "idle" || state.phase === "opening") };
 }
 
+// Removes withdrawn descriptors so image-free scenes cannot retain stale content.
+export function updateSceneImage(images: SceneImageRegistry, sceneId: SceneId, image: ImageDescriptor | null): SceneImageRegistry {
+    if ((images[sceneId] ?? null) === image) return images;
+    const next = { ...images };
+    if (image) next[sceneId] = image;
+    else delete next[sceneId];
+    return next;
+}
+
+// Uses a smooth direct ease without overshooting either scene endpoint.
 function smoothDirectTravelEase(progress: number) {
     return progress * progress * (3 - 2 * progress);
 }

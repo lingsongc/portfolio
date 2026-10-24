@@ -8,6 +8,7 @@ const aboutImage: ImageDescriptor = {
     alt: "",
     objectPosition: "center",
     transform: "translate(21%, -20%) scale(1.15)",
+    presentation: { shade: "horizon" },
 };
 
 type AboutProps = {

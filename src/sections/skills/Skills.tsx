@@ -1,6 +1,7 @@
 import { IconVectorBezier } from "@tabler/icons-react";
 import { useId, type CSSProperties } from "react";
 import { skills } from "../../data/skills";
+import { useDocumentVisible } from "../../motion/useDocumentVisible";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
 import type { SceneLifecycleControl } from "../../types/scene";
 
@@ -40,13 +41,15 @@ const skillGroups = skills.reduce<SkillGroup[]>((groups, skill) => {
 
 // Renders the accessible Skills content and its circle-aligned visual marquee.
 export function Skills({ circleGeometry, lifecycle }: SkillsProps) {
+    const documentVisible = useDocumentVisible();
+    const motionActive = lifecycle.active && lifecycle.phase === "idle" && documentVisible && !lifecycle.reducedMotion;
     const contentVisible = lifecycle.active === true
         && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
     const circleStyle = circleGeometry as CSSProperties | undefined;
 
     return (
         <section
-            className={`skill-container${contentVisible ? " skill-content-visible" : ""}`}
+            className={`skill-container${contentVisible ? " skill-content-visible" : ""}${motionActive ? " skill-motion-active" : ""}`}
             aria-labelledby="skill-title"
         >
             <div className="skill-introduction">

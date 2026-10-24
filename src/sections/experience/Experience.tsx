@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type RefObject } from "react";
 import { IconBriefcase, IconCalendar, IconSchool } from "@tabler/icons-react";
 import { education } from "../../data/education";
 import { experiences } from "../../data/experiences";
+import { useDocumentVisible } from "../../motion/useDocumentVisible";
 import type { ImageDescriptor, MainCircleImagePublisher } from "../../types/images";
 import type { SceneLifecycleControl } from "../../types/scene";
 import { ExperienceOrbit } from "./ExperienceOrbit";
@@ -23,6 +24,8 @@ type ExperienceProps = {
 
 // Coordinates the shared Experience and Education timeline, content, and image.
 export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: ExperienceProps) {
+    const documentVisible = useDocumentVisible();
+    const motionActive = lifecycle.active && lifecycle.phase === "idle" && documentVisible && !lifecycle.reducedMotion;
     const [experienceType, setExperienceType] = useState<ExperienceType>("experience");
     const [activeEventIds, setActiveEventIds] = useState({
         experience: experienceEvents[0].id,
@@ -53,37 +56,31 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
 
     return (
         <section
-            className={`experience-container${contentVisible ? " experience-content-visible" : ""}${lifecycle.phase === "idle" ? " experience-orbit-ready" : ""}`}
+            className={`experience-container${contentVisible ? " experience-content-visible" : ""}${lifecycle.phase === "idle" ? " experience-orbit-ready" : ""}${motionActive ? " experience-motion-active" : ""}`}
             aria-labelledby="experience-title"
         >
             <div className="experience-copy">
                 <header className="experience-header">
                     <div className="experience-header-content">
                         <h2 id="experience-title" className="experience-title" tabIndex={-1}>
-                            {experienceType === "experience" ? "Experience" : "Education"}
-                        </h2>
-                        <div
-                            className="experience-type-toggle"
-                            data-active-type={experienceType}
-                            role="group"
-                            aria-label="Timeline type"
-                        >
                             {(["experience", "education"] as const).map((type) => (
-                                <button
-                                    className={`experience-type-button${experienceType === type ? " experience-type-button-active" : ""}`}
-                                    type="button"
-                                    aria-pressed={experienceType === type}
-                                    disabled={!contentVisible}
-                                    onClick={() => {
-                                        if (type === experienceType) return;
-                                        setExperienceType(type);
-                                    }}
-                                    key={type}
-                                >
-                                    {type[0].toUpperCase() + type.slice(1)}
-                                </button>
+                                <span className="experience-title-option" key={type}>
+                                    {type === "education" && <span className="experience-title-divider" aria-hidden="true">|</span>}
+                                    <button
+                                        className={`experience-type-button${experienceType === type ? " experience-type-button-active" : ""}`}
+                                        type="button"
+                                        aria-pressed={experienceType === type}
+                                        disabled={!contentVisible}
+                                        onClick={() => {
+                                            if (type === experienceType) return;
+                                            setExperienceType(type);
+                                        }}
+                                    >
+                                        {type[0].toUpperCase() + type.slice(1)}
+                                    </button>
+                                </span>
                             ))}
-                        </div>
+                        </h2>
                     </div>
                 </header>
                 
@@ -125,6 +122,7 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                 imagePath={(id) => eventImagePath(experienceType, id)}
                 interactive={lifecycle.active && lifecycle.phase === "idle"}
                 label={experienceType}
+                motionActive={motionActive}
                 orbitRef={orbitRef}
                 onEntrySelect={activateEvent}
                 reducedMotion={lifecycle.reducedMotion}

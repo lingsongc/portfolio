@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:krita="http://krita.org/namespaces/svg/krita"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    width="8.64pt"
+    height="8.64pt"
+    viewBox="0 0 8.64 8.64">
+<defs/>
+<path id="linkedinLogo" transform="matrix(0.12 0 0 0.12 1.2 1.2)" fill="#ffffff" fill-rule="evenodd" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" d="M52 52L41.3156 52L41.3156 33.8021C41.3156 28.8128 39.4198 26.0245 35.4707 26.0245C31.1746 26.0245 28.9301 28.9261 28.9301 33.8021L28.9301 52L18.6333 52L18.6333 17.3333L28.9301 17.3333L28.9301 22.0029C28.9301 22.0029 32.026 16.2742 39.3826 16.2742C46.7357 16.2742 52 20.7645 52 30.0512ZM6.34935 12.794C2.84206 12.794 0 9.92966 0 6.39701C0 2.86436 2.84206 0 6.34935 0C9.85664 0 12.697 2.86436 12.697 6.39701C12.697 9.92966 9.85664 12.794 6.34935 12.794ZM1.03255 52L11.7694 52L11.7694 17.3333L1.03255 17.3333Z" sodipodi:nodetypes="ccccccccccccccccccccccc"/>
+</svg>

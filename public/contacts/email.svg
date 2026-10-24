@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:krita="http://krita.org/namespaces/svg/krita"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+    width="10.56pt"
+    height="7.92pt"
+    viewBox="0 0 10.56 7.92">
+<defs/>
+<path id="gmailLogo" transform="matrix(0.119999995231629 0 0 0.119999995231629 0 1.68000006849152)" fill="#ffffff" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" d="M6 52L20 52L20 15.9184L0 0L0 45.6327C0 49.1559 2.69 52 6 52" sodipodi:nodetypes="cccccc"/><path id="shape1" transform="matrix(0.119999995231629 0 0 0.119999995231629 8.15999967575075 1.65000006939721)" fill="#ffffff" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" d="M0 52.25L14 52.25C17.32 52.25 20 49.3816 20 45.852L20 0L0 15.9949" sodipodi:nodetypes="ccccc"/><path id="shape2" transform="matrix(0.119999995231629 0 0 0.119999995231629 8.15999967575075 -0.00204249604501238)" fill="#ffffff" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" d="M0 6.01702L0 32.017L20 17.017L20 9.01702C20 1.59702 11.53 -2.63298 5.6 1.81702" sodipodi:nodetypes="ccccc"/><path id="shape3" transform="matrix(0.119999995231629 0 0 0.119999995231629 1.27506511113834 0.719999956064876)" fill="#ffffff" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" d="M9.37446 26C-4.5146 26.7797 -1.65343 0.0260836 9.37446 1.12112e-06L33.3745 18L57.3745 1.12112e-06C73.8375 -0.00623362 70.2158 25.994 57.3745 26L33.3745 44" sodipodi:nodetypes="cccccc"/><path id="shape4" transform="matrix(0.119999995231629 0 0 0.119999995231629 0 -0.00204249604501238)" fill="#ffffff" stroke-opacity="0" stroke="#000000" stroke-width="0" stroke-linecap="square" stroke-linejoin="bevel" d="M0 9.01702L0 17.017L20 32.017L20 6.01702L14.4 1.81702C8.46 -2.63298 7.10543e-15 1.59702 7.10543e-15 9.01702" sodipodi:nodetypes="cccccc"/>
+</svg>

@@ -68,7 +68,7 @@
 }
 
 .navigation-container.navigation-docked {
-    z-index: 3;
+    z-index: 5;
     inset: var(--navigation-rail-inset) var(--navigation-rail-inset) var(--navigation-rail-inset) auto;
     width: var(--navigation-link-size);
     aspect-ratio: auto;
@@ -102,22 +102,44 @@
 }
 
 .navigation-container.navigation-home-entering {
-    animation: navigation-home-enter 500ms ease both;
+    animation: navigation-home-enter 500ms ease both, navigation-home-fade-in 125ms linear both;
+}
+
+.navigation-container.navigation-home-exiting {
+    animation: navigation-home-exit 500ms ease both, navigation-home-fade-out 125ms linear 375ms both;
+}
+
+@keyframes navigation-home-exit {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    to {
+        transform: translate(-50%, -50%) scale(0);
+    }
 }
 
 @keyframes navigation-home-enter {
     0% {
         visibility: visible;
-        opacity: 0;
         transform: translate(-50%, -50%) scale(0);
     }
 
-    25% { opacity: 1; }
     100% {
         visibility: visible;
-        opacity: 1;
         transform: translate(-50%, -50%) scale(1);
     }
+}
+
+/* Match the Home ring's linear fade independently of its scale easing. */
+@keyframes navigation-home-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes navigation-home-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .navigation-docked .navigation-theme-slot { top: 0; }
@@ -129,7 +151,7 @@
 
 .navigation-rail {
     position: fixed;
-    z-index: 3;
+    z-index: 5;
     inset-block: var(--navigation-rail-inset);
     right: var(--navigation-rail-inset);
     display: grid;
@@ -257,6 +279,7 @@
     width: max-content;
     clip-path: var(--navigation-label-hidden);
     font-size: var(--text-body);
+    font-weight: 700;
     transform: var(--navigation-label-position);
     visibility: hidden;
     pointer-events: none;
@@ -290,10 +313,15 @@
         transition: none;
     }
 
-    .navigation-container.navigation-home-entering { animation: none; }
+    .navigation-container.navigation-home-entering,
+    .navigation-container.navigation-home-exiting { animation: none; }
 
     .navigation-copyright-controlled-entering,
     .navigation-copyright-controlled-exiting { animation: none; }
 
     .navigation-copyright-visible { transition: none; }
+}
+/* Reserve compact viewports for the scene controls and meaningful content. */
+@media (max-width: 48rem), (max-height: 32rem) {
+    .navigation-copyright { display: none; }
 }

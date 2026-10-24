@@ -5,12 +5,5 @@ const pneuRelief = projectById("pneurelief");
 
 // Supplies PneuRelief content.
 export function PneuReliefPage() {
-    return (
-        <ProjectPageLayout project={pneuRelief}>
-            <section>
-                <h2>Overview</h2>
-                <p>Detailed PneuRelief project information will be added here.</p>
-            </section>
-        </ProjectPageLayout>
-    );
+    return <ProjectPageLayout project={pneuRelief} />;
 }

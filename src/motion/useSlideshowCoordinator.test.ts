@@ -6,6 +6,7 @@ import {
     requestSceneTransition,
     sceneIdFromHash,
     sceneUrl,
+    settleSceneLayout,
 } from "./useSlideshowCoordinator";
 
 // Verifies pure request, phase, and URL decisions used by the React-owned coordinator.
@@ -53,5 +54,21 @@ describe("slideshow coordinator model", () => {
         expect(initialSceneIdFromHash("")).toBe("home");
         expect(sceneUrl("projects", { pathname: "/portfolio/", search: "?preview=1" }))
             .toBe("/portfolio/?preview=1#projects");
+    });
+});
+// Resizing must refresh completed geometry as well as interrupted travel.
+describe("layout recovery", () => {
+    it("invalidates an idle scene's endpoint measurement", () => {
+        expect(settleSceneLayout({
+            currentSceneId: "about", requestedSceneId: null, phase: "idle", direction: null,
+            settledVersion: 2, travelProgress: 0,
+        })).toMatchObject({ currentSceneId: "about", phase: "idle", settledVersion: 3, travelProgress: 0 });
+    });
+
+    it("settles interrupted movement at the requested destination", () => {
+        expect(settleSceneLayout({
+            currentSceneId: "about", requestedSceneId: "skills", phase: "moving", direction: "forward",
+            settledVersion: 2, travelProgress: 0.3,
+        })).toMatchObject({ currentSceneId: "skills", requestedSceneId: null, phase: "idle", settledVersion: 3, travelProgress: 0 });
     });
 });

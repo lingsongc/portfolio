@@ -39,11 +39,7 @@ export function Home({ lifecycle, onMainCircleImageChange }: HomeProps) {
             <div
                 className="orbit-ring home-navigation-ring"
                 aria-hidden="true"
-            >
-                {Array.from({ length: 6 }, (_, index) => (
-                    <span className="home-navigation-exit-marker" key={index} />
-                ))}
-            </div>
+            />
             <div className="home-text">
                 <h1 id="home-title" className="home-title" aria-label={homeDetails.name.fullName} tabIndex={-1}>
                     <span className={`home-name-left ${homeDetails.name.isWestern ? "home-first-name" : ""}`} aria-hidden="true">
@@ -55,17 +51,7 @@ export function Home({ lifecycle, onMainCircleImageChange }: HomeProps) {
                         </span>
                     </span>
                 </h1>
-                <p className="visually-hidden">{homeDetails.introduction}</p>
-                <svg className="home-description-curve" viewBox="0 0 100 100" aria-hidden="true">
-                    <defs>
-                        <path id="home-description-path" d="M 0 50 A 50 50 0 0 0 100 50" />
-                    </defs>
-                    <text>
-                        <textPath href="#home-description-path" startOffset="50%" textAnchor="middle">
-                            {homeDetails.introduction}
-                        </textPath>
-                    </text>
-                </svg>
+                <p className="home-description">{homeDetails.introduction}</p>
             </div>
         </section>
     );

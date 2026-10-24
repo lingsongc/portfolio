@@ -6,8 +6,9 @@
 }
 
 .project-container {
-    --project-planet-size: clamp(3.75rem, 9vmin, 7.5rem);
-    --project-ring-gap: clamp(6rem, 16.5vw, 15rem);
+    /* Preserve the approved circle, planet, and ring proportions as one composition. */
+    --project-planet-size: calc(var(--project-circle-size) * 0.16);
+    --project-ring-gap: calc(var(--project-circle-size) * 0.36);
     --project-ring-step: calc(var(--project-ring-gap) + var(--project-ring-gap));
     --project-ring-1-size: calc(var(--project-circle-size) + var(--project-ring-step));
     --project-ring-2-size: calc(var(--project-circle-size) + var(--project-ring-step) + var(--project-ring-step));
@@ -30,6 +31,14 @@
     transform: translateX(-50%);
     white-space: nowrap;
 }
+
+.project-title,
+.project-detail-link {
+    opacity: 0;
+    transition: opacity 500ms ease;
+}
+
+.project-copy-visible :is(.project-title, .project-detail-link) { opacity: 1; }
 
 .project-ring {
     --project-stage-one-size: var(--project-ring-1-size);
@@ -210,6 +219,7 @@
 }
 
 .project-link {
+    position: relative;
     display: grid;
     width: var(--project-planet-size);
     aspect-ratio: 1;
@@ -251,7 +261,7 @@
     aspect-ratio: 1;
     opacity: 0;
     transform: translate(-50%, -50%);
-    transition: opacity 0s linear 500ms;
+    transition: opacity 500ms ease;
     pointer-events: none;
 }
 
@@ -262,16 +272,38 @@
 
 .project-selected-summary {
     position: absolute;
-    right: 15%;
-    bottom: 15%;
-    left: 15%;
-    padding: clamp(0.5rem, 1.2vmin, 1rem);
-    border-radius: 0.75rem;
-    background-color: rgb(18 8 24 / 78%);
+    top: 50%;
+    right: 0;
+    left: 0;
+    box-sizing: border-box;
+    height: 44%;
+    padding: clamp(0.75rem, 2vmin, 1.25rem);
     color: var(--colour-text);
-    font-size: clamp(0.625rem, 1.8vmin, 1rem);
+    font-size: clamp(0.75rem, 1.7vmin, 0.95rem);
     line-height: 1.5;
     text-align: center;
+}
+
+/* Floated shapes narrow each successive line without clipping the text itself. */
+.project-selected-summary p {
+    padding-top: var(--project-summary-offset, 0px);
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.project-summary-edge {
+    width: 27%;
+    height: 100%;
+}
+
+.project-summary-edge-left {
+    float: left;
+    shape-outside: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.project-summary-edge-right {
+    float: right;
+    shape-outside: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 .project-detail-link {
@@ -309,10 +341,23 @@
     .project-container,
     .project-selected-content { --project-circle-size: 57.6vw; }
 
+    .project-selected-summary { font-size: clamp(0.625rem, 1.8vmin, 1rem); }
+
     .project-title { font-size: clamp(2.5rem, 12vw, 4rem); }
 }
 
+@media (max-height: 32rem) {
+    .project-title {
+        top: 1rem;
+        font-size: clamp(2rem, 8vh, 3rem);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
+    .project-title,
+    .project-detail-link,
+    .project-selected-content { transition: none; }
+
     .project-content-visible .project-ring::before,
     .project-content-visible .project-item,
     .project-content-exiting .project-ring::before,

@@ -1,3 +1,4 @@
+/* Owns the shared project case-study reading layout and media presentation. */
 .project-detail-page {
     min-height: 100vh;
     min-height: 100svh;
@@ -54,3 +55,19 @@
     border-radius: 50%;
     object-fit: cover;
 }
+
+.project-detail-figure {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.project-detail-figure img {
+    display: block;
+    width: 100%;
+    border-radius: 1.5rem;
+}
+
+.project-detail-figure figcaption { color: var(--colour-text-muted); }
+
+.project-detail-content :is(p, li, a) { overflow-wrap: anywhere; }

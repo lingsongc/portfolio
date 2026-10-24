@@ -27,6 +27,7 @@ type ExperienceOrbitProps = {
     imagePath: (id: string) => string;
     interactive: boolean;
     label: string;
+    motionActive: boolean;
     orbitRef: RefObject<HTMLElement | null>;
     onEntrySelect: (index: number) => void;
     reducedMotion: boolean;
@@ -40,6 +41,7 @@ export function ExperienceOrbit({
     imagePath,
     interactive,
     label,
+    motionActive,
     orbitRef,
     onEntrySelect,
     reducedMotion,
@@ -125,7 +127,7 @@ export function ExperienceOrbit({
         };
     }, [entries.length]);
 
-    // Rendering this layer at page level lets planets pass in front of the main circle.
+    // The panel's sibling overlay host lets planets pass in front of the main circle.
     const planetLayer = (
         <div
             className={`experience-orbit-planets${contentVisible ? " experience-orbit-planets-visible" : ""}${interactive ? " experience-orbit-planets-ready" : ""}`}
@@ -186,7 +188,7 @@ export function ExperienceOrbit({
                 </div>
             </aside>
             <ScenePanelOverlay>
-                <div className={`experience-orbit-foreground${contentVisible ? " experience-orbit-foreground-visible" : ""}`}>
+                <div className={`experience-orbit-foreground${contentVisible ? " experience-orbit-foreground-visible" : ""}${motionActive ? " experience-motion-active" : ""}`}>
                     <div className="experience-orbit-front" aria-hidden="true">
                         <svg className="experience-orbit-front-path" viewBox={experienceOrbitViewBox} style={experienceOrbitLayerStyles}>
                             <path className="experience-orbit-path" d={experienceOrbitFrontPath} />
