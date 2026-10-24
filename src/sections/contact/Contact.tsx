@@ -69,7 +69,7 @@ export function Contact({ lifecycle }: ContactProps) {
                 </div>
                 <nav className="contact-link-layer" aria-label="Contact links">
                     {contactProfiles.map((profile) => (
-                        <a className="contact-link" data-profile={profile.id} href={profile.href} aria-label={profile.label} style={profileStyle(profile, layout)} key={profile.id}>
+                        <a className="contact-link" data-profile={profile.id} href={profile.href} target={profile.href.startsWith("mailto:") ? undefined : "_blank"} rel="noopener noreferrer" aria-label={profile.label} style={profileStyle(profile, layout)} key={profile.id}>
                             <img className="contact-social-icon" src={profile.image} alt="" />
                             <span className="contact-social-label">{profile.label}</span>
                         </a>
