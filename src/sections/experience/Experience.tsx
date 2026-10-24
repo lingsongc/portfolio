@@ -92,27 +92,25 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                         aria-label={`${activeEvent.title} details`}
                     >
                         <h3 className="experience-event-title">{activeEvent.title}</h3>
-                        <div className="experience-event-details">
-                            <div className="experience-event-metadata">
-                                <p className="experience-metadata-item">
-                                    <EventTypeIcon className="experience-metadata-icon" aria-hidden="true" />
-                                    {activeEvent.subtitle}
-                                </p>
-                                <p className="experience-metadata-item">
-                                    <IconCalendar className="experience-metadata-icon" aria-hidden="true" />
-                                    {activeEvent.startDate} to {activeEvent.endDate}
-                                </p>
-                            </div>
-                            <p className="experience-description">{activeEvent.description}</p>
-                            <ul className="experience-highlights body-copy">
-                                {activeEvent.highlights.map((highlight) => (
-                                    <li key={highlight}>
-                                        <span className="experience-highlight-marker" aria-hidden="true" />
-                                        <span>{highlight}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="experience-event-metadata">
+                            <p className="experience-metadata-item">
+                                <EventTypeIcon className="experience-metadata-icon" aria-hidden="true" />
+                                {activeEvent.subtitle}
+                            </p>
+                            <p className="experience-metadata-item">
+                                <IconCalendar className="experience-metadata-icon" aria-hidden="true" />
+                                {activeEvent.startDate} to {activeEvent.endDate}
+                            </p>
                         </div>
+                        <p className="experience-description">{activeEvent.description}</p>
+                        <ul className="experience-highlights body-copy">
+                            {activeEvent.highlights.map((highlight) => (
+                                <li key={highlight}>
+                                    <span className="experience-highlight-marker" aria-hidden="true" />
+                                    <span>{highlight}</span>
+                                </li>
+                            ))}
+                        </ul>
                     </article>
                 </div>
             </div>
