@@ -1,5 +1,7 @@
 /* about */
 
+:root { --about-circle-size: 160vh; }
+
 .about-container {
     --about-circle-arc: 64vh;
 
@@ -63,6 +65,7 @@
 }
 
 @media (max-width: 48rem) {
+    :root { --about-circle-size: 95vw; }
     .about-container {
         --about-circle-arc: 28.5vw;
     }

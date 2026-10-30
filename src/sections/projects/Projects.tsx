@@ -32,12 +32,34 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
         const container = summaryContainer;
         const paragraph = summaryTextRef.current;
         if (!container || !paragraph) return;
-        const centerText = () => centerProjectSummary(container, paragraph);
-        const observer = new ResizeObserver(centerText);
+        let lastLayout = "";
+        let frame = 0;
+        const centerText = () => {
+            const containerStyle = getComputedStyle(container);
+            const textStyle = getComputedStyle(paragraph);
+            // Ignore the paragraph height changed by our own padding search.
+            const layout = [container.clientWidth, container.clientHeight, containerStyle.padding,
+                textStyle.font, textStyle.lineHeight, textStyle.letterSpacing].join(":");
+            if (layout === lastLayout) return;
+            lastLayout = layout;
+            centerProjectSummary(container, paragraph);
+        };
+        const schedule = () => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(centerText);
+        };
+        const fontsChanged = () => { lastLayout = ""; schedule(); };
+        const observer = new ResizeObserver(schedule);
         observer.observe(container);
         observer.observe(paragraph);
+        // Font metrics can change without changing the computed font declaration.
+        document.fonts.addEventListener("loadingdone", fontsChanged);
         centerText();
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            cancelAnimationFrame(frame);
+            document.fonts.removeEventListener("loadingdone", fontsChanged);
+        };
     }, [activeProject.summary, summaryContainer]);
 
     // Selects a project and updates the image when the section is visible.

@@ -1,9 +1,10 @@
 /* experience and education */
 
+:root { --experience-circle-size: min(46.5vw, 69vh); }
+
 .experience-container,
 .experience-orbit-foreground {
     --experience-section-padding-inline: var(--section-padding-inline);
-    --experience-circle-size: min(46.5vw, 69vh);
     --experience-rail-gap: clamp(1rem, 2vw, 2rem);
     --experience-orbit-center-x: calc(100vw - var(--navigation-rail-inset) - var(--navigation-link-size) - var(--experience-rail-gap) - var(--experience-circle-size) / 2);
 }
@@ -479,8 +480,8 @@
 }
 
 @media (max-width: 48rem) {
+    :root { --experience-circle-size: 78vw; }
     .experience-container {
-        --experience-circle-size: 78vw;
         --experience-orbit-size: 123vw;
         --experience-content-width: 100%;
 

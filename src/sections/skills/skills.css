@@ -1,5 +1,7 @@
 /* Skills balances a quiet introduction with angled, circle-clipped marquee rows. */
 
+:root { --skill-circle-size: min(90vw, 90vh); }
+
 .skill-container {
     position: relative;
 }

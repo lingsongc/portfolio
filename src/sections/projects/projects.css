@@ -1,7 +1,6 @@
 /* projects */
 
-.project-container,
-.project-selected-content {
+:root {
     --project-circle-size: min(38.4vw, 54.4vh);
 }
 
@@ -324,8 +323,7 @@
 }
 
 @media (max-width: 48rem) {
-    .project-container,
-    .project-selected-content { --project-circle-size: 57.6vw; }
+    :root { --project-circle-size: 57.6vw; }
 
     .project-selected-summary { font-size: clamp(0.625rem, 1.8vmin, 1rem); }
 

@@ -1,5 +1,6 @@
 @import "./tokens.css";
 @import "./base.css";
+@import "../app.css";
 @import "../components/background-grid/background-grid.css";
 @import "./shared.css";
 @import "../components/scene-panel/scene-panel.css";

@@ -26,6 +26,7 @@
 
     --section-padding-inline: clamp(1.5rem, 6vw, 6rem);
     --home-circle-size: clamp(8rem, 28vw, 22rem);
+    --scene-layout-narrow: 0;
     --home-ring-size: calc(var(--home-circle-size) + 10rem);
     --orbit-ring-width: 0.25rem;
     --icon-stroke-width: 1.75;
@@ -33,4 +34,8 @@
     --navigation-link-size: 2.75rem;
     --navigation-link-gap: 0.25rem;
     --navigation-rail-inset: 0.625rem;
+}
+
+@media (max-width: 48rem) {
+    :root { --scene-layout-narrow: 1; }
 }

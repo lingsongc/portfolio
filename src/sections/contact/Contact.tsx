@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import type { SceneLifecycleControl } from "../../types/scene";
 import { contactProfiles, type ContactProfile } from "../../data/contact";
-import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, contactUsesStackedLayout, type ContactOffset } from "./contactGeometry";
+import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, type ContactOffset } from "./contactGeometry";
 import { ContactForm } from "./ContactForm";
 
 type ContactProps = { lifecycle: SceneLifecycleControl };
+type ContactLayout = { orbitSize: number; viewportWidth: number; viewportHeight: number; stacked: boolean };
 type ContactProfileLayout = {
     offset: ContactOffset;
     mobileOffset: ContactOffset;
@@ -27,7 +28,7 @@ const contactProfileLayouts: Record<ContactProfile["id"], ContactProfileLayout> 
 // Coordinates the circular prototype form and measured four-profile split.
 export function Contact({ lifecycle }: ContactProps) {
     const orbitRef = useRef<HTMLDivElement>(null);
-    const [layout, setLayout] = useState({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0 });
+    const [layout, setLayout] = useState<ContactLayout>({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0, stacked: false });
     const visible = lifecycle.active && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
 
     useLayoutEffect(() => {
@@ -37,6 +38,7 @@ export function Contact({ lifecycle }: ContactProps) {
             orbitSize: orbit.offsetWidth,
             viewportWidth: window.innerWidth,
             viewportHeight: window.innerHeight,
+            stacked: getComputedStyle(orbit).getPropertyValue("--contact-layout-stacked").trim() === "1",
         });
         const observer = new ResizeObserver(measure);
         observer.observe(orbit);
@@ -82,13 +84,12 @@ export function Contact({ lifecycle }: ContactProps) {
 }
 
 // Publishes the measured start and fitted endpoint as CSS variables.
-function profileStyle(profile: ContactProfile, layout: { orbitSize: number; viewportWidth: number; viewportHeight: number }): ProfileStyle {
-    const { orbitSize, viewportWidth, viewportHeight } = layout;
+function profileStyle(profile: ContactProfile, layout: ContactLayout): ProfileStyle {
+    const { orbitSize, viewportWidth, viewportHeight, stacked } = layout;
     const placement = contactProfileLayouts[profile.id];
     // Use two rows wherever the viewport has insufficient space beside the form.
-    const stacked = contactUsesStackedLayout(viewportWidth, viewportHeight);
     const offset = stacked ? placement.mobileOffset : placement.offset;
-    const diameter = contactProfileDiameter(placement.diameterRatio, orbitSize, viewportWidth, viewportHeight);
+    const diameter = contactProfileDiameter(placement.diameterRatio, orbitSize, viewportWidth, viewportHeight, stacked);
     const diameterRatio = orbitSize > 0 ? diameter / orbitSize : placement.diameterRatio;
     return {
         width: `${diameter}px`,

@@ -96,7 +96,7 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
     // Stops the temporary feedback animation when the grid unmounts.
     useEffect(() => () => cancelAnimationFrame(feedbackFrameRef.current ?? 0), []);
 
-    // Rebuilds the grid when its circle geometry changes and exposes the current renderer to feedback frames.
+    // Rebuilds for geometry and viewport changes, including standalone pages without a circle.
     useEffect(() => {
         const lines = linesRef.current;
         const fadeCircle = fadeCircleRef.current;
@@ -158,8 +158,10 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
         };
         renderRef.current = render;
         render();
+        window.addEventListener("resize", render);
         document.addEventListener("visibilitychange", handleVisibilityChange);
         return () => {
+            window.removeEventListener("resize", render);
             document.removeEventListener("visibilitychange", handleVisibilityChange);
             if (renderRef.current === render) renderRef.current = null;
         };

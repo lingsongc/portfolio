@@ -1,8 +1,11 @@
 /* contact */
 
-.contact-container {
+:root {
     --contact-circle-size: min(80vw, 80vh);
+    --contact-layout-stacked: 0;
+}
 
+.contact-container {
     position: relative;
     place-items: center;
 }
@@ -214,7 +217,10 @@ textarea.contact-form-field { resize: none; }
 }
 
 @media (max-width: 48rem), (max-aspect-ratio: 31/20) {
-    .contact-container { --contact-circle-size: min(86vw, 52vh); }
+    :root {
+        --contact-circle-size: min(86vw, 52vh);
+        --contact-layout-stacked: 1;
+    }
     .contact-form-field { font-size: 1rem; }
 }
 
