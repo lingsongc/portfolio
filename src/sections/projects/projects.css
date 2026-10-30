@@ -34,7 +34,7 @@
 .project-title,
 .project-detail-link {
     opacity: 0;
-    transition: opacity 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease;
 }
 
 .project-copy-visible :is(.project-title, .project-detail-link) { opacity: 1; }
@@ -118,12 +118,12 @@
 
 .project-content-visible .project-ring::before,
 .project-content-visible .project-item {
-    animation: project-orbit-enter 500ms ease both;
+    animation: project-orbit-enter var(--scene-visual-duration) ease both;
 }
 
 .project-content-exiting .project-ring::before,
 .project-content-exiting .project-item {
-    animation: project-orbit-exit 500ms ease both;
+    animation: project-orbit-exit var(--scene-visual-duration) ease both;
 }
 
 .project-content-visible .project-item { animation-name: project-planet-enter; }
@@ -260,7 +260,7 @@
     aspect-ratio: 1;
     opacity: 0;
     transform: translate(-50%, -50%);
-    transition: opacity 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease;
     pointer-events: none;
 }
 

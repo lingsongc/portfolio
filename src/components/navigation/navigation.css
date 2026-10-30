@@ -72,7 +72,7 @@
     inset: var(--navigation-rail-inset) var(--navigation-rail-inset) var(--navigation-rail-inset) auto;
     width: var(--navigation-link-size);
     aspect-ratio: auto;
-    animation: navigation-rail-enter 250ms ease 500ms both;
+    animation: navigation-rail-enter calc(var(--scene-travel-duration) * 0.25) ease var(--scene-visual-duration) both;
     transform: none;
 }
 
@@ -102,11 +102,11 @@
 }
 
 .navigation-container.navigation-home-entering {
-    animation: navigation-home-enter 500ms ease both, navigation-home-fade-in 125ms linear both;
+    animation: navigation-home-enter var(--scene-visual-duration) ease both, navigation-home-fade-in calc(var(--scene-visual-duration) * 0.25) linear both;
 }
 
 .navigation-container.navigation-home-exiting {
-    animation: navigation-home-exit 500ms ease both, navigation-home-fade-out 125ms linear 375ms both;
+    animation: navigation-home-exit var(--scene-visual-duration) ease both, navigation-home-fade-out calc(var(--scene-visual-duration) * 0.25) linear calc(var(--scene-visual-duration) * 0.75) both;
 }
 
 @keyframes navigation-home-exit {
@@ -149,51 +149,33 @@
 .navigation-docked .navigation-item:nth-child(5) { bottom: calc(var(--navigation-link-size) + var(--navigation-link-gap)); }
 .navigation-docked .navigation-item:nth-child(6) { bottom: 0; }
 
-.navigation-rail {
-    position: fixed;
-    z-index: 5;
-    inset-block: var(--navigation-rail-inset);
-    right: var(--navigation-rail-inset);
-    display: grid;
-    grid-template-rows: var(--navigation-link-size) minmax(0, 1fr) auto;
-    width: var(--navigation-link-size);
-    justify-items: center;
-    pointer-events: none;
-}
-
-.navigation-rail-slot {
-    width: var(--navigation-link-size);
-    aspect-ratio: 1;
-}
-
 .navigation-controlled.navigation-rail-departing {
-    animation: navigation-rail-enter 250ms ease both;
+    animation: navigation-rail-enter calc(var(--scene-travel-duration) * 0.25) ease both;
 }
 
 .navigation-controlled.navigation-rail-returning {
-    animation: navigation-rail-exit 250ms ease 750ms both;
+    animation: navigation-rail-exit calc(var(--scene-travel-duration) * 0.25) ease calc(var(--scene-travel-duration) * 0.75) both;
 }
 
-.navigation-rail-links {
-    display: flex;
-    flex-direction: column;
-    gap: var(--navigation-link-gap);
-}
-
+/* Share the rail's moving parent, centered between the theme slot and section links. */
 .navigation-copyright {
-    align-self: center;
+    position: absolute;
+    top: var(--navigation-link-size);
+    bottom: calc(5 * var(--navigation-link-size) + 4 * var(--navigation-link-gap));
+    left: 50%;
+    display: none;
+    height: max-content;
+    margin: auto 0;
     color: var(--colour-text-muted);
     font-size: var(--text-small);
-    opacity: 0;
+    opacity: 0.75;
     writing-mode: vertical-rl;
     text-orientation: sideways;
     white-space: nowrap;
+    transform: translateX(-50%);
 }
 
-.navigation-copyright-visible {
-    opacity: 0.75;
-    transition: opacity 250ms ease 500ms;
-}
+.navigation-docked .navigation-copyright { display: block; }
 
 .navigation-theme-slot {
     display: grid;
@@ -217,24 +199,6 @@
 .navigation-effects-ready .navigation-link,
 .navigation-controlled:not(.navigation-busy) .navigation-link {
     pointer-events: auto;
-}
-
-.navigation-copyright-controlled-entering {
-    animation: navigation-copyright-controlled-enter 250ms ease both;
-}
-
-.navigation-copyright-controlled-exiting {
-    animation: navigation-copyright-controlled-exit 250ms ease 750ms both;
-}
-
-@keyframes navigation-copyright-controlled-enter {
-    from { opacity: 0; }
-    to { opacity: 0.75; }
-}
-
-@keyframes navigation-copyright-controlled-exit {
-    from { opacity: 0.75; }
-    to { opacity: 0; }
 }
 
 .navigation-busy .navigation-link {
@@ -265,7 +229,7 @@
     content: "";
     opacity: var(--navigation-travel-progress, 0);
     transform: translate(-50%, -50%);
-    transition: opacity 80ms linear;
+    transition: opacity calc(var(--scene-travel-duration) * 0.08) linear;
     pointer-events: none;
 }
 
@@ -316,13 +280,9 @@
         transition: none;
     }
 
+    .navigation-container.navigation-docked,
     .navigation-container.navigation-home-entering,
     .navigation-container.navigation-home-exiting { animation: none; }
-
-    .navigation-copyright-controlled-entering,
-    .navigation-copyright-controlled-exiting { animation: none; }
-
-    .navigation-copyright-visible { transition: none; }
 }
 /* Shorten the single vertical line before it can reach either group of controls. */
 @media (max-height: 48rem) {
@@ -335,5 +295,5 @@
 
 /* Reserve the shortest and narrow viewports for scene controls and meaningful content. */
 @media (max-width: 48rem), (max-height: 27rem) {
-    .navigation-copyright { display: none; }
+    .navigation-docked .navigation-copyright { display: none; }
 }

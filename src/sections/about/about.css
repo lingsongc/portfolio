@@ -21,7 +21,7 @@
     gap: clamp(1.5rem, 3vw, 2.5rem);
     visibility: hidden;
     clip-path: inset(0 50%);
-    transition: clip-path 500ms ease, visibility 0s linear 500ms;
+    transition: clip-path var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
 }
 
 .about-content-visible .about-text {

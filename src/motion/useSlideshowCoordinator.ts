@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MAIN_CIRCLE_TRAVEL_DURATION_MS } from "../components/main-circle/mainCircleGeometry";
 import { sceneOrder, type SceneDirection, type SceneId, type SceneLifecycleControl, type SceneRequest, type SceneRequestResult } from "../types/scene";
 
-const SCENE_VISUAL_DURATION_MS = 500;
+const SCENE_VISUAL_DURATION_MS = 400;
 
 export type SceneTransitionState =
     | { currentSceneId: SceneId; direction: null; phase: "idle"; requestedSceneId: null }

@@ -35,7 +35,7 @@
     transform: translateZ(0);
     background-color: var(--colour-image-blank);
     opacity: 0;
-    transition: opacity 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease;
 }
 
 .main-circle-image-visible { opacity: 1; }

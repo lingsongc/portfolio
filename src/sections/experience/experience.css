@@ -51,17 +51,17 @@
 .experience-header-content,
 .experience-text {
     visibility: hidden;
-    transition: visibility 0s linear 500ms;
+    transition: visibility 0s linear var(--scene-visual-duration);
 }
 
 .experience-header-content {
     transform: translateY(-110%);
-    transition: transform 500ms ease, visibility 0s linear 500ms;
+    transition: transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
 }
 
 .experience-text {
     clip-path: inset(50% 0);
-    transition: clip-path 500ms ease, visibility 0s linear 500ms;
+    transition: clip-path var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
 }
 
 .experience-content-visible :is(.experience-header-content, .experience-text) {
@@ -226,7 +226,7 @@
     text-transform: inherit;
     cursor: pointer;
     /* Interpolate weight with size so the labels do not snap wider on selection. */
-    transition: color 150ms ease, font-size 200ms cubic-bezier(0.4, 0, 0.2, 1), font-weight 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color 200ms ease, font-size 200ms cubic-bezier(0.4, 0, 0.2, 1), font-weight 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .experience-type-button:not(.experience-type-button-active):is(:hover, :focus-visible) {
@@ -273,7 +273,7 @@
     overflow: hidden;
     border-radius: inherit;
     visibility: hidden;
-    transition: visibility 0s linear 500ms;
+    transition: visibility 0s linear var(--scene-visual-duration);
 }
 
 .experience-orbit-front-path {
@@ -285,7 +285,7 @@
     overflow: visible;
     opacity: 0;
     transform: translate(-50%, -50%) rotate(var(--experience-ellipse-rotation)) scale(0);
-    transition: opacity 500ms ease, transform 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease;
 }
 
 .experience-orbit-foreground-visible .experience-orbit-front {
@@ -331,7 +331,7 @@
     color: var(--colour-text);
     opacity: 0;
     transform: translateX(-50%);
-    transition: opacity 150ms ease;
+    transition: opacity 200ms ease;
     pointer-events: none;
 }
 
@@ -372,7 +372,7 @@
     visibility: hidden;
     opacity: 0;
     transform: translate(-50%, -50%) rotate(var(--experience-ellipse-rotation)) scale(0);
-    transition: opacity 500ms ease, transform 500ms ease, visibility 0s linear 500ms;
+    transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
     pointer-events: none;
 }
 
@@ -410,7 +410,7 @@
     visibility: hidden;
     opacity: 0;
     transform: translate(-50%, -50%) rotate(var(--experience-ellipse-rotation)) scale(0);
-    transition: opacity 500ms ease, transform 500ms ease, visibility 0s linear 500ms;
+    transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
     pointer-events: none;
 }
 

@@ -34,7 +34,7 @@
     text-align: center;
     opacity: 0;
     transform: translate(-50%, -50%);
-    transition: opacity 500ms ease-in-out, box-shadow 200ms ease;
+    transition: opacity var(--scene-visual-duration) ease-in-out, box-shadow 200ms ease;
 }
 
 .contact-content-visible .contact-content { opacity: 1; }
@@ -104,8 +104,8 @@ textarea.contact-form-field { resize: none; }
     inset: 0;
     opacity: 0;
     visibility: hidden;
-    /* Keep the reverse split visible, then fade during its final 60ms. */
-    transition: opacity 60ms linear 440ms, visibility 0s linear 500ms;
+    /* Keep the reverse split visible, then fade during its final 12 percent. */
+    transition: opacity calc(var(--scene-visual-duration) * 0.12) linear calc(var(--scene-visual-duration) * 0.88), visibility 0s linear var(--scene-visual-duration);
 }
 
 .contact-blob-layer {
@@ -115,8 +115,8 @@ textarea.contact-form-field { resize: none; }
 
 .contact-link-layer {
     z-index: 3;
-    /* Mirror the last 120ms of entry by fading surfaces during the first 120ms of exit. */
-    transition: opacity 120ms linear, visibility 0s linear 500ms;
+    /* Mirror the last 24 percent of entry by fading surfaces during the first 24 percent of exit. */
+    transition: opacity calc(var(--scene-visual-duration) * 0.24) linear, visibility 0s linear var(--scene-visual-duration);
 }
 
 .contact-blob-center,
@@ -146,7 +146,7 @@ textarea.contact-form-field { resize: none; }
     left: 50%;
     aspect-ratio: 1;
     transform: translate(calc(-50% + var(--contact-initial-x)), calc(-50% + var(--contact-initial-y)));
-    transition: transform 500ms ease-in-out;
+    transition: transform var(--scene-visual-duration) ease-in-out;
 }
 
 .contact-split-visible .contact-blob-layer {
@@ -158,7 +158,7 @@ textarea.contact-form-field { resize: none; }
 .contact-split-visible .contact-link-layer {
     opacity: 1;
     visibility: visible;
-    transition: opacity 120ms linear 380ms, visibility 0s;
+    transition: opacity calc(var(--scene-visual-duration) * 0.24) linear calc(var(--scene-visual-duration) * 0.76), visibility 0s;
 }
 
 .contact-split-visible :is(.contact-satellite, .contact-link) {
@@ -175,7 +175,7 @@ textarea.contact-form-field { resize: none; }
     font-weight: 700;
     text-decoration: none;
     pointer-events: auto;
-    transition: transform 500ms ease-in-out, box-shadow 200ms ease;
+    transition: transform var(--scene-visual-duration) ease-in-out, box-shadow 200ms ease;
 }
 
 .contact-satellite[data-profile="github"]::before, .contact-link[data-profile="github"] { background-color: #24292e; }
