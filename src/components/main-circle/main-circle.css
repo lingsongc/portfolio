@@ -15,8 +15,8 @@
 .main-circle-mask {
     position: absolute;
     inset: 0;
-    overflow: hidden;
-    border-radius: inherit;
+    /* Clip the composited image and shade as one group, including their antialiased edge. */
+    clip-path: circle(50%);
     background-color: var(--colour-circle-void);
 }
 
@@ -30,8 +30,9 @@
 }
 
 .main-circle-image {
-    overflow: hidden;
-    border-radius: inherit;
+    /* Keep the light photo and dark shade on one composited surface before clipping. */
+    isolation: isolate;
+    transform: translateZ(0);
     background-color: var(--colour-image-blank);
     opacity: 0;
     transition: opacity 500ms ease;
