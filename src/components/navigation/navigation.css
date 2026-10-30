@@ -186,6 +186,8 @@
     font-size: var(--text-small);
     opacity: 0;
     writing-mode: vertical-rl;
+    text-orientation: sideways;
+    white-space: nowrap;
 }
 
 .navigation-copyright-visible {
@@ -322,7 +324,16 @@
 
     .navigation-copyright-visible { transition: none; }
 }
-/* Reserve compact viewports for the scene controls and meaningful content. */
-@media (max-width: 48rem), (max-height: 32rem) {
+/* Shorten the single vertical line before it can reach either group of controls. */
+@media (max-height: 48rem) {
+    .navigation-copyright-rights { display: none; }
+}
+
+@media (max-height: 36rem) {
+    .navigation-copyright-name { display: none; }
+}
+
+/* Reserve the shortest and narrow viewports for scene controls and meaningful content. */
+@media (max-width: 48rem), (max-height: 27rem) {
     .navigation-copyright { display: none; }
 }

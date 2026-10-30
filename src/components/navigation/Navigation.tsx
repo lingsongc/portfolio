@@ -59,7 +59,9 @@ export function Navigation({
                 <span className="navigation-rail-slot" aria-hidden="true" />
 
                 <small className={`navigation-copyright${copyrightClasses}`}>
-                    Copyright © {currentYear} Chen Ling Song. All Rights Reserved.
+                    Copyright © {currentYear}
+                    <span className="navigation-copyright-name"> Chen Ling Song.</span>
+                    <span className="navigation-copyright-rights"> All Rights Reserved.</span>
                 </small>
                 
                 <div className="navigation-rail-links" aria-hidden="true">
