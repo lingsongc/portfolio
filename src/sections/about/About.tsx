@@ -47,7 +47,7 @@ export function About({ lifecycle, onMainCircleImageChange }: AboutProps) {
                         </li>
                     ))}
                 </ul>
-                <a className="about-resume-link" href="/about/resume.pdf" target="_blank" rel="noopener noreferrer">
+                <a className="action-button action-button-pill about-resume-link" href="/about/resume.pdf" target="_blank" rel="noopener noreferrer">
                     View Resume
                     <IconArrowUpRight aria-hidden="true" />
                 </a>

@@ -311,23 +311,10 @@
     z-index: 3;
     top: calc(50% + var(--project-circle-size) / 2);
     left: calc(50% + var(--project-circle-size) / 2);
-    display: grid;
     width: min(clamp(2.75rem, 5vmin, 4rem), calc(var(--project-circle-size) * 0.16));
     aspect-ratio: 1;
-    place-items: center;
-    border: var(--orbit-ring-width) solid var(--colour-text);
     border-radius: 50%;
-    background-color: transparent;
-    color: var(--colour-text);
     transform: translate(-100%, -100%);
-}
-
-.project-detail-link:is(:hover, :focus-visible) {
-    background-color: var(--colour-accent);
-}
-
-.project-detail-link:focus-visible {
-    outline: none;
 }
 
 .project-detail-link svg {

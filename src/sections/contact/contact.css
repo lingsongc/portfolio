@@ -71,7 +71,7 @@
     min-width: 0;
     min-height: 0;
     padding: 0.5rem 1rem;
-    border: 2px solid var(--colour-text);
+    border: 3px solid var(--colour-text);
     border-radius: var(--contact-field-radius);
     outline: none;
     background: transparent;
@@ -86,27 +86,14 @@ input.contact-form-field { height: var(--contact-field-height); }
 textarea.contact-form-field { resize: none; }
 
 .contact-form-send {
-    position: relative;
-    display: grid;
     width: 46%;
     min-width: 8rem;
     max-width: 100%;
     min-height: 2.75rem;
     justify-self: center;
-    place-items: center;
-    padding: 0.5rem 1.25rem;
-    border: 2px solid var(--colour-text);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--colour-text);
-    font-weight: 700;
+    padding-block: 0.5rem;
     text-transform: uppercase;
-    cursor: pointer;
-    transition: background-color 200ms ease;
 }
-
-.contact-form-send:is(:hover, :focus-visible) { background-color: var(--colour-accent); }
-.contact-form-send:focus-visible { outline: none; }
 
 .contact-blob-layer,
 .contact-link-layer {

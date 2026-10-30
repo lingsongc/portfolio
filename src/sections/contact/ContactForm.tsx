@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { IconRocket } from "@tabler/icons-react";
 
 // Previews the contact form locally without navigating or delivering a message.
 export function ContactForm() {
@@ -23,8 +24,9 @@ export function ContactForm() {
                 </div>
                 <label className="visually-hidden" htmlFor="contact-comments">Comments</label>
                 <textarea className="contact-form-field" id="contact-comments" name="comments" placeholder="Comments" data-scene-scroll-owner required />
-                <button className="contact-form-send" type="submit">
+                <button className="action-button action-button-pill contact-form-send" type="submit">
                     Send
+                    <IconRocket aria-hidden="true" />
                 </button>
                 <p className="visually-hidden" role="status">
                     {previewed ? "Preview only. No message was sent." : ""}

@@ -58,33 +58,8 @@
 }
 
 .about-resume-link {
-    position: relative;
-    display: grid;
     width: 100%;
-    min-height: 2.75em;
-    place-items: center;
-    padding: 0.75em 3.5em;
-    border: var(--orbit-ring-width) solid var(--colour-text);
-    border-radius: 999px;
-    background-color: transparent;
-    color: var(--colour-text);
     font-size: var(--text-body);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.about-resume-link:is(:hover, :focus-visible) { background-color: var(--colour-accent); }
-.about-resume-link:focus-visible { outline: none; }
-
-/* Position the arrow independently so the label stays centered across the full pill. */
-.about-resume-link svg {
-    position: absolute;
-    right: 1em;
-    top: 50%;
-    width: 2em;
-    height: 2em;
-    transform: translateY(-50%);
-    stroke-width: var(--icon-stroke-width);
 }
 
 @media (max-width: 48rem) {

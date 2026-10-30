@@ -70,7 +70,7 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
                 </div>
             </ScenePanelOverlay>
             <a
-                className="project-detail-link"
+                className="action-button project-detail-link"
                 href={activeProject.href}
                 aria-label={`View ${activeProject.name} project details`}
             >
