@@ -64,15 +64,36 @@
     font-size: var(--text-body);
 }
 
-@media (max-width: 48rem) {
-    :root { --about-circle-size: 95vw; }
+.about-circle-anchor { display: none; }
+
+@media (--narrow-layout) {
+    :root {
+        --about-circle-size: 150vw;
+        --about-image-transform: translate(0, -3%) scale(1.1);
+    }
+
     .about-container {
-        --about-circle-arc: 28.5vw;
+        position: relative;
+        display: block;
+        padding: calc(32dvh + 2rem) var(--section-padding-inline) var(--scene-bottom-space);
+    }
+
+    .about-circle-anchor {
+        position: absolute;
+        display: block;
+        top: calc(32dvh - var(--about-circle-size));
+        left: 50%;
+        width: var(--about-circle-size);
+        aspect-ratio: 1;
+        transform: translateX(-50%);
     }
 
     .about-text {
-        width: min(65vw, calc(100% - 1.5rem));
+        width: 100%;
+        gap: 1.5rem;
     }
+
+    .about-statistic-amount { font-size: clamp(2.5rem, 12vw, 5rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {

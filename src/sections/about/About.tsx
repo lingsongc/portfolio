@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import { aboutDetails } from "../../data/about";
 import type { ImageDescriptor, MainCircleImagePublisher } from "../../types/images";
@@ -8,17 +8,18 @@ const aboutImage: ImageDescriptor = {
     src: "/about/profile-2.jpg",
     alt: "",
     objectPosition: "center",
-    transform: "translate(21%, -20%) scale(1.15)",
+    transform: "var(--about-image-transform, translate(21%, -20%) scale(1.15))",
     presentation: { shade: "horizon" },
 };
 
 type AboutProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
     lifecycle: SceneLifecycleControl;
     onMainCircleImageChange: MainCircleImagePublisher;
 };
 
 // Reveals About exclusively from the explicit slideshow lifecycle.
-export function About({ lifecycle, onMainCircleImageChange }: AboutProps) {
+export function About({ circleAnchorRef, lifecycle, onMainCircleImageChange }: AboutProps) {
     const paragraphs = aboutDetails.description.trim().split(/\n\s*\n/);
     const contentVisible = lifecycle.active === true
         && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
@@ -32,6 +33,7 @@ export function About({ lifecycle, onMainCircleImageChange }: AboutProps) {
             className={`about-container${contentVisible ? " about-content-visible" : ""}`}
             aria-labelledby="about-title"
         >
+            <div ref={circleAnchorRef} className="about-circle-anchor" aria-hidden="true" />
             <div className="about-text">
                 <h2 id="about-title" tabIndex={-1}>About Me</h2>
                 <div className="about-description">

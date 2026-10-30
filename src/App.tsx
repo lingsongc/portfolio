@@ -43,6 +43,7 @@ export default function App() {
     const experienceOrbitRef = useRef<HTMLElement>(null);
     const circleMeasureRef = useRef<HTMLDivElement>(null);
     const homeCircleRef = useRef<HTMLDivElement>(null);
+    const aboutCircleRef = useRef<HTMLDivElement>(null);
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
@@ -72,7 +73,7 @@ export default function App() {
         measure.style.width = `var(${sceneCircleSizeProperties[sceneId]})`;
         const circleWidth = measure.getBoundingClientRect().width;
         const narrowLayout = getComputedStyle(measure).getPropertyValue("--scene-layout-narrow").trim() === "1";
-        const anchor = sceneId === "home" ? homeCircleRef.current : null;
+        const anchor = { home: homeCircleRef.current, about: aboutCircleRef.current }[sceneId as "home" | "about"];
         const anchorBounds = anchor?.getBoundingClientRect();
         return resolveMainCircleSceneEndpoint(sceneId, {
             viewportWidth: window.innerWidth,
@@ -184,6 +185,7 @@ export default function App() {
                     overflowRef={activeSceneScrollerRef}
                 >
                     <About
+                        circleAnchorRef={aboutCircleRef}
                         lifecycle={slideshow.lifecycleFor("about")}
                         onMainCircleImageChange={publishAboutImage}
                     />
