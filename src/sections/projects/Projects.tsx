@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { ScenePanelOverlay } from "../../components/scene-panel/ScenePanel";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import { projects, type Project } from "../../data/projects";
@@ -7,12 +7,14 @@ import type { SceneLifecycleControl } from "../../types/scene";
 import { ProjectOrbit, type ProjectOrbitTransitionState } from "./ProjectOrbit";
 
 type ProjectsProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
+    narrowLayout: boolean;
     lifecycle: SceneLifecycleControl;
     onMainCircleImageChange: MainCircleImagePublisher;
 };
 
 // Coordinates project selection, orbit visibility, and the main-circle image.
-export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) {
+export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircleImageChange }: ProjectsProps) {
     const [summaryContainer, setSummaryContainer] = useState<HTMLDivElement | null>(null);
     const summaryTextRef = useRef<HTMLParagraphElement>(null);
     const [activeProjectId, setActiveProjectId] = useState(projects[0].id);
@@ -73,13 +75,43 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
             aria-labelledby="project-title"
         >
             <h2 id="project-title" className="project-title" tabIndex={-1}>Projects</h2>
-            <ProjectOrbit
+            {narrowLayout ? (
+                <>
+                    <div ref={circleAnchorRef} className="project-circle-anchor" aria-hidden="true" />
+                    <div className="project-selector" role="group" aria-label="Project selection">
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                            <path d="M 0 15 Q 50 115 100 15" />
+                        </svg>
+                        {projects.map((project, index) => {
+                            const position = (index + 1) / (projects.length + 1);
+                            return (
+                                <button
+                                    className="project-link"
+                                    style={{ left: `${position * 100}%`, top: `${15 + 200 * position * (1 - position)}%` }}
+                                    key={project.id}
+                                    type="button"
+                                    aria-label={project.name}
+                                    aria-pressed={project.id === activeProjectId}
+                                    disabled={lifecycle.phase !== "idle"}
+                                    onClick={() => selectProject(project)}
+                                >
+                                    <img className="project-image" src={`/projects/${project.id}.png`} alt="" />
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="project-description" aria-live="polite">
+                        <h3>{activeProject.name}</h3>
+                        <p>{activeProject.summary}</p>
+                    </div>
+                </>
+            ) : <ProjectOrbit
                 activeProjectId={activeProjectId}
                 projects={projects}
                 transitionState={transitionState}
                 onProjectSelect={selectProject}
-            />
-            <ScenePanelOverlay>
+            />}
+            {!narrowLayout && <ScenePanelOverlay>
                 <div
                     className={`project-selected-content${transitionState === "idle" ? "" : ` project-selected-content-${transitionState}`}`}
                     aria-live="polite"
@@ -90,12 +122,13 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
                         <p ref={summaryTextRef}>{activeProject.summary}</p>
                     </div>
                 </div>
-            </ScenePanelOverlay>
+            </ScenePanelOverlay>}
             <a
                 className="action-button project-detail-link"
                 href={activeProject.href}
                 aria-label={`View ${activeProject.name} project details`}
             >
+                <span className="project-detail-label">View project</span>
                 <IconArrowUpRight aria-hidden="true" />
             </a>
         </section>

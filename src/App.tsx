@@ -46,6 +46,7 @@ export default function App() {
     const homeCircleRef = useRef<HTMLDivElement>(null);
     const aboutCircleRef = useRef<HTMLDivElement>(null);
     const experienceCircleRef = useRef<HTMLDivElement>(null);
+    const projectCircleRef = useRef<HTMLDivElement>(null);
     const narrowLayout = useNarrowLayout();
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
@@ -78,6 +79,7 @@ export default function App() {
         const narrowLayout = getComputedStyle(measure).getPropertyValue("--scene-layout-narrow").trim() === "1";
         const anchors: Partial<Record<SceneId, HTMLDivElement | null>> = {
             home: homeCircleRef.current, about: aboutCircleRef.current, experience: experienceCircleRef.current,
+            projects: projectCircleRef.current,
         };
         const anchor = anchors[sceneId];
         const anchorBounds = anchor?.getBoundingClientRect();
@@ -218,9 +220,11 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="project-title"
                     overflowRef={activeSceneScrollerRef}
-                    scrollable={false}
+                    scrollable={narrowLayout}
                 >
                     <Projects
+                        circleAnchorRef={projectCircleRef}
+                        narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("projects")}
                         onMainCircleImageChange={publishProjectImage}
                     />
