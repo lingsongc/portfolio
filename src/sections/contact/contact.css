@@ -39,14 +39,14 @@
 
 .contact-content h2 {
     position: absolute;
-    top: 8%;
+    top: 10%;
     left: 50%;
     font-size: min(var(--text-section-title), calc(var(--contact-circle-size) * 0.135));
     transform: translateX(-50%);
 }
 
 .contact-form {
-    --contact-form-gap: calc(var(--contact-circle-size) * 0.035);
+    --contact-form-gap: calc(var(--contact-circle-size) * 0.018);
     --contact-field-height: max(2.75rem, calc(var(--contact-circle-size) * 0.065));
     --contact-field-radius: calc(var(--contact-field-height) / 2);
 
@@ -55,8 +55,8 @@
     left: 16.667%;
     display: grid;
     width: 66.666%;
-    height: 68%;
-    grid-template-rows: auto minmax(3rem, 1fr) auto auto;
+    height: 60%;
+    grid-template-rows: auto minmax(3rem, 1fr) auto;
     gap: var(--contact-form-gap);
 }
 
@@ -77,12 +77,11 @@
     background: transparent;
     color: var(--colour-text);
     font: 500 clamp(0.875rem, 1.8vmin, 1.125rem) / 1.5 var(--font-text);
-    opacity: 0.5;
-    transition: opacity 200ms ease;
+    transition: border-color 200ms ease;
 }
 
 .contact-form-field::placeholder { color: inherit; }
-.contact-form-field:is(:hover, :focus) { opacity: 1; }
+.contact-form-field:is(:hover, :focus) { border-color: var(--colour-accent); }
 input.contact-form-field { height: var(--contact-field-height); }
 textarea.contact-form-field { resize: none; }
 
@@ -103,19 +102,11 @@ textarea.contact-form-field { resize: none; }
     font-weight: 700;
     text-transform: uppercase;
     cursor: pointer;
-    opacity: 0.5;
-    transition: opacity 200ms ease;
+    transition: background-color 200ms ease;
 }
 
-.contact-form-send:is(:hover, :focus-visible) { opacity: 1; }
-.contact-form-send:focus-visible { outline: 2px solid var(--colour-accent); outline-offset: 4px; }
-
-.contact-form-status {
-    min-height: 2.8em;
-    color: var(--colour-text-muted);
-    font-size: 0.75rem;
-    line-height: 1.4;
-}
+.contact-form-send:is(:hover, :focus-visible) { background-color: var(--colour-accent); }
+.contact-form-send:focus-visible { outline: none; }
 
 .contact-blob-layer,
 .contact-link-layer {
@@ -237,9 +228,7 @@ textarea.contact-form-field { resize: none; }
 
 @media (max-width: 48rem), (max-aspect-ratio: 31/20) {
     .contact-container { --contact-circle-size: min(86vw, 52vh); }
-    .contact-form { --contact-form-gap: calc(var(--contact-circle-size) * 0.03); }
     .contact-form-field { font-size: 1rem; }
-    .contact-form-status { font-size: 0.6875rem; }
 }
 
 @media (max-height: 28rem) {

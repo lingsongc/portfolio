@@ -14,7 +14,7 @@ export function ContactForm() {
     return (
         <div className="contact-content">
             <h2 id="contact-title" tabIndex={-1}>Contact</h2>
-            <form className="contact-form" onSubmit={previewMessage} aria-labelledby="contact-title" aria-describedby="contact-preview-note" data-scene-scroll-owner>
+            <form className="contact-form" onSubmit={previewMessage} aria-labelledby="contact-title" data-scene-scroll-owner>
                 <div className="contact-form-row">
                     <label className="visually-hidden" htmlFor="contact-name">Name</label>
                     <input className="contact-form-field" id="contact-name" name="name" placeholder="Name" autoComplete="name" required />
@@ -26,8 +26,8 @@ export function ContactForm() {
                 <button className="contact-form-send" type="submit">
                     Send
                 </button>
-                <p className="contact-form-status" id="contact-preview-note" role="status">
-                    {previewed ? "Preview only. No message was sent." : "Preview only. Messages are not sent."}
+                <p className="visually-hidden" role="status">
+                    {previewed ? "Preview only. No message was sent." : ""}
                 </p>
             </form>
         </div>
