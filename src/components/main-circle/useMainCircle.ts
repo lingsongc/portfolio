@@ -49,7 +49,7 @@ export function useMainCircle({
     ) : null, [endpoints, phase, travelProgress]);
     renderedEndpointRef.current = snapshot?.endpoint ?? null;
 
-    // Track only the explicit scene scroller; local content flow never drives scene state.
+    // Track only the explicit scene scroller; resize recovery can enable it after a wide layout.
     useLayoutEffect(() => {
         if (phase === "moving") return;
         const scroller = activeScrollerRef?.current;
@@ -67,7 +67,7 @@ export function useMainCircle({
             scroller.removeEventListener("scroll", measure);
             document.fonts.removeEventListener("loadingdone", measure);
         };
-    }, [activeScrollerRef, currentSceneId, phase, resolveEndpoint]);
+    }, [activeScrollerRef, currentSceneId, layoutVersion, phase, resolveEndpoint]);
 
     const publishSceneImage = useCallback((sceneId: SceneId, image: ImageDescriptor | null) => {
         setImages((current) => updateSceneImage(current, sceneId, image));
