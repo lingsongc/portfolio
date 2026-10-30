@@ -268,7 +268,8 @@
 }
 
 .navigation-link-active::before {
-    background-color: var(--colour-text);
+    border-color: var(--colour-accent);
+    background-color: var(--colour-accent);
 }
 
 .navigation-label {
