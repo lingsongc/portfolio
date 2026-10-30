@@ -479,36 +479,97 @@
     scroll-snap-stop: always;
 }
 
-@media (max-width: 48rem) {
-    :root { --experience-circle-size: 78vw; }
+@media (--narrow-layout) {
+    :root { --experience-circle-size: clamp(6rem, 25vw, 10rem); }
     .experience-container {
-        --experience-orbit-size: 123vw;
-        --experience-content-width: 100%;
-
-        height: 100%;
-        min-height: 100%;
-        grid-template-columns: minmax(0, 1fr);
-        padding-right: calc(
-            var(--navigation-rail-inset)
-            + var(--navigation-link-size)
-            + 1rem
-            + env(safe-area-inset-right)
-        );
+        --experience-title-size: clamp(1.5rem, 6.4vw, 3rem);
+        display: block;
+        height: 100dvh;
+        min-height: 32rem;
+        padding: var(--scene-top-space) var(--section-padding-inline) var(--scene-bottom-space);
     }
 
-    .experience-copy { width: 100%; }
+    .experience-copy { width: 100%; height: 100%; }
+    .experience-copy::after { display: none; }
+    .experience-header { flex: none; max-width: 100%; }
+    .experience-content-region { width: 100%; align-items: start; }
+    .experience-text { padding: 0 0.25rem 1rem 0; }
+    .experience-event-title { font-size: clamp(1.5rem, 5vw, 2.25rem); }
+    .experience-event-metadata { gap: 0.75rem; flex-direction: column; margin-top: 1rem; }
+    .experience-highlights li { column-gap: 0.5rem; }
 
-    .experience-content-region { width: 100%; }
-
-    .experience-copy::after {
-        flex-basis: calc(28dvh + var(--experience-circle-size) / 2 + 1rem);
+    .experience-image-row {
+        position: relative;
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 1rem;
+        margin-block: 1.75rem;
+        visibility: hidden;
+        opacity: 0;
+        transform: scale(0.8);
+        transform-origin: calc(var(--experience-circle-size) / 2) center;
+        transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
     }
 
-    /* Fit both labels on one line beside the persistent navigation rail. */
-    .experience-container { --experience-title-size: clamp(1.25rem, 6.3vw, 3rem); }
+    .experience-content-visible .experience-image-row {
+        visibility: visible;
+        opacity: 1;
+        transform: scale(1);
+        transition-delay: 0s;
+    }
 
-    .experience-orbit,
-    .experience-orbit-foreground { top: 72%; }
+    .experience-image-row::before {
+        position: absolute;
+        inset: 50% 0 auto;
+        height: 2px;
+        background: var(--colour-line);
+        content: "";
+    }
+
+    .experience-circle-anchor { flex: none; width: var(--experience-circle-size); aspect-ratio: 1; }
+    .experience-strip-orbit { min-width: 0; flex: 1; }
+
+    .experience-strip {
+        --experience-thumbnail-size: clamp(3rem, 13vw, 4.5rem);
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-block: 0.5rem;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+    }
+
+    .experience-strip::after {
+        flex: 0 0 max(0px, calc(100% - var(--experience-thumbnail-size) - 1rem));
+        content: "";
+    }
+
+    .experience-strip-button {
+        flex: none;
+        width: var(--experience-thumbnail-size);
+        aspect-ratio: 1;
+        overflow: hidden;
+        padding: 0;
+        border: 3px solid transparent;
+        border-radius: 50%;
+        background: var(--colour-background);
+        scroll-snap-align: start;
+        cursor: pointer;
+    }
+
+    .experience-strip-button[aria-pressed="true"] { border-color: var(--colour-accent); }
+    .experience-strip-button:focus-visible { outline: 2px solid var(--colour-text); outline-offset: -6px; }
+    .experience-strip-button img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+}
+
+@media (--narrow-layout) and (max-height: 32rem) {
+    .experience-container { height: auto; min-height: 100dvh; }
+    .experience-text { max-height: none; overflow: visible; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -519,7 +580,8 @@
         transform: translateX(-50%);
     }
 
-    .experience-type-button { transition: none; }
+    .experience-type-button,
+    .experience-image-row { transition: none; }
 
     .experience-orbit-ring,
     .experience-orbit-front,

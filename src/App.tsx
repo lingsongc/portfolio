@@ -7,6 +7,7 @@ import { ScenePanel } from "./components/scene-panel/ScenePanel";
 import { resolveMainCircleSceneEndpoint } from "./motion/sceneCircleGeometry";
 import { useSlideshowCoordinator } from "./motion/useSlideshowCoordinator";
 import { useSceneInput } from "./motion/useSceneInput";
+import { useNarrowLayout } from "./motion/useNarrowLayout";
 import { About } from "./sections/about/About";
 import { Contact } from "./sections/contact/Contact";
 import { Experience } from "./sections/experience/Experience";
@@ -44,6 +45,8 @@ export default function App() {
     const circleMeasureRef = useRef<HTMLDivElement>(null);
     const homeCircleRef = useRef<HTMLDivElement>(null);
     const aboutCircleRef = useRef<HTMLDivElement>(null);
+    const experienceCircleRef = useRef<HTMLDivElement>(null);
+    const narrowLayout = useNarrowLayout();
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
@@ -73,7 +76,10 @@ export default function App() {
         measure.style.width = `var(${sceneCircleSizeProperties[sceneId]})`;
         const circleWidth = measure.getBoundingClientRect().width;
         const narrowLayout = getComputedStyle(measure).getPropertyValue("--scene-layout-narrow").trim() === "1";
-        const anchor = { home: homeCircleRef.current, about: aboutCircleRef.current }[sceneId as "home" | "about"];
+        const anchors: Partial<Record<SceneId, HTMLDivElement | null>> = {
+            home: homeCircleRef.current, about: aboutCircleRef.current, experience: experienceCircleRef.current,
+        };
+        const anchor = anchors[sceneId];
         const anchorBounds = anchor?.getBoundingClientRect();
         return resolveMainCircleSceneEndpoint(sceneId, {
             viewportWidth: window.innerWidth,
@@ -196,9 +202,11 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="experience-title"
                     overflowRef={activeSceneScrollerRef}
-                    scrollable={false}
+                    scrollable={narrowLayout}
                 >
                     <Experience
+                        circleAnchorRef={experienceCircleRef}
+                        narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("experience")}
                         orbitRef={experienceOrbitRef}
                         onMainCircleImageChange={publishExperienceImage}
