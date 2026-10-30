@@ -317,7 +317,7 @@
     place-items: center;
     border: var(--orbit-ring-width) solid var(--colour-text);
     border-radius: 50%;
-    background-color: var(--colour-background);
+    background-color: transparent;
     color: var(--colour-text);
     transform: translate(-100%, -100%);
 }

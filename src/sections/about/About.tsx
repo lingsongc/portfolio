@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { IconArrowUpRight } from "@tabler/icons-react";
 import { aboutDetails } from "../../data/about";
 import type { ImageDescriptor, MainCircleImagePublisher } from "../../types/images";
 import type { SceneLifecycleControl } from "../../types/scene";
@@ -46,6 +47,10 @@ export function About({ lifecycle, onMainCircleImageChange }: AboutProps) {
                         </li>
                     ))}
                 </ul>
+                <a className="about-resume-link" href="/about/resume.pdf" target="_blank" rel="noopener noreferrer">
+                    View Resume
+                    <IconArrowUpRight aria-hidden="true" />
+                </a>
             </div>
         </section>
     );
