@@ -226,7 +226,7 @@
     place-items: center;
     overflow: hidden;
     padding: 0;
-    border: var(--orbit-ring-width) solid var(--colour-text);
+    border: 0;
     border-radius: 50%;
     background-color: var(--colour-surface);
     color: var(--colour-text);
@@ -322,13 +322,12 @@
     transform: translate(-100%, -100%);
 }
 
-.project-detail-link:hover {
+.project-detail-link:is(:hover, :focus-visible) {
     background-color: var(--colour-accent);
 }
 
 .project-detail-link:focus-visible {
-    outline: var(--orbit-ring-width) solid var(--colour-accent);
-    outline-offset: var(--orbit-ring-width);
+    outline: none;
 }
 
 .project-detail-link svg {
