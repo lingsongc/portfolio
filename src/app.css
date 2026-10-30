@@ -1,0 +1,7 @@
+/* Measures section-owned CSS circle sizes without painting or occupying layout space. */
+.slideshow-circle-measure {
+    position: fixed;
+    height: 0;
+    visibility: hidden;
+    pointer-events: none;
+}

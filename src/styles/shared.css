@@ -1,5 +1,55 @@
 /* shared */
 
+.action-button {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border: 3px solid var(--colour-text);
+    background: transparent;
+    color: var(--colour-text);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.action-button::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-color: var(--colour-accent);
+    content: "";
+    transform: translateY(-101%);
+    transition: transform 200ms ease;
+    pointer-events: none;
+}
+
+.action-button:is(:hover, :focus-visible)::before { transform: translateY(0); }
+.action-button:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .action-button::before { transition: none; }
+}
+
+.action-button-pill {
+    position: relative;
+    min-height: 2.75em;
+    padding: 0.75em 3.5em;
+    border-radius: 999px;
+}
+
+/* Equal side padding and an independent icon keep the label centered in the whole pill. */
+.action-button-pill svg {
+    position: absolute;
+    right: 1em;
+    top: 50%;
+    width: 2em;
+    height: 2em;
+    transform: translateY(-50%);
+    stroke-width: var(--icon-stroke-width);
+}
+
 .home-container,
 .about-container,
 .experience-container,

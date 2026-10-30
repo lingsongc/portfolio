@@ -1,5 +1,7 @@
 /* about */
 
+:root { --about-circle-size: 160vh; }
+
 .about-container {
     --about-circle-arc: 64vh;
 
@@ -19,7 +21,7 @@
     gap: clamp(1.5rem, 3vw, 2.5rem);
     visibility: hidden;
     clip-path: inset(0 50%);
-    transition: clip-path 500ms ease, visibility 0s linear 500ms;
+    transition: clip-path var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
 }
 
 .about-content-visible .about-text {
@@ -57,7 +59,13 @@
     line-height: 1;
 }
 
+.about-resume-link {
+    width: 100%;
+    font-size: var(--text-body);
+}
+
 @media (max-width: 48rem) {
+    :root { --about-circle-size: 95vw; }
     .about-container {
         --about-circle-arc: 28.5vw;
     }

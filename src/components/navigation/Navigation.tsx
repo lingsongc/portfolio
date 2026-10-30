@@ -31,7 +31,6 @@ export function Navigation({
         )
         : [];
     const positionClasses = controlledNavigationClasses(sceneControl);
-    const copyrightClasses = controlledCopyrightClasses(sceneControl);
 
     // Activates named navigation immediately for mouse, touch, and keyboard clicks.
     const handleNavigationClick = (event: MouseEvent<HTMLAnchorElement>, sectionId: SceneId) => {
@@ -54,57 +53,46 @@ export function Navigation({
     };
 
     return (
-        <>
-            <div className="navigation-rail">
-                <span className="navigation-rail-slot" aria-hidden="true" />
+        <nav
+            className={`navigation-container navigation-controlled${busy ? " navigation-busy" : ""}${positionClasses}`}
+            aria-label="Portfolio sections"
+        >
+            <small className="navigation-copyright">
+                Copyright © {currentYear}
+                <span className="navigation-copyright-name"> Chen Ling Song.</span>
+                <span className="navigation-copyright-rights"> All Rights Reserved.</span>
+            </small>
+            <ul className="navigation-list">
+                <li className="navigation-item navigation-theme-slot" aria-hidden="true" />
 
-                <small className={`navigation-copyright${copyrightClasses}`}>
-                    Copyright © {currentYear} Chen Ling Song. All Rights Reserved.
-                </small>
-                
-                <div className="navigation-rail-links" aria-hidden="true">
-                    {visibleSections.map((section) => (
-                        <span className="navigation-rail-slot" key={section.id} />
-                    ))}
-                </div>
-            </div>
-
-            <nav
-                className={`navigation-container navigation-controlled${busy ? " navigation-busy" : ""}${positionClasses}`}
-                aria-label="Portfolio sections"
-            >
-                <ul className="navigation-list">
-                    <li className="navigation-item navigation-theme-slot" aria-hidden="true" />
-
-                    {visibleSections.map((section) => {
-                        const markerProgress = transientMarkers.find(
-                            (marker) => marker.sceneId === section.id,
-                        )?.progress ?? 0;
-                        return (
-                            <li className="navigation-item" key={section.id}>
-                                <a
-                                    className={`navigation-link${activeSection === section.id
-                                        ? " navigation-link-active"
-                                        : ""}${markerProgress > 0
-                                        ? " navigation-link-travelling"
-                                        : ""}`}
-                                    href={`#${section.id}`}
-                                    aria-label={section.label}
-                                    aria-current={activeSection === section.id ? "location" : undefined}
-                                    aria-disabled={busy || undefined}
-                                    tabIndex={busy ? -1 : undefined}
-                                    style={{ "--navigation-travel-progress": markerProgress } as CSSProperties}
-                                    onClick={(event) => handleNavigationClick(event, section.id)}
-                                    onKeyDown={(event) => handleNavigationKeyDown(event, section.id)}
-                                >
-                                    <span className="navigation-label">{section.label}</span>
-                                </a>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </nav>
-        </>
+                {visibleSections.map((section) => {
+                    const markerProgress = transientMarkers.find(
+                        (marker) => marker.sceneId === section.id,
+                    )?.progress ?? 0;
+                    return (
+                        <li className="navigation-item" key={section.id}>
+                            <a
+                                className={`navigation-link${activeSection === section.id
+                                    ? " navigation-link-active"
+                                    : ""}${markerProgress > 0
+                                    ? " navigation-link-travelling"
+                                    : ""}`}
+                                href={`#${section.id}`}
+                                aria-label={section.label}
+                                aria-current={activeSection === section.id ? "location" : undefined}
+                                aria-disabled={busy || undefined}
+                                tabIndex={busy ? -1 : undefined}
+                                style={{ "--navigation-travel-progress": markerProgress } as CSSProperties}
+                                onClick={(event) => handleNavigationClick(event, section.id)}
+                                onKeyDown={(event) => handleNavigationKeyDown(event, section.id)}
+                            >
+                                <span className="navigation-label">{section.label}</span>
+                            </a>
+                        </li>
+                    );
+                })}
+            </ul>
+        </nav>
     );
 }
 
@@ -123,19 +111,6 @@ function controlledNavigationClasses(sceneControl: NavigationSceneControl) {
         return " navigation-docked navigation-rail-returning";
     }
     return " navigation-docked navigation-effects-ready";
-}
-
-// Keeps copyright timing aligned with the controlled rail without owning scene state.
-function controlledCopyrightClasses(sceneControl: NavigationSceneControl) {
-    const { currentSceneId, destinationSceneId, phase } = sceneControl;
-    if (currentSceneId === "home") {
-        return phase === "moving" && destinationSceneId !== "home"
-            ? " navigation-copyright-controlled-entering"
-            : "";
-    }
-    return phase === "moving" && destinationSceneId === "home"
-        ? " navigation-copyright-controlled-exiting"
-        : " navigation-copyright-visible";
 }
 
 // Calculates visual-only intermediate marker fills in direct travel order.

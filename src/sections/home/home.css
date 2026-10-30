@@ -11,13 +11,13 @@
     left: 50%;
     width: var(--home-ring-size);
     transform: translate(-50%, -50%);
-    transition: transform 500ms ease, opacity 125ms linear;
+    transition: transform var(--scene-visual-duration) ease, opacity calc(var(--scene-visual-duration) * 0.25) linear;
 }
 
 .home-exiting .home-navigation-ring {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0);
-    transition: transform 500ms ease, opacity 125ms linear 375ms;
+    transition: transform var(--scene-visual-duration) ease, opacity calc(var(--scene-visual-duration) * 0.25) linear calc(var(--scene-visual-duration) * 0.75);
 }
 
 .home-text {
@@ -61,7 +61,7 @@
 
 .home-name-value {
     display: block;
-    transition: transform 500ms ease;
+    transition: transform var(--scene-visual-duration) ease;
 }
 
 .home-name-right .home-name-value {
@@ -89,7 +89,7 @@
     font-size: clamp(1.25rem, 2vw, 1.5rem);
     text-align: center;
     transform: translateX(-50%);
-    transition: opacity 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease;
 }
 
 .home-exiting .home-description { opacity: 0; }

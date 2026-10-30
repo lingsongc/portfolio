@@ -1,13 +1,8 @@
 export type ContactOffset = readonly [number, number];
 
-// Mirrors the CSS fallback when side-by-side balls would collide with a large form.
-export function contactUsesStackedLayout(viewportWidth: number, viewportHeight: number) {
-    return viewportWidth <= 768 || viewportWidth <= viewportHeight * 1.55;
-}
-
 // Keeps desktop balls at their original scale while the main form grows independently.
-export function contactProfileDiameter(diameterRatio: number, orbitSize: number, viewportWidth: number, viewportHeight: number) {
-    const baseSize = contactUsesStackedLayout(viewportWidth, viewportHeight)
+export function contactProfileDiameter(diameterRatio: number, orbitSize: number, viewportWidth: number, viewportHeight: number, stacked: boolean) {
+    const baseSize = stacked
         ? orbitSize
         : Math.min(viewportWidth, viewportHeight) * 0.56;
     return diameterRatio * baseSize;

@@ -1,7 +1,6 @@
 /* projects */
 
-.project-container,
-.project-selected-content {
+:root {
     --project-circle-size: min(38.4vw, 54.4vh);
 }
 
@@ -35,7 +34,7 @@
 .project-title,
 .project-detail-link {
     opacity: 0;
-    transition: opacity 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease;
 }
 
 .project-copy-visible :is(.project-title, .project-detail-link) { opacity: 1; }
@@ -119,12 +118,12 @@
 
 .project-content-visible .project-ring::before,
 .project-content-visible .project-item {
-    animation: project-orbit-enter 500ms ease both;
+    animation: project-orbit-enter var(--scene-visual-duration) ease both;
 }
 
 .project-content-exiting .project-ring::before,
 .project-content-exiting .project-item {
-    animation: project-orbit-exit 500ms ease both;
+    animation: project-orbit-exit var(--scene-visual-duration) ease both;
 }
 
 .project-content-visible .project-item { animation-name: project-planet-enter; }
@@ -226,7 +225,7 @@
     place-items: center;
     overflow: hidden;
     padding: 0;
-    border: var(--orbit-ring-width) solid var(--colour-text);
+    border: 0;
     border-radius: 50%;
     background-color: var(--colour-surface);
     color: var(--colour-text);
@@ -261,7 +260,7 @@
     aspect-ratio: 1;
     opacity: 0;
     transform: translate(-50%, -50%);
-    transition: opacity 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease;
     pointer-events: none;
 }
 
@@ -311,24 +310,10 @@
     z-index: 3;
     top: calc(50% + var(--project-circle-size) / 2);
     left: calc(50% + var(--project-circle-size) / 2);
-    display: grid;
     width: min(clamp(2.75rem, 5vmin, 4rem), calc(var(--project-circle-size) * 0.16));
     aspect-ratio: 1;
-    place-items: center;
-    border: var(--orbit-ring-width) solid var(--colour-text);
     border-radius: 50%;
-    background-color: var(--colour-background);
-    color: var(--colour-text);
     transform: translate(-100%, -100%);
-}
-
-.project-detail-link:hover {
-    background-color: var(--colour-accent);
-}
-
-.project-detail-link:focus-visible {
-    outline: var(--orbit-ring-width) solid var(--colour-accent);
-    outline-offset: var(--orbit-ring-width);
 }
 
 .project-detail-link svg {
@@ -338,8 +323,7 @@
 }
 
 @media (max-width: 48rem) {
-    .project-container,
-    .project-selected-content { --project-circle-size: 57.6vw; }
+    :root { --project-circle-size: 57.6vw; }
 
     .project-selected-summary { font-size: clamp(0.625rem, 1.8vmin, 1rem); }
 

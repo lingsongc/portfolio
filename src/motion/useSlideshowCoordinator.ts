@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MAIN_CIRCLE_TRAVEL_DURATION_MS } from "../components/main-circle/mainCircleGeometry";
 import { sceneOrder, type SceneDirection, type SceneId, type SceneLifecycleControl, type SceneRequest, type SceneRequestResult } from "../types/scene";
 
-const SCENE_VISUAL_DURATION_MS = 500;
+const SCENE_VISUAL_DURATION_MS = 400;
 
 export type SceneTransitionState =
     | { currentSceneId: SceneId; direction: null; phase: "idle"; requestedSceneId: null }
@@ -16,6 +16,7 @@ export function useSlideshowCoordinator() {
     const stateRef = useRef(state);
     const reducedMotionRef = useRef(reducedMotion);
     const lastHandledHashRef = useRef(window.location.hash);
+    const historyDestinationRef = useRef<SceneId | null>(null);
     const lastSettledVersionRef = useRef(state.settledVersion);
     const phaseFrameRef = useRef(0);
     const travelFrameRef = useRef(0);
@@ -34,6 +35,7 @@ export function useSlideshowCoordinator() {
         const current = stateRef.current;
         const update = requestSceneTransition(current, request);
         if (update.result.status !== "accepted") return update.result;
+        if (request.source !== "history") historyDestinationRef.current = null;
         commit(reducedMotionRef.current
             ? { ...createSceneTransitionState(update.result.destinationSceneId), settledVersion: current.settledVersion + 1, travelProgress: 0 }
             : { ...update.state, settledVersion: current.settledVersion, travelProgress: 0 });
@@ -103,6 +105,8 @@ export function useSlideshowCoordinator() {
         const arrivedImmediately = state.settledVersion !== lastSettledVersionRef.current;
         if (!arrivedDuringOpening && !arrivedImmediately) return;
         lastSettledVersionRef.current = state.settledVersion;
+        // A browser-selected URL already owns its history entry, even during pending travel.
+        if (historyDestinationRef.current !== null) return;
         if (sceneIdFromHash(window.location.hash) === state.currentSceneId) return;
         lastHandledHashRef.current = `#${state.currentSceneId}`;
         window.history.pushState({ sceneId: state.currentSceneId }, "", sceneUrl(state.currentSceneId, window.location));
@@ -133,12 +137,25 @@ export function useSlideshowCoordinator() {
                 lastHandledHashRef.current = "#home";
                 window.history.replaceState({ sceneId: "home" }, "", sceneUrl("home", window.location));
             }
-            requestScene({ kind: "direct", destinationSceneId: destinationSceneId ?? "home", source: "history" });
+            historyDestinationRef.current = destinationSceneId ?? "home";
+            const result = requestScene({ kind: "direct", destinationSceneId: historyDestinationRef.current, source: "history" });
+            if (result.status === "ignored" && result.reason === "same-scene") historyDestinationRef.current = null;
         };
         window.addEventListener("popstate", requestLocationScene);
         window.addEventListener("hashchange", requestLocationScene);
         return () => { window.removeEventListener("popstate", requestLocationScene); window.removeEventListener("hashchange", requestLocationScene); };
     }, [requestScene]);
+
+    // Coalesces rapid history changes to the latest URL after the current transition finishes.
+    useEffect(() => {
+        const destinationSceneId = historyDestinationRef.current;
+        if (state.phase !== "idle" || destinationSceneId === null) return;
+        if (destinationSceneId === state.currentSceneId) {
+            historyDestinationRef.current = null;
+            return;
+        }
+        requestScene({ kind: "direct", destinationSceneId, source: "history" });
+    }, [requestScene, state.currentSceneId, state.phase]);
 
     const lifecycleFor = useCallback((sceneId: SceneId): SceneLifecycleControl => ({
         active: state.phase !== "moving" && state.currentSceneId === sceneId,

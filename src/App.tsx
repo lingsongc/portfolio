@@ -4,7 +4,7 @@ import { MainCircle } from "./components/main-circle/MainCircle";
 import { useMainCircle } from "./components/main-circle/useMainCircle";
 import { Navigation } from "./components/navigation/Navigation";
 import { ScenePanel } from "./components/scene-panel/ScenePanel";
-import { homeCircleSize, resolveMainCircleSceneEndpoint } from "./components/main-circle/mainCircleGeometry";
+import { resolveMainCircleSceneEndpoint } from "./motion/sceneCircleGeometry";
 import { useSlideshowCoordinator } from "./motion/useSlideshowCoordinator";
 import { useSceneInput } from "./motion/useSceneInput";
 import { About } from "./sections/about/About";
@@ -26,11 +26,22 @@ const sceneHeadingIds: Record<SceneId, string> = {
     contact: "contact-title",
 };
 
+// Sections own these CSS sizes; the page measures them only at endpoint boundaries.
+const sceneCircleSizeProperties: Record<SceneId, string> = {
+    home: "--home-circle-size",
+    about: "--about-circle-size",
+    experience: "--experience-circle-size",
+    projects: "--project-circle-size",
+    skills: "--skill-circle-size",
+    contact: "--contact-circle-size",
+};
+
 // Composes the six viewport Sections around one page-level slideshow coordinator.
 export default function App() {
     const activeSceneScrollerRef = useRef<HTMLDivElement>(null);
     const backgroundGridRef = useRef<BackgroundGridHandle>(null);
     const experienceOrbitRef = useRef<HTMLElement>(null);
+    const circleMeasureRef = useRef<HTMLDivElement>(null);
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
@@ -55,11 +66,16 @@ export default function App() {
     // Measures the current viewport-owned inputs needed by a requested endpoint.
     const resolveCircleEndpoint = useCallback((sceneId: SceneId) => {
         const experienceBounds = experienceOrbitRef.current?.getBoundingClientRect();
-        const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const measure = circleMeasureRef.current;
+        if (!measure) throw new Error("Circle endpoint measurement is unavailable.");
+        measure.style.width = `var(${sceneCircleSizeProperties[sceneId]})`;
+        const circleWidth = measure.getBoundingClientRect().width;
+        const narrowLayout = getComputedStyle(measure).getPropertyValue("--scene-layout-narrow").trim() === "1";
         return resolveMainCircleSceneEndpoint(sceneId, {
             viewportWidth: window.innerWidth,
             viewportHeight: window.innerHeight,
-            homeCircleWidth: homeCircleSize(window.innerWidth, rootFontSize),
+            circleWidth,
+            narrowLayout,
             experienceCenter: experienceBounds
                 ? {
                     top: experienceBounds.top + experienceBounds.height / 2,
@@ -125,6 +141,7 @@ export default function App() {
             <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} />
 
             <main className="slideshow-stage">
+                <div ref={circleMeasureRef} className="slideshow-circle-measure" aria-hidden="true" />
                 <Navigation
                     sceneControl={{
                         busy: slideshow.busy,

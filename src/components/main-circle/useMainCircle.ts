@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { preload } from "react-dom";
 import type { ImageDescriptor } from "../../types/images";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
@@ -14,7 +14,7 @@ type MainCircleOptions = {
     resolveEndpoint: (sceneId: SceneId) => MainCircleEndpoint;
 };
 
-type EndpointSnapshot = { from: MainCircleEndpoint; key: string; to: MainCircleEndpoint };
+type EndpointSnapshot = { from: MainCircleEndpoint; to: MainCircleEndpoint };
 type SceneImageRegistry = Partial<Record<SceneId, ImageDescriptor>>;
 
 // Owns the persistent circle's endpoint snapshot, shared geometry, and image registry.
@@ -26,38 +26,23 @@ export function useMainCircle({
     layoutVersion,
     resolveEndpoint,
 }: MainCircleOptions) {
-    const endpointSnapshotRef = useRef<EndpointSnapshot | null>(null);
-    const [geometry, setGeometry] = useState<MainCircleEndpoint | null>(null);
-    const [easedTravelProgress, setEasedTravelProgress] = useState(0);
+    const [endpoints, setEndpoints] = useState<EndpointSnapshot | null>(null);
     const [images, setImages] = useState<SceneImageRegistry>({});
 
     useLayoutEffect(() => {
         void layoutVersion;
-        if (phase !== "moving" || !requestedSceneId) {
-            endpointSnapshotRef.current = null;
-            setGeometry(resolveEndpoint(currentSceneId));
-            setEasedTravelProgress(phase === "opening" ? 1 : 0);
-            return;
-        }
+        const from = resolveEndpoint(currentSceneId);
+        const to = phase === "moving" && requestedSceneId ? resolveEndpoint(requestedSceneId) : from;
+        setEndpoints({ from, to });
+    }, [currentSceneId, layoutVersion, phase, requestedSceneId, resolveEndpoint]);
 
-        const key = `${currentSceneId}:${requestedSceneId}`;
-        if (endpointSnapshotRef.current?.key !== key) {
-            endpointSnapshotRef.current = {
-                from: resolveEndpoint(currentSceneId),
-                key,
-                to: resolveEndpoint(requestedSceneId),
-            };
-        }
-        const endpoints = endpointSnapshotRef.current;
-        const snapshot = mainCircleTravelAtTime(
-            endpoints.from,
-            endpoints.to,
-            travelProgress * MAIN_CIRCLE_TRAVEL_DURATION_MS,
-            smoothDirectTravelEase,
-        );
-        setGeometry(snapshot.endpoint);
-        setEasedTravelProgress(snapshot.easedProgress);
-    }, [currentSceneId, layoutVersion, phase, requestedSceneId, resolveEndpoint, travelProgress]);
+    // Derive every frame from the coordinator's clock without scheduling a second render.
+    const snapshot = useMemo(() => endpoints ? mainCircleTravelAtTime(
+        endpoints.from,
+        endpoints.to,
+        (phase === "moving" ? travelProgress : phase === "opening" ? 1 : 0) * MAIN_CIRCLE_TRAVEL_DURATION_MS,
+        smoothDirectTravelEase,
+    ) : null, [endpoints, phase, travelProgress]);
 
     const publishSceneImage = useCallback((sceneId: SceneId, image: ImageDescriptor | null) => {
         setImages((current) => updateSceneImage(current, sceneId, image));
@@ -73,7 +58,7 @@ export function useMainCircle({
         currentSceneId, phase,
     }), [currentSceneId, images, phase]);
 
-    return { geometry, easedTravelProgress, ...imageState, publishSceneImage };
+    return { geometry: snapshot?.endpoint ?? null, easedTravelProgress: snapshot?.easedProgress ?? 0, ...imageState, publishSceneImage };
 }
 
 // Retains outgoing content invisibly over the void until the destination opens.
@@ -94,7 +79,9 @@ export function updateSceneImage(images: SceneImageRegistry, sceneId: SceneId, i
     return next;
 }
 
-// Uses a smooth direct ease without overshooting either scene endpoint.
-function smoothDirectTravelEase(progress: number) {
-    return progress * progress * (3 - 2 * progress);
+// Uses ease-in-out quart for a pronounced departure and arrival without overshoot.
+export function smoothDirectTravelEase(progress: number) {
+    return progress < 0.5
+        ? 8 * progress ** 4
+        : 1 - (-2 * progress + 2) ** 4 / 2;
 }

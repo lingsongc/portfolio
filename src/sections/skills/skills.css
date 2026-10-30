@@ -1,5 +1,7 @@
 /* Skills balances a quiet introduction with angled, circle-clipped marquee rows. */
 
+:root { --skill-circle-size: min(90vw, 90vh); }
+
 .skill-container {
     position: relative;
 }
@@ -13,7 +15,7 @@
     visibility: hidden;
     opacity: 0;
     transform: translateX(-1.5rem);
-    transition: opacity 500ms ease, transform 500ms ease, visibility 0s linear 500ms;
+    transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
 }
 
 .skill-content-visible .skill-introduction {
@@ -68,7 +70,7 @@
     color: var(--colour-text);
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.96);
-    transition: opacity 500ms ease, transform 500ms ease;
+    transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease;
     pointer-events: auto;
     container-type: size;
 }

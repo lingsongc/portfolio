@@ -1,12 +1,20 @@
 import { describe, expect, it } from "vitest";
 import type { ImageDescriptor } from "../../types/images";
-import { resolveImageState, updateSceneImage } from "./useMainCircle";
+import { resolveImageState, smoothDirectTravelEase, updateSceneImage } from "./useMainCircle";
 
 const about: ImageDescriptor = { src: "/about.jpg", alt: "" };
 const experience: ImageDescriptor = { src: "/experience.jpg", alt: "" };
 
 // Verifies the controller's pure image staging decisions.
 describe("main circle controller", () => {
+    it("uses symmetric quartic acceleration and braking for travel", () => {
+        expect(smoothDirectTravelEase(0)).toBe(0);
+        expect(smoothDirectTravelEase(0.25)).toBe(0.03125);
+        expect(smoothDirectTravelEase(0.5)).toBe(0.5);
+        expect(smoothDirectTravelEase(0.75)).toBe(0.96875);
+        expect(smoothDirectTravelEase(1)).toBe(1);
+    });
+
     it("hides the outgoing image while closing", () => {
         expect(resolveImageState({ about }, {
             currentSceneId: "about", phase: "closing",
