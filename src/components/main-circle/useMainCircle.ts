@@ -79,7 +79,9 @@ export function updateSceneImage(images: SceneImageRegistry, sceneId: SceneId, i
     return next;
 }
 
-// Uses a smooth direct ease without overshooting either scene endpoint.
-function smoothDirectTravelEase(progress: number) {
-    return progress * progress * (3 - 2 * progress);
+// Uses ease-in-out quart for a pronounced departure and arrival without overshoot.
+export function smoothDirectTravelEase(progress: number) {
+    return progress < 0.5
+        ? 8 * progress ** 4
+        : 1 - (-2 * progress + 2) ** 4 / 2;
 }

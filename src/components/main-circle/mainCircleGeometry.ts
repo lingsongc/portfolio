@@ -1,6 +1,6 @@
 import type { MainCircleEndpoint } from "../../types/mainCircle";
 
-export const MAIN_CIRCLE_TRAVEL_DURATION_MS = 800;
+export const MAIN_CIRCLE_TRAVEL_DURATION_MS = 1000;
 
 // Interpolates direct circle geometry and shared eased progress at one elapsed time.
 export function mainCircleTravelAtTime(

@@ -3,7 +3,7 @@
 :root {
     /* Keep these phase lengths aligned with the coordinator and circle travel clocks. */
     --scene-visual-duration: 400ms;
-    --scene-travel-duration: 800ms;
+    --scene-travel-duration: 1000ms;
     color-scheme: dark;
 
     --colour-background: #120818;
