@@ -8,6 +8,13 @@ const layout: MainCircleSceneLayout = {
 
 // Verifies placement from CSS measurements rather than duplicating responsive size formulas.
 describe("scene circle endpoints", () => {
+    it("uses a measured narrow anchor without changing wide placement", () => {
+        const measured = { top: 210, left: 195 };
+        expect(resolveMainCircleSceneEndpoint("home", { ...layout, narrowLayout: true, narrowCenter: measured }))
+            .toEqual({ width: 720, ...measured });
+        expect(resolveMainCircleSceneEndpoint("home", { ...layout, narrowCenter: measured }))
+            .toEqual({ width: 720, top: 450, left: 720 });
+    });
     it("centers Home, Projects and Contact using their measured width", () => {
         for (const id of ["home", "projects", "contact"] as const) {
             expect(resolveMainCircleSceneEndpoint(id, layout)).toEqual({ width: 720, top: 450, left: 720 });

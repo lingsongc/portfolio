@@ -42,6 +42,7 @@ export default function App() {
     const backgroundGridRef = useRef<BackgroundGridHandle>(null);
     const experienceOrbitRef = useRef<HTMLElement>(null);
     const circleMeasureRef = useRef<HTMLDivElement>(null);
+    const homeCircleRef = useRef<HTMLDivElement>(null);
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
@@ -71,11 +72,14 @@ export default function App() {
         measure.style.width = `var(${sceneCircleSizeProperties[sceneId]})`;
         const circleWidth = measure.getBoundingClientRect().width;
         const narrowLayout = getComputedStyle(measure).getPropertyValue("--scene-layout-narrow").trim() === "1";
+        const anchor = sceneId === "home" ? homeCircleRef.current : null;
+        const anchorBounds = anchor?.getBoundingClientRect();
         return resolveMainCircleSceneEndpoint(sceneId, {
             viewportWidth: window.innerWidth,
             viewportHeight: window.innerHeight,
             circleWidth,
             narrowLayout,
+            narrowCenter: anchorBounds ? { top: anchorBounds.top + anchorBounds.height / 2, left: anchorBounds.left + anchorBounds.width / 2 } : undefined,
             experienceCenter: experienceBounds
                 ? {
                     top: experienceBounds.top + experienceBounds.height / 2,
@@ -92,6 +96,7 @@ export default function App() {
         travelProgress: slideshow.travelProgress,
         layoutVersion: slideshow.settledVersion,
         resolveEndpoint: resolveCircleEndpoint,
+        activeScrollerRef: activeSceneScrollerRef,
     });
 
     // Gives each Section a stable descriptor publisher without exposing the registry.
@@ -166,6 +171,7 @@ export default function App() {
                     overflowRef={activeSceneScrollerRef}
                 >
                     <Home
+                        circleAnchorRef={homeCircleRef}
                         lifecycle={slideshow.lifecycleFor("home")}
                         onMainCircleImageChange={publishHomeImage}
                     />

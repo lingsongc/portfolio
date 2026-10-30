@@ -94,11 +94,54 @@
 
 .home-exiting .home-description { opacity: 0; }
 
-@media (max-width: 48rem) {
-    .home-text {
-        column-gap: clamp(0.75rem, 3vw, 2rem);
+.home-circle-anchor { display: none; }
+
+@media (--narrow-layout) {
+    .home-container {
+        align-content: center;
+        justify-items: center;
+        gap: 2rem;
+        padding-block: var(--scene-top-space) var(--scene-bottom-space);
     }
 
+    .home-circle-anchor {
+        display: block;
+        width: var(--home-circle-size);
+        aspect-ratio: 1;
+    }
+
+    .home-navigation-ring { display: none; }
+
+    .home-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .home-title {
+        display: grid;
+        gap: 0.2em;
+        font-size: clamp(2rem, 9.8vw, 4.8rem);
+        text-align: center;
+    }
+
+    .home-name-left,
+    .home-name-right {
+        display: block;
+        grid-column: auto;
+        grid-row: auto;
+        justify-self: center;
+    }
+
+    .home-name-right .home-name-value { display: flex; gap: 0.25em; }
+
+    .home-description {
+        position: static;
+        max-width: 100%;
+        font-size: clamp(1rem, 3.5vw, 1.25rem);
+        transform: none;
+    }
 }
 
 @media (max-height: 30rem) and (orientation: landscape) {

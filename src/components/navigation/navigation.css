@@ -297,3 +297,32 @@
 @media (max-width: 48rem), (max-height: 27rem) {
     .navigation-docked .navigation-copyright { display: none; }
 }
+
+/* Keep one navigation tree, with no Home orbit or rail travel at narrow widths. */
+@media (--narrow-layout) {
+    .navigation-container.navigation-controlled {
+        z-index: 10;
+        inset: auto 0 0;
+        width: 100%;
+        aspect-ratio: auto;
+        padding: 0.5rem max(1rem, env(safe-area-inset-right)) calc(0.75rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+        background: var(--colour-background);
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        animation: none;
+    }
+
+    .navigation-list { display: flex; justify-content: center; gap: clamp(0.5rem, 4vw, 2rem); }
+
+    .navigation-controlled .navigation-item {
+        position: static;
+        transform: none;
+    }
+
+    .navigation-controlled .navigation-theme-slot,
+    .navigation-controlled .navigation-copyright,
+    .navigation-controlled .navigation-label { display: none; }
+
+    .navigation-link-active::before { border-radius: 0.25rem; transform: rotate(45deg); }
+}

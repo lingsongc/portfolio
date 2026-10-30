@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 import { homeDetails } from "../../data/about";
 import type { ImageDescriptor, MainCircleImagePublisher } from "../../types/images";
 import type { SceneLifecycleControl } from "../../types/scene";
@@ -10,12 +10,13 @@ const homeImage: ImageDescriptor = {
 };
 
 type HomeProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
     lifecycle: SceneLifecycleControl;
     onMainCircleImageChange: MainCircleImagePublisher;
 };
 
 // Renders the Home introduction and publishes its image at the top of the page.
-export function Home({ lifecycle, onMainCircleImageChange }: HomeProps) {
+export function Home({ circleAnchorRef, lifecycle, onMainCircleImageChange }: HomeProps) {
     const leftName = homeDetails.name.isWestern
         ? homeDetails.name.firstName
         : homeDetails.name.lastName;
@@ -36,6 +37,7 @@ export function Home({ lifecycle, onMainCircleImageChange }: HomeProps) {
             className={`home-container${controlledExiting ? " home-exiting" : ""}`}
             aria-labelledby="home-title"
         >
+            <div ref={circleAnchorRef} className="home-circle-anchor" aria-hidden="true" />
             <div
                 className="orbit-ring home-navigation-ring"
                 aria-hidden="true"

@@ -32,6 +32,7 @@ export function ScenePanel({
         } else if (overflowRef.current === overflowElement) {
             overflowRef.current = null;
         }
+        if (!active) overflowElement.scrollTop = 0;
         return () => {
             if (overflowRef.current === overflowElement) overflowRef.current = null;
         };

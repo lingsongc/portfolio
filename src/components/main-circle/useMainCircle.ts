@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { preload } from "react-dom";
 import type { ImageDescriptor } from "../../types/images";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
@@ -12,6 +12,7 @@ type MainCircleOptions = {
     travelProgress: number;
     layoutVersion: number;
     resolveEndpoint: (sceneId: SceneId) => MainCircleEndpoint;
+    activeScrollerRef?: RefObject<HTMLDivElement | null>;
 };
 
 type EndpointSnapshot = { from: MainCircleEndpoint; to: MainCircleEndpoint };
@@ -25,13 +26,16 @@ export function useMainCircle({
     travelProgress,
     layoutVersion,
     resolveEndpoint,
+    activeScrollerRef,
 }: MainCircleOptions) {
     const [endpoints, setEndpoints] = useState<EndpointSnapshot | null>(null);
     const [images, setImages] = useState<SceneImageRegistry>({});
+    const renderedEndpointRef = useRef<MainCircleEndpoint | null>(null);
 
     useLayoutEffect(() => {
         void layoutVersion;
-        const from = resolveEndpoint(currentSceneId);
+        const from = phase === "moving" && renderedEndpointRef.current
+            ? renderedEndpointRef.current : resolveEndpoint(currentSceneId);
         const to = phase === "moving" && requestedSceneId ? resolveEndpoint(requestedSceneId) : from;
         setEndpoints({ from, to });
     }, [currentSceneId, layoutVersion, phase, requestedSceneId, resolveEndpoint]);
@@ -43,6 +47,27 @@ export function useMainCircle({
         (phase === "moving" ? travelProgress : phase === "opening" ? 1 : 0) * MAIN_CIRCLE_TRAVEL_DURATION_MS,
         smoothDirectTravelEase,
     ) : null, [endpoints, phase, travelProgress]);
+    renderedEndpointRef.current = snapshot?.endpoint ?? null;
+
+    // Track only the explicit scene scroller; local content flow never drives scene state.
+    useLayoutEffect(() => {
+        if (phase === "moving") return;
+        const scroller = activeScrollerRef?.current;
+        if (!scroller) return;
+        const measure = () => {
+            const endpoint = resolveEndpoint(currentSceneId);
+            setEndpoints({ from: endpoint, to: endpoint });
+        };
+        const observer = new ResizeObserver(measure);
+        if (scroller.firstElementChild) observer.observe(scroller.firstElementChild);
+        scroller.addEventListener("scroll", measure, { passive: true });
+        document.fonts.addEventListener("loadingdone", measure);
+        return () => {
+            observer.disconnect();
+            scroller.removeEventListener("scroll", measure);
+            document.fonts.removeEventListener("loadingdone", measure);
+        };
+    }, [activeScrollerRef, currentSceneId, phase, resolveEndpoint]);
 
     const publishSceneImage = useCallback((sceneId: SceneId, image: ImageDescriptor | null) => {
         setImages((current) => updateSceneImage(current, sceneId, image));
