@@ -47,6 +47,7 @@ export default function App() {
     const aboutCircleRef = useRef<HTMLDivElement>(null);
     const experienceCircleRef = useRef<HTMLDivElement>(null);
     const projectCircleRef = useRef<HTMLDivElement>(null);
+    const skillCircleRef = useRef<HTMLDivElement>(null);
     const narrowLayout = useNarrowLayout();
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
@@ -80,6 +81,7 @@ export default function App() {
         const anchors: Partial<Record<SceneId, HTMLDivElement | null>> = {
             home: homeCircleRef.current, about: aboutCircleRef.current, experience: experienceCircleRef.current,
             projects: projectCircleRef.current,
+            skills: skillCircleRef.current,
         };
         const anchor = anchors[sceneId];
         const anchorBounds = anchor?.getBoundingClientRect();
@@ -237,6 +239,8 @@ export default function App() {
                     overflowRef={activeSceneScrollerRef}
                 >
                     <Skills
+                        circleAnchorRef={skillCircleRef}
+                        narrowLayout={narrowLayout}
                         circleGeometry={mainCircle.geometry}
                         lifecycle={slideshow.lifecycleFor("skills")}
                     />
