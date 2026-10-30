@@ -4,10 +4,23 @@ import {
     contactFittedFinalOffset,
     contactInitialOffset,
     contactProfileDiameter,
+    contactRowOffset,
 } from "./contactGeometry";
 
 // Verifies the radial start and end positions of Contact profile circles.
 describe("contact geometry", () => {
+    it("places four row balls symmetrically below the form with a detached gap", () => {
+        const positions = [0, 1, 2, 3].map((index) => contactRowOffset(index, 4, 350, 60, 12, 32));
+        expect(positions).toEqual([[-108, 237], [-36, 237], [36, 237], [108, 237]]);
+        for (const [x, y] of positions) {
+            expect(Math.abs(x) + 30).toBeLessThan(195);
+            expect(y - 30 - 175).toBe(32);
+            expect(Math.hypot(
+                contactInitialOffset([x / 350, y / 350], 60 / 350, 350, 0),
+                contactInitialOffset([x / 350, y / 350], 60 / 350, 350, 1),
+            ) + 30).toBeLessThan(175);
+        }
+    });
     it("preserves satellite sizes when the desktop form grows", () => {
         expect(contactProfileDiameter(1 / 3, 720, 1440, 900, false)).toBeCloseTo(168);
         expect(contactProfileDiameter(7 / 15, 720, 1440, 900, false)).toBeCloseTo(235.2);

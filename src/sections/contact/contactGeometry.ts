@@ -1,5 +1,10 @@
 export type ContactOffset = readonly [number, number];
 
+// Centers equal-size profile balls in one row below the form using measured CSS spacing.
+export function contactRowOffset(index: number, count: number, orbitSize: number, diameter: number, gap: number, clearance: number): ContactOffset {
+    return [(index - (count - 1) / 2) * (diameter + gap), orbitSize / 2 + clearance + diameter / 2];
+}
+
 // Keeps desktop balls at their original scale while the main form grows independently.
 export function contactProfileDiameter(diameterRatio: number, orbitSize: number, viewportWidth: number, viewportHeight: number, stacked: boolean) {
     const baseSize = stacked

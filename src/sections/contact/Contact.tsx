@@ -1,11 +1,14 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import type { SceneLifecycleControl } from "../../types/scene";
 import { contactProfiles, type ContactProfile } from "../../data/contact";
-import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, type ContactOffset } from "./contactGeometry";
+import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, contactRowOffset, type ContactOffset } from "./contactGeometry";
 import { ContactForm } from "./ContactForm";
 
-type ContactProps = { lifecycle: SceneLifecycleControl };
-type ContactLayout = { orbitSize: number; viewportWidth: number; viewportHeight: number; stacked: boolean };
+type ContactProps = { circleAnchorRef: RefObject<HTMLDivElement | null>; lifecycle: SceneLifecycleControl };
+type ContactLayout = {
+    orbitSize: number; viewportWidth: number; viewportHeight: number; stacked: boolean;
+    row: { diameter: number; gap: number; clearance: number } | null;
+};
 type ContactProfileLayout = {
     offset: ContactOffset;
     mobileOffset: ContactOffset;
@@ -26,9 +29,10 @@ const contactProfileLayouts: Record<ContactProfile["id"], ContactProfileLayout> 
 };
 
 // Coordinates the circular prototype form and measured four-profile split.
-export function Contact({ lifecycle }: ContactProps) {
+export function Contact({ circleAnchorRef, lifecycle }: ContactProps) {
     const orbitRef = useRef<HTMLDivElement>(null);
-    const [layout, setLayout] = useState<ContactLayout>({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0, stacked: false });
+    const profileMeasureRef = useRef<HTMLDivElement>(null);
+    const [layout, setLayout] = useState<ContactLayout>({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0, stacked: false, row: null });
     const visible = lifecycle.active && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
 
     useLayoutEffect(() => {
@@ -39,9 +43,16 @@ export function Contact({ lifecycle }: ContactProps) {
             viewportWidth: window.innerWidth,
             viewportHeight: window.innerHeight,
             stacked: getComputedStyle(orbit).getPropertyValue("--contact-layout-stacked").trim() === "1",
+            row: getComputedStyle(orbit).getPropertyValue("--scene-layout-narrow").trim() === "1" && profileMeasureRef.current
+                ? {
+                    diameter: profileMeasureRef.current.offsetWidth,
+                    gap: parseFloat(getComputedStyle(profileMeasureRef.current).columnGap),
+                    clearance: profileMeasureRef.current.offsetHeight,
+                } : null,
         });
         const observer = new ResizeObserver(measure);
         observer.observe(orbit);
+        if (profileMeasureRef.current) observer.observe(profileMeasureRef.current);
         // Phone height changes can move the viewport bounds without resizing the orbit.
         window.addEventListener("resize", measure);
         measure();
@@ -53,7 +64,9 @@ export function Contact({ lifecycle }: ContactProps) {
 
     return (
         <section id="contact" className={`contact-container${visible ? " contact-content-visible" : ""}`} aria-labelledby="contact-title">
+            <div className="contact-circle-anchor" ref={circleAnchorRef}>
             <div ref={orbitRef} className={`contact-orbit${visible ? " contact-split-visible" : ""}`}>
+                <div className="contact-profile-measure" ref={profileMeasureRef} aria-hidden="true" />
                 <svg width="0" height="0" aria-hidden="true">
                     <defs>
                         <filter id="contact-goo" x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
@@ -79,23 +92,27 @@ export function Contact({ lifecycle }: ContactProps) {
                 </nav>
             </div>
             <ContactForm />
+            </div>
         </section>
     );
 }
 
 // Publishes the measured start and fitted endpoint as CSS variables.
 function profileStyle(profile: ContactProfile, layout: ContactLayout): ProfileStyle {
-    const { orbitSize, viewportWidth, viewportHeight, stacked } = layout;
+    const { orbitSize, viewportWidth, viewportHeight, stacked, row } = layout;
     const placement = contactProfileLayouts[profile.id];
-    // Use two rows wherever the viewport has insufficient space beside the form.
-    const offset = stacked ? placement.mobileOffset : placement.offset;
-    const diameter = contactProfileDiameter(placement.diameterRatio, orbitSize, viewportWidth, viewportHeight, stacked);
+    // The compact wide layout retains two rows; the narrow composition uses one detached row.
+    const rowOffset = row ? contactRowOffset(contactProfiles.indexOf(profile), contactProfiles.length, orbitSize, row.diameter, row.gap, row.clearance) : null;
+    const offset: ContactOffset = rowOffset && orbitSize > 0
+        ? [rowOffset[0] / orbitSize, rowOffset[1] / orbitSize]
+        : stacked ? placement.mobileOffset : placement.offset;
+    const diameter = row?.diameter ?? contactProfileDiameter(placement.diameterRatio, orbitSize, viewportWidth, viewportHeight, stacked);
     const diameterRatio = orbitSize > 0 ? diameter / orbitSize : placement.diameterRatio;
     return {
         width: `${diameter}px`,
         "--contact-initial-x": `${contactInitialOffset(offset, diameterRatio, orbitSize, 0)}px`,
         "--contact-initial-y": `${contactInitialOffset(offset, diameterRatio, orbitSize, 1)}px`,
-        "--contact-final-x": `${contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 0, stacked ? 48 : 64)}px`,
-        "--contact-final-y": `${contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 1, stacked ? 4 : 24)}px`,
+        "--contact-final-x": `${rowOffset?.[0] ?? contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 0, stacked ? 48 : 64)}px`,
+        "--contact-final-y": `${rowOffset?.[1] ?? contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 1, stacked ? 4 : 24)}px`,
     };
 }

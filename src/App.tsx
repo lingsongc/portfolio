@@ -48,6 +48,7 @@ export default function App() {
     const experienceCircleRef = useRef<HTMLDivElement>(null);
     const projectCircleRef = useRef<HTMLDivElement>(null);
     const skillCircleRef = useRef<HTMLDivElement>(null);
+    const contactCircleRef = useRef<HTMLDivElement>(null);
     const narrowLayout = useNarrowLayout();
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
@@ -82,6 +83,7 @@ export default function App() {
             home: homeCircleRef.current, about: aboutCircleRef.current, experience: experienceCircleRef.current,
             projects: projectCircleRef.current,
             skills: skillCircleRef.current,
+            contact: contactCircleRef.current,
         };
         const anchor = anchors[sceneId];
         const anchorBounds = anchor?.getBoundingClientRect();
@@ -252,7 +254,7 @@ export default function App() {
                     headingFocusTargetId="contact-title"
                     overflowRef={activeSceneScrollerRef}
                 >
-                    <Contact lifecycle={slideshow.lifecycleFor("contact")} />
+                    <Contact circleAnchorRef={contactCircleRef} lifecycle={slideshow.lifecycleFor("contact")} />
                 </ScenePanel>
             </main>
         </>
