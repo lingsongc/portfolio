@@ -64,6 +64,15 @@ describe("project orbit geometry", () => {
 describe("narrow project rings", () => {
     const layoutFor = (count: number, width = 591) => narrowProjectLayout(count, width, Math.min(width * 0.91, 480), 72, 64);
 
+    it("keeps positions finite when a thumbnail is temporarily larger than its ring", () => {
+        const layout = narrowProjectLayout(2, 350, 20, 72, 0);
+        expect(layout.planets).toHaveLength(2);
+        for (const planet of layout.planets) {
+            expect(Number.isFinite(planet.x)).toBe(true);
+            expect(Number.isFinite(planet.y)).toBe(true);
+        }
+    });
+
     it("places every thumbnail on a ring centered on the main image", () => {
         const layout = layoutFor(12);
         for (const planet of layout.planets) {

@@ -142,6 +142,8 @@ function NarrowProjectOrbit({ circleAnchorRef, projects, activeProjectId, intera
         if (!composition || !anchor || !sizing) return;
         const measure = () => {
             const size = sizing.getBoundingClientRect();
+            // Wide CSS can replace narrow sizing before React unmounts this observer.
+            if (size.width <= 0 || size.height <= 0) return;
             const next = narrowProjectLayout(projects.length, composition.getBoundingClientRect().width,
                 anchor.getBoundingClientRect().width, size.width, size.height);
             setLayout(current => JSON.stringify(current) === JSON.stringify(next) ? current : next);

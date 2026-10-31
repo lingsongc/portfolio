@@ -84,7 +84,8 @@ export function narrowProjectLayout(count: number, width: number, circleSize: nu
         const ringCount = Math.min(count - planets.length, capacities[ringIndex]);
         if (ringCount <= 0) break;
         radii.push(radius);
-        const step = 2 * Math.asin(planetSize * thumbnailSpacingRatio / (2 * radius));
+        // Match the capacity calculation's domain clamp during transient resize measurements.
+        const step = 2 * Math.asin(Math.min(1, planetSize * thumbnailSpacingRatio / (2 * radius)));
         for (let index = 0; index < ringCount; index++) {
             const angle = (index - (ringCount - 1) / 2) * step;
             planets.push({ x: center.x + Math.sin(angle) * radius, y: center.y + Math.cos(angle) * radius, ringIndex });
