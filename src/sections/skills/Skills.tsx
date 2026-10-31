@@ -55,15 +55,17 @@ export function Skills({ circleAnchorRef, narrowLayout, circleGeometry, lifecycl
             aria-labelledby="skill-title"
         >
             <div className="skill-introduction">
-                <h2 id="skill-title" tabIndex={-1}>Skills</h2>
-                <p className="skill-description">
-                    I work across software development, interface design, and visual storytelling.
-                </p>
-                <ul className="skill-category-list" aria-label="Skill categories">
-                    {skillGroups.map((group) => (
-                        <li key={group.category}>{group.category}</li>
-                    ))}
-                </ul>
+                <h2 id="skill-title" className="skill-title" tabIndex={-1}>Skills</h2>
+                <div className="skill-description-content">
+                    <p className="skill-description">
+                        I work across software development, interface design, and visual storytelling.
+                    </p>
+                    <ul className="skill-category-list" aria-label="Skill categories">
+                        {skillGroups.map((group) => (
+                            <li key={group.category}>{group.category}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
             <div className="skill-circle-anchor" ref={circleAnchorRef}>
