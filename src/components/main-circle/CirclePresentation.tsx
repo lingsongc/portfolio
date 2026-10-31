@@ -1,6 +1,6 @@
 import type { ImageShade } from "../../types/images";
 
-type CircleShadeProps = { variant?: ImageShade };
+type CircleShadeProps = { variant?: ImageShade; opacity?: number };
 
 // Close shadows outside the image bounds so only the shared mask draws the circle edge.
 // Default shading keeps its original interior curves.
@@ -27,12 +27,12 @@ const capBands = [
 const bandsByVariant = { sphere: shadeBands, horizon: horizonBands, "horizon-bottom": bottomHorizonBands, cap: capBands };
 
 // Renders flat image shadows inside the fading image layer.
-export function CircleShade({ variant = "sphere" }: CircleShadeProps) {
+export function CircleShade({ variant = "sphere", opacity: opacityOverride }: CircleShadeProps) {
     const bands = bandsByVariant[variant];
     return (
         <svg className="main-circle-shade" viewBox="0 0 100 100" aria-hidden="true">
             {bands.map(({ path, opacity }) => (
-                <path d={path} fill="var(--colour-background)" fillRule="evenodd" opacity={opacity} key={path} />
+                <path d={path} fill="var(--colour-background)" fillRule="evenodd" opacity={opacityOverride ?? opacity} key={path} />
             ))}
         </svg>
     );

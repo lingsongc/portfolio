@@ -49,7 +49,7 @@ export function MainCircle({
                                 transform: image.transform,
                             }}
                         />
-                        <CircleShade variant={image.presentation?.shade} />
+                        <CircleShade variant={image.presentation?.shade} opacity={image.presentation?.shadeOpacity} />
                     </div>
                 )}
             </div>

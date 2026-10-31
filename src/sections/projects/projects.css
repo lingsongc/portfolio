@@ -29,15 +29,24 @@
     font-size: clamp(4rem, 10.5vw, 10rem);
     transform: translateX(-50%);
     white-space: nowrap;
+    clip-path: inset(0);
 }
 
-.project-title,
+/* Keep the heading mask fixed while its text enters from below and closes downward. */
+.project-title-text {
+    display: block;
+    transform: translateY(110%);
+    transition: transform var(--scene-visual-duration) ease;
+}
+
+.project-copy-visible .project-title-text { transform: translateY(0); }
+
 .project-detail-link {
     opacity: 0;
     transition: opacity var(--scene-visual-duration) ease;
 }
 
-.project-copy-visible :is(.project-title, .project-detail-link) { opacity: 1; }
+.project-copy-visible .project-detail-link { opacity: 1; }
 
 .project-ring {
     --project-stage-one-size: var(--project-ring-1-size);
@@ -331,43 +340,53 @@
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        padding: var(--scene-top-space) var(--section-padding-inline) var(--scene-bottom-space);
+        gap: 1.5rem;
+        padding: var(--scene-top-space) var(--section-padding-inline) calc(var(--scene-bottom-space) + 1rem);
     }
 
     .project-container .project-title {
         position: relative;
         z-index: 1;
         inset: auto;
-        margin-bottom: -0.4em;
+        margin-bottom: calc(-0.4em - 1.5rem);
         font-size: clamp(2.5rem, 11vw, 5rem);
         text-align: center;
         transform: none;
     }
 
     .project-circle-anchor {
-        flex: none;
-        align-self: center;
+        margin-inline: auto;
         width: var(--project-circle-size);
         aspect-ratio: 1;
     }
 
-    .project-selector {
+    .project-composition {
         position: relative;
         flex: none;
-        align-self: center;
-        width: min(90%, 24rem);
-        height: 5rem;
-        margin-block: 0.75rem 1.5rem;
+        height: calc(var(--project-circle-size) + 7rem);
+    }
+
+    /* Measure resolved CSS dimensions without duplicating responsive formulas in JavaScript. */
+    .project-selector-sizing {
+        position: absolute;
+        visibility: hidden;
+        width: clamp(3rem, 13vw, 4.5rem);
+        height: clamp(4.5rem, 13vw, 6rem);
+        pointer-events: none;
+    }
+
+    .project-selector {
+        position: absolute;
+        inset: 0;
         opacity: 0;
         transform: scale(0);
         transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease;
     }
 
-    .project-selector svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .project-selector path { fill: none; stroke: var(--colour-line); stroke-width: 2; vector-effect: non-scaling-stroke; }
+    .project-selector svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .project-selector circle { fill: none; stroke: var(--colour-line); stroke-width: var(--orbit-ring-width); }
     .project-selector .project-link {
         position: absolute;
-        width: clamp(3rem, 13vw, 4.5rem);
         transform: translate(-50%, -50%);
     }
 
@@ -379,18 +398,19 @@
     .project-container .project-detail-link {
         position: relative;
         inset: auto;
-        align-self: center;
-        width: max-content;
+        align-self: stretch;
+        width: 100%;
         max-width: 100%;
         min-height: 2.75em;
         aspect-ratio: auto;
-        margin-top: 1.5rem;
+        margin-top: auto;
+        font-size: var(--text-body);
         padding: 0.75em 3.5em;
         border-radius: 999px;
         transform: none;
     }
 
-    .project-detail-label { display: inline; }
+    .project-container .project-detail-label { display: inline; color: inherit; font-size: inherit; text-transform: none; }
     .project-detail-link svg { position: absolute; right: 1em; top: 50%; width: 2em; height: 2em; transform: translateY(-50%); }
 }
 
@@ -402,7 +422,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .project-title,
+    .project-title-text,
     .project-detail-link,
     .project-selected-content { transition: none; }
     .project-selector,

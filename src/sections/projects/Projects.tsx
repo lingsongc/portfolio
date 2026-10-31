@@ -26,8 +26,8 @@ export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircl
             ? "exiting"
             : "idle";
     useEffect(() => {
-        onMainCircleImageChange(projectImage(activeProject));
-    }, [activeProject, onMainCircleImageChange]);
+        onMainCircleImageChange(projectImage(activeProject, narrowLayout));
+    }, [activeProject, narrowLayout, onMainCircleImageChange]);
 
     // The overlay host mounts after the section, so wait for its actual DOM node.
     useLayoutEffect(() => {
@@ -74,32 +74,14 @@ export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircl
             className={`project-container${transitionState === "visible" ? " project-copy-visible" : ""}`}
             aria-labelledby="project-title"
         >
-            <h2 id="project-title" className="project-title" tabIndex={-1}>Projects</h2>
+            <h2 id="project-title" className="project-title" tabIndex={-1}>
+                <span className="project-title-text">Projects</span>
+            </h2>
             {narrowLayout ? (
                 <>
-                    <div ref={circleAnchorRef} className="project-circle-anchor" aria-hidden="true" />
-                    <div className="project-selector" role="group" aria-label="Project selection">
-                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                            <path d="M 0 15 Q 50 115 100 15" />
-                        </svg>
-                        {projects.map((project, index) => {
-                            const position = (index + 1) / (projects.length + 1);
-                            return (
-                                <button
-                                    className="project-link"
-                                    style={{ left: `${position * 100}%`, top: `${15 + 200 * position * (1 - position)}%` }}
-                                    key={project.id}
-                                    type="button"
-                                    aria-label={project.name}
-                                    aria-pressed={project.id === activeProjectId}
-                                    disabled={lifecycle.phase !== "idle"}
-                                    onClick={() => selectProject(project)}
-                                >
-                                    <img className="project-image" src={`/projects/${project.id}.png`} alt="" />
-                                </button>
-                            );
-                        })}
-                    </div>
+                    <ProjectOrbit narrowLayout circleAnchorRef={circleAnchorRef} projects={projects}
+                        activeProjectId={activeProjectId} interactive={lifecycle.phase === "idle"}
+                        onProjectSelect={selectProject} />
                     <div className="project-description" aria-live="polite">
                         <h3>{activeProject.name}</h3>
                         <p>{activeProject.summary}</p>
@@ -128,7 +110,7 @@ export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircl
                 href={activeProject.href}
                 aria-label={`View ${activeProject.name} project details`}
             >
-                <span className="project-detail-label">View project</span>
+                <span className="project-detail-label">View Project</span>
                 <IconArrowUpRight aria-hidden="true" />
             </a>
         </section>
@@ -161,11 +143,11 @@ function centerProjectSummary(container: HTMLElement, paragraph: HTMLElement) {
 }
 
 // Creates the image data published for a selected project.
-function projectImage(project: Project): ImageDescriptor {
+function projectImage(project: Project, narrowLayout: boolean): ImageDescriptor {
     return {
         src: `/projects/${project.id}.png`,
         alt: "",
         objectPosition: "center",
-        presentation: { shade: "cap" },
+        presentation: { shade: "cap", shadeOpacity: narrowLayout ? 0.24 : undefined },
     };
 }

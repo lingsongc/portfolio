@@ -9,7 +9,7 @@ export type ImageDescriptor = {
     alt: string;
     objectPosition?: CSSProperties["objectPosition"];
     transform?: CSSProperties["transform"];
-    presentation?: { shade?: ImageShade };
+    presentation?: { shade?: ImageShade; shadeOpacity?: number };
 };
 
 export type MainCircleImagePublisher = (image: ImageDescriptor | null) => void;
