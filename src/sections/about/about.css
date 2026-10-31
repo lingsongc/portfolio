@@ -68,20 +68,24 @@
 
 @media (--narrow-layout) {
     :root {
-        --about-circle-size: 150vw;
-        --about-image-transform: translate(0, -3%) scale(1.1);
+        --about-circle-size: 160vw;
+        --about-visible-arc: 36dvh;
+        /* Lower the subject as the top crop grows, without exposing the photo's lower edge. */
+        --about-image-transform: translate(-5%, max(0px, calc(38% - var(--about-visible-arc) * 0.9)));
     }
 
     .about-container {
+        --about-content-top-space: calc(var(--about-visible-arc) + 2rem);
+        --about-content-bottom-space: calc(var(--scene-bottom-space) + 1rem);
         position: relative;
         display: block;
-        padding: calc(32dvh + 2rem) var(--section-padding-inline) var(--scene-bottom-space);
+        padding: var(--about-content-top-space) var(--section-padding-inline) var(--about-content-bottom-space);
     }
 
     .about-circle-anchor {
         position: absolute;
         display: block;
-        top: calc(32dvh - var(--about-circle-size));
+        top: calc(var(--about-visible-arc) - var(--about-circle-size));
         left: 50%;
         width: var(--about-circle-size);
         aspect-ratio: 1;
@@ -89,9 +93,15 @@
     }
 
     .about-text {
+        display: flex;
+        flex-direction: column;
         width: 100%;
+        min-height: max(0px, calc(100dvh - var(--about-content-top-space) - var(--about-content-bottom-space)));
         gap: 1.5rem;
     }
+
+    /* Absorb only unused height; taller content carries the action along with its own scroller. */
+    .about-resume-link { margin-top: auto; }
 
     .about-statistic-amount { font-size: clamp(2.5rem, 12vw, 5rem); }
 }

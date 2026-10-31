@@ -12,21 +12,27 @@ const aboutImage: ImageDescriptor = {
     presentation: { shade: "horizon" },
 };
 
+const aboutNarrowImage: ImageDescriptor = {
+    ...aboutImage,
+    presentation: { shade: "horizon-bottom" },
+};
+
 type AboutProps = {
     circleAnchorRef: RefObject<HTMLDivElement | null>;
+    narrowLayout: boolean;
     lifecycle: SceneLifecycleControl;
     onMainCircleImageChange: MainCircleImagePublisher;
 };
 
 // Reveals About exclusively from the explicit slideshow lifecycle.
-export function About({ circleAnchorRef, lifecycle, onMainCircleImageChange }: AboutProps) {
+export function About({ circleAnchorRef, narrowLayout, lifecycle, onMainCircleImageChange }: AboutProps) {
     const paragraphs = aboutDetails.description.trim().split(/\n\s*\n/);
     const contentVisible = lifecycle.active === true
         && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
 
     useEffect(() => {
-        onMainCircleImageChange(aboutImage);
-    }, [onMainCircleImageChange]);
+        onMainCircleImageChange(narrowLayout ? aboutNarrowImage : aboutImage);
+    }, [narrowLayout, onMainCircleImageChange]);
 
     return (
         <section

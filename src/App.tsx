@@ -198,6 +198,7 @@ export default function App() {
                 >
                     <About
                         circleAnchorRef={aboutCircleRef}
+                        narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("about")}
                         onMainCircleImageChange={publishAboutImage}
                     />
