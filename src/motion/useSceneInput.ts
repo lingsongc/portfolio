@@ -13,6 +13,7 @@ const WHEEL_FEEDBACK_HOLD_MS = 60;
 const WHEEL_FEEDBACK_RETURN_MS = 300;
 
 type SceneInputOptions = {
+    scrollNavigationEnabled: boolean;
     activeScrollerRef: RefObject<HTMLDivElement | null>;
     currentSceneId: SceneId;
     onWheelFeedbackChange: (progress: number, durationMs: number) => void;
@@ -31,6 +32,7 @@ type TouchGesture = {
 
 // Owns page-level wheel, touch, and keyboard events around the pure input model.
 export function useSceneInput({
+    scrollNavigationEnabled,
     activeScrollerRef,
     currentSceneId,
     onWheelFeedbackChange,
@@ -64,16 +66,17 @@ export function useSceneInput({
     useEffect(() => {
         const previousPhase = previousPhaseRef.current;
         previousPhaseRef.current = phase;
-        if (phase !== "idle") cancelPendingInput();
+        if (phase !== "idle" || !scrollNavigationEnabled) cancelPendingInput();
         else if (previousPhase !== "idle") {
             // A completed transition must observe a quiet interval before accepting momentum.
             wheelIntentRef.current = createWheelIntentState(true, performance.now());
         }
-    }, [cancelPendingInput, phase]);
+    }, [cancelPendingInput, phase, scrollNavigationEnabled]);
 
     // Converts unowned wheel input into deliberate adjacent-scene requests while idle.
     useEffect(() => {
-        if (phase !== "idle") return;
+        // Narrow layouts leave scrolling to section content and use named navigation controls.
+        if (phase !== "idle" || !scrollNavigationEnabled) return;
 
         const scheduleNeutralRelease = () => {
             window.clearTimeout(neutralTimerRef.current);
@@ -140,11 +143,11 @@ export function useSceneInput({
             window.clearTimeout(commitTimerRef.current);
             window.clearTimeout(neutralTimerRef.current);
         };
-    }, [activeScrollerRef, currentSceneId, onWheelFeedbackChange, phase, requestScene]);
+    }, [activeScrollerRef, currentSceneId, onWheelFeedbackChange, phase, requestScene, scrollNavigationEnabled]);
 
     // Tracks one vertical touch gesture and commits its scene request on release.
     useEffect(() => {
-        if (phase !== "idle") return;
+        if (phase !== "idle" || !scrollNavigationEnabled) return;
         const handleTouchStart = (event: TouchEvent) => {
             if (event.touches.length !== 1 || isInteractiveInputTarget(event.target)) {
                 touchGestureRef.current = null;
@@ -200,7 +203,7 @@ export function useSceneInput({
             window.removeEventListener("touchend", handleTouchEnd);
             window.removeEventListener("touchcancel", handleTouchCancel);
         };
-    }, [activeScrollerRef, currentSceneId, phase, requestScene]);
+    }, [activeScrollerRef, currentSceneId, phase, requestScene, scrollNavigationEnabled]);
 
     // Gives scroll owners first keyboard priority, then requests adjacent scenes.
     useEffect(() => {

@@ -68,6 +68,7 @@ export default function App() {
     const sceneInput = useSceneInput({
         activeScrollerRef: activeSceneScrollerRef,
         currentSceneId: slideshow.currentSceneId,
+        scrollNavigationEnabled: !narrowLayout,
         onWheelFeedbackChange: updateWheelFeedback,
         phase: slideshow.phase,
         requestScene: slideshow.requestScene,

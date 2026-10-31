@@ -36,6 +36,7 @@ export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive
             scrollingRef.current = false;
             strip.scrollTo({ left: index * step(), behavior: "instant" });
         };
+        // Commit the snapped entry after movement ends so its image and details change together.
         const settle = () => {
             window.clearTimeout(timer);
             if (!scrollingRef.current || !latestRef.current.interactive) return;
@@ -43,6 +44,7 @@ export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive
             targetIndex = snappedEntryIndex(strip.scrollLeft, step(), entries.length);
             latestRef.current.onEntrySelect(targetIndex);
         };
+        // Fall back to 180ms of quiet when the browser omits or delays scrollend.
         const scroll = () => {
             scrollingRef.current = true;
             window.clearTimeout(timer);
@@ -86,6 +88,7 @@ export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive
         else strip.scrollTo({ left: button.offsetLeft, behavior: reducedMotion ? "instant" : "smooth" });
     };
 
+    // Move keyboard focus without native scrolling, then align selection through the shared snap path.
     const handleKeyDown = (event: KeyboardEvent, index: number) => {
         const next = event.key === "ArrowRight" ? index + 1 : event.key === "ArrowLeft" ? index - 1
             : event.key === "Home" ? 0 : event.key === "End" ? entries.length - 1 : null;
