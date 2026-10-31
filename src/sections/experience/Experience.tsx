@@ -7,6 +7,8 @@ import type { ImageDescriptor, MainCircleImagePublisher } from "../../types/imag
 import type { SceneLifecycleControl } from "../../types/scene";
 import { ExperienceOrbit } from "./ExperienceOrbit";
 import { ExperienceStrip } from "./ExperienceStrip";
+import { ScenePanelOverlay } from "../../components/scene-panel/ScenePanel";
+import type { MainCircleEndpoint } from "../../types/mainCircle";
 
 type ExperienceType = "experience" | "education";
 
@@ -19,6 +21,8 @@ const educationEvents = education.map(({ id, institution, qualification, ...even
 const eventsByType = { experience: experienceEvents, education: educationEvents };
 type ExperienceProps = {
     circleAnchorRef: RefObject<HTMLDivElement | null>;
+    circleGeometry: MainCircleEndpoint | null;
+    circleFadeMaskId: string;
     narrowLayout: boolean;
     lifecycle: SceneLifecycleControl;
     orbitRef: RefObject<HTMLElement | null>;
@@ -26,7 +30,7 @@ type ExperienceProps = {
 };
 
 // Coordinates the shared Experience and Education timeline, content, and image.
-export function Experience({ circleAnchorRef, narrowLayout, lifecycle, orbitRef, onMainCircleImageChange }: ExperienceProps) {
+export function Experience({ circleAnchorRef, circleGeometry, circleFadeMaskId, narrowLayout, lifecycle, orbitRef, onMainCircleImageChange }: ExperienceProps) {
     const documentVisible = useDocumentVisible();
     const motionActive = lifecycle.active && lifecycle.phase === "idle" && documentVisible && !lifecycle.reducedMotion;
     const [experienceType, setExperienceType] = useState<ExperienceType>("experience");
@@ -132,6 +136,20 @@ export function Experience({ circleAnchorRef, narrowLayout, lifecycle, orbitRef,
                     </article>
                 </div>
             </div>
+
+            {narrowLayout && circleGeometry && (
+                <ScenePanelOverlay>
+                    <svg className={`experience-strip-line${contentVisible ? " experience-strip-line-visible" : ""}`} aria-hidden="true">
+                        <line
+                            x1={circleGeometry.left}
+                            x2="100%"
+                            y1={circleGeometry.top}
+                            y2={circleGeometry.top}
+                            mask={`url(#${circleFadeMaskId})`}
+                        />
+                    </svg>
+                </ScenePanelOverlay>
+            )}
 
             {!narrowLayout && <ExperienceOrbit
                 activeEntryId={activeEvent.id}

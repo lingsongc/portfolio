@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, type KeyboardEvent } from "react";
 import type { ExperienceOrbitEntry } from "./ExperienceOrbit";
 import { snappedEntryIndex } from "./experienceStripGeometry";
+import { createExperienceWheelBoundaryState, updateExperienceWheelBoundary } from "./experienceOrbitInput";
 
 type ExperienceStripProps = {
     activeEntryId: string;
@@ -16,19 +17,22 @@ type ExperienceStripProps = {
 export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive, label, onEntrySelect, reducedMotion }: ExperienceStripProps) {
     const stripRef = useRef<HTMLDivElement>(null);
     const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
-    const latestRef = useRef({ interactive, onEntrySelect });
+    const latestRef = useRef({ interactive, onEntrySelect, reducedMotion });
     const selectedRef = useRef(activeEntryId);
     const scrollingRef = useRef(false);
-    latestRef.current = { interactive, onEntrySelect };
+    latestRef.current = { interactive, onEntrySelect, reducedMotion };
     selectedRef.current = activeEntryId;
 
     useLayoutEffect(() => {
         const strip = stripRef.current;
         if (!strip) return;
         let timer = 0;
+        let targetIndex = 0;
+        let wheelBoundary = createExperienceWheelBoundaryState();
         const step = () => (buttonsRef.current[1]?.offsetLeft ?? 0) - (buttonsRef.current[0]?.offsetLeft ?? 0);
         const alignSelection = () => {
             const index = Math.max(0, entries.findIndex(({ id }) => id === selectedRef.current));
+            targetIndex = index;
             scrollingRef.current = false;
             strip.scrollTo({ left: index * step(), behavior: "instant" });
         };
@@ -36,23 +40,39 @@ export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive
             window.clearTimeout(timer);
             if (!scrollingRef.current || !latestRef.current.interactive) return;
             scrollingRef.current = false;
-            latestRef.current.onEntrySelect(snappedEntryIndex(strip.scrollLeft, step(), entries.length));
+            targetIndex = snappedEntryIndex(strip.scrollLeft, step(), entries.length);
+            latestRef.current.onEntrySelect(targetIndex);
         };
         const scroll = () => {
             scrollingRef.current = true;
             window.clearTimeout(timer);
             timer = window.setTimeout(settle, 180);
         };
+        // Reuse the desktop selector's boundary gate so momentum cannot escape into scene navigation.
+        const handleWheel = (event: WheelEvent) => {
+            if (!latestRef.current.interactive || event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+            const direction = event.deltaY < 0 ? -1 : 1;
+            const atBoundary = direction < 0 ? targetIndex === 0 : targetIndex === entries.length - 1;
+            const update = updateExperienceWheelBoundary(wheelBoundary, direction, atBoundary, performance.now());
+            wheelBoundary = update.state;
+            if (!update.consume) return;
+            event.preventDefault();
+            if (atBoundary) return;
+            targetIndex += direction;
+            strip.scrollTo({ left: targetIndex * step(), behavior: latestRef.current.reducedMotion ? "instant" : "smooth" });
+        };
         const observer = new ResizeObserver(alignSelection);
         observer.observe(strip);
         strip.addEventListener("scroll", scroll, { passive: true });
         strip.addEventListener("scrollend", settle);
+        strip.addEventListener("wheel", handleWheel, { passive: false });
         alignSelection();
         return () => {
             window.clearTimeout(timer);
             observer.disconnect();
             strip.removeEventListener("scroll", scroll);
             strip.removeEventListener("scrollend", settle);
+            strip.removeEventListener("wheel", handleWheel);
         };
     }, [entries]);
 

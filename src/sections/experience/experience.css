@@ -480,18 +480,21 @@
 }
 
 @media (--narrow-layout) {
-    :root { --experience-circle-size: clamp(6rem, 25vw, 10rem); }
+    :root { --experience-circle-size: 40vw; }
     .experience-container {
         --experience-title-size: clamp(1.5rem, 6.4vw, 3rem);
         display: block;
         height: 100dvh;
         min-height: 32rem;
         padding: var(--scene-top-space) var(--section-padding-inline) var(--scene-bottom-space);
+        container-type: normal;
     }
 
-    .experience-copy { width: 100%; height: 100%; }
+    /* Keep the selector's rear path in the stage's lower layer, behind the persistent image. */
+    .experience-copy { z-index: auto; width: 100%; height: 100%; }
     .experience-copy::after { display: none; }
-    .experience-header { flex: none; max-width: 100%; }
+    /* Reserve the final heading height while its label sizes transition on resize. */
+    .experience-header { flex: none; height: calc(var(--experience-title-size) * 1.1); max-width: 100%; }
     .experience-content-region { width: 100%; align-items: start; }
     .experience-text { padding: 0 0.25rem 1rem 0; }
     .experience-event-title { font-size: clamp(1.5rem, 5vw, 2.25rem); }
@@ -500,6 +503,7 @@
 
     .experience-image-row {
         position: relative;
+        z-index: 1;
         display: flex;
         flex: none;
         align-items: center;
@@ -519,23 +523,50 @@
         transition-delay: 0s;
     }
 
-    .experience-image-row::before {
+    /* Share the grid's viewport-space mask so both strokes disappear at the same circle boundary. */
+    .experience-strip-line {
+        position: fixed;
+        z-index: 0;
+        inset: 0;
+        width: calc(100% - var(--section-padding-inline));
+        height: 100%;
+        opacity: 0;
+        transition: opacity var(--scene-visual-duration) ease;
+        pointer-events: none;
+    }
+
+    .experience-strip-line-visible { opacity: 1; }
+    .experience-strip-line line { stroke: var(--colour-line); stroke-width: 2; }
+
+    .experience-circle-anchor { flex: none; width: var(--experience-circle-size); aspect-ratio: 1; }
+    .experience-strip-orbit {
+        --experience-thumbnail-size: clamp(3rem, 13vw, 4.5rem);
+        position: relative;
+        min-width: 0;
+        flex: 1;
+    }
+
+    /* The marker stays in place while thumbnails travel through the active slot. */
+    .experience-strip-orbit::after {
         position: absolute;
-        inset: 50% 0 auto;
-        height: 2px;
-        background: var(--colour-line);
+        box-sizing: border-box;
+        top: 50%;
+        left: 0;
+        width: calc(var(--experience-thumbnail-size) + 6px);
+        aspect-ratio: 1;
+        border: 3px solid var(--colour-accent);
+        border-radius: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
         content: "";
     }
 
-    .experience-circle-anchor { flex: none; width: var(--experience-circle-size); aspect-ratio: 1; }
-    .experience-strip-orbit { min-width: 0; flex: 1; }
-
     .experience-strip {
-        --experience-thumbnail-size: clamp(3rem, 13vw, 4.5rem);
+        --experience-thumbnail-gap: 1.25rem;
         position: relative;
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: var(--experience-thumbnail-gap);
         overflow-x: auto;
         overflow-y: hidden;
         padding-block: 0.5rem;
@@ -545,24 +576,23 @@
     }
 
     .experience-strip::after {
-        flex: 0 0 max(0px, calc(100% - var(--experience-thumbnail-size) - 1rem));
+        flex: 0 0 max(0px, calc(100% - var(--experience-thumbnail-size) - 6px - var(--experience-thumbnail-gap)));
         content: "";
     }
 
     .experience-strip-button {
         flex: none;
-        width: var(--experience-thumbnail-size);
+        width: calc(var(--experience-thumbnail-size) + 6px);
         aspect-ratio: 1;
         overflow: hidden;
-        padding: 0;
+        padding: 3px;
         border: 3px solid transparent;
         border-radius: 50%;
-        background: var(--colour-background);
+        background: transparent;
         scroll-snap-align: start;
         cursor: pointer;
     }
 
-    .experience-strip-button[aria-pressed="true"] { border-color: var(--colour-accent); }
     .experience-strip-button:focus-visible { outline: 2px solid var(--colour-text); outline-offset: -6px; }
     .experience-strip-button img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 }
@@ -581,7 +611,8 @@
     }
 
     .experience-type-button,
-    .experience-image-row { transition: none; }
+    .experience-image-row,
+    .experience-strip-line { transition: none; }
 
     .experience-orbit-ring,
     .experience-orbit-front,

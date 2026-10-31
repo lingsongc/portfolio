@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
 import { BackgroundGrid, type BackgroundGridHandle } from "./components/background-grid/BackgroundGrid";
 import { MainCircle } from "./components/main-circle/MainCircle";
 import { useMainCircle } from "./components/main-circle/useMainCircle";
@@ -39,6 +39,7 @@ const sceneCircleSizeProperties: Record<SceneId, string> = {
 
 // Composes the six viewport Sections around one page-level slideshow coordinator.
 export default function App() {
+    const circleFadeMaskId = useId();
     const activeSceneScrollerRef = useRef<HTMLDivElement>(null);
     const backgroundGridRef = useRef<BackgroundGridHandle>(null);
     const experienceOrbitRef = useRef<HTMLElement>(null);
@@ -156,7 +157,7 @@ export default function App() {
 
     return (
         <>
-            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} />
+            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId} />
 
             <main className="slideshow-stage">
                 <div ref={circleMeasureRef} className="slideshow-circle-measure" aria-hidden="true" />
@@ -213,6 +214,8 @@ export default function App() {
                 >
                     <Experience
                         circleAnchorRef={experienceCircleRef}
+                        circleGeometry={mainCircle.geometry}
+                        circleFadeMaskId={circleFadeMaskId}
                         narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("experience")}
                         orbitRef={experienceOrbitRef}
