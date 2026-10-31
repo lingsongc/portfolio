@@ -257,15 +257,25 @@
     transition: clip-path 180ms ease;
 }
 
-:is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover::before,
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible::before {
     border-radius: 0.5rem;
     transform: rotate(45deg);
 }
 
-:is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover .navigation-label,
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible .navigation-label {
     clip-path: inset(0);
+}
+
+/* Touch browsers can retain :hover after a tap; only hover-capable inputs get these effects. */
+@media (hover: hover) {
+    :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover::before {
+        border-radius: 0.5rem;
+        transform: rotate(45deg);
+    }
+
+    :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover .navigation-label {
+        clip-path: inset(0);
+    }
 }
 
 .navigation-link:focus-visible {
@@ -338,12 +348,20 @@
         transition: none;
     }
 
-    .navigation-controlled:not(.navigation-busy) .navigation-link:is(:hover, :focus-visible) .navigation-label {
+    .navigation-controlled:not(.navigation-busy) .navigation-link:focus-visible .navigation-label {
         clip-path: inset(0);
         opacity: 1;
         transform: translate(-50%, 0);
     }
 
+}
+
+@media (--narrow-layout) and (hover: hover) {
+    .navigation-controlled:not(.navigation-busy) .navigation-link:hover .navigation-label {
+        clip-path: inset(0);
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
 }
 
 @media (--narrow-layout) and (prefers-reduced-motion: no-preference) {
