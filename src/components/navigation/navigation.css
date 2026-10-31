@@ -313,7 +313,7 @@
         animation: none;
     }
 
-    .navigation-list { display: flex; justify-content: center; gap: clamp(0.5rem, 4vw, 2rem); }
+    .navigation-list { display: flex; justify-content: space-around; }
 
     .navigation-controlled .navigation-item {
         position: static;
@@ -321,8 +321,33 @@
     }
 
     .navigation-controlled .navigation-theme-slot,
-    .navigation-controlled .navigation-copyright,
-    .navigation-controlled .navigation-label { display: none; }
+    .navigation-controlled .navigation-copyright { display: none; }
 
-    .navigation-link-active::before { border-radius: 0.25rem; transform: rotate(45deg); }
+    .navigation-controlled .navigation-label {
+        display: block;
+        top: auto;
+        bottom: calc(100% + 0.5rem);
+        left: 50%;
+        max-width: min(12rem, calc(100vw - 2rem));
+        font-size: 0.875rem;
+        text-align: center;
+        clip-path: inset(100% 0 0);
+        opacity: 0;
+        visibility: visible;
+        transform: translate(-50%, 0.75rem);
+        transition: none;
+    }
+
+    .navigation-controlled:not(.navigation-busy) .navigation-link:is(:hover, :focus-visible) .navigation-label {
+        clip-path: inset(0);
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+}
+
+@media (--narrow-layout) and (prefers-reduced-motion: no-preference) {
+    .navigation-controlled .navigation-label {
+        transition: transform 180ms ease, opacity 180ms ease, clip-path 180ms ease;
+    }
 }
