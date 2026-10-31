@@ -2,6 +2,17 @@ import type { MainCircleEndpoint } from "../../types/mainCircle";
 
 export const MAIN_CIRCLE_TRAVEL_DURATION_MS = 1000;
 
+// Converts a viewport endpoint into stable content coordinates for native scrolling.
+export function mainCircleInScrollContent(endpoint: MainCircleEndpoint, frame: {
+    top: number; left: number; scrollTop: number; scrollLeft: number;
+}): MainCircleEndpoint {
+    return {
+        width: endpoint.width,
+        top: endpoint.top - frame.top + frame.scrollTop,
+        left: endpoint.left - frame.left + frame.scrollLeft,
+    };
+}
+
 // Interpolates direct circle geometry and shared eased progress at one elapsed time.
 export function mainCircleTravelAtTime(
     from: MainCircleEndpoint,

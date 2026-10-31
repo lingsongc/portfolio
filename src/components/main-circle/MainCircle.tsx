@@ -1,12 +1,14 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { ImageDescriptor } from "../../types/images";
-import type { MainCircleEndpoint } from "../../types/mainCircle";
+import type { MainCircleEndpoint, MainCircleScrollPlacement } from "../../types/mainCircle";
 import { CircleShade } from "./CirclePresentation";
 
 type MainCircleProps = {
     geometry: MainCircleEndpoint | null;
     image: ImageDescriptor | null;
     imageVisible?: boolean;
+    scrollPlacement?: MainCircleScrollPlacement | null;
 };
 
 // Displays the current image and moves its circular frame between sections.
@@ -14,6 +16,7 @@ export function MainCircle({
     geometry,
     image,
     imageVisible = true,
+    scrollPlacement = null,
 }: MainCircleProps) {
     const imageRef = useRef<HTMLImageElement>(null);
     const [readySource, setReadySource] = useState<string | null>(null);
@@ -33,8 +36,9 @@ export function MainCircle({
         return () => { cancelled = true; };
     }, [image?.src]);
 
-    return (
-        <div className="main-circle-container" style={geometry ?? undefined}>
+    const circle = (
+        <div className={`main-circle-container${scrollPlacement ? " main-circle-scrolling" : ""}`}
+            style={scrollPlacement?.geometry ?? geometry ?? undefined}>
             <div className="main-circle-mask">
                 {image && (
                     <div className={`main-circle-image${imageVisible && contentReady ? " main-circle-image-visible" : ""}`}>
@@ -55,4 +59,5 @@ export function MainCircle({
             </div>
         </div>
     );
+    return scrollPlacement ? createPortal(circle, scrollPlacement.host) : circle;
 }

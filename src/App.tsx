@@ -112,6 +112,7 @@ export default function App() {
         layoutVersion: slideshow.settledVersion,
         resolveEndpoint: resolveCircleEndpoint,
         activeScrollerRef: activeSceneScrollerRef,
+        scrollWithContent: narrowLayout,
     });
 
     // Gives each Section a stable descriptor publisher without exposing the registry.
@@ -175,6 +176,7 @@ export default function App() {
 
                 <MainCircle
                     geometry={mainCircle.geometry}
+                    scrollPlacement={mainCircle.scrollPlacement}
                     image={mainCircle.image}
                     imageVisible={mainCircle.imageVisible}
                 />
