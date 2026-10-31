@@ -279,8 +279,7 @@
 }
 
 .navigation-link:focus-visible {
-    outline: 2px solid var(--colour-text);
-    outline-offset: 0.125rem;
+    outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -247,10 +247,7 @@
     outline-offset: var(--orbit-ring-width);
 }
 
-.project-link:focus-visible {
-    outline: var(--orbit-ring-width) solid var(--colour-text);
-    outline-offset: var(--orbit-ring-width);
-}
+.project-link:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
 
 .project-image {
     width: 100%;

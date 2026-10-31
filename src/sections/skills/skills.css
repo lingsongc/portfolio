@@ -95,7 +95,7 @@
 
 .skill-marquee {
     overflow: hidden;
-    padding-block: 1cqb;
+    padding-block: max(16px, 2cqb);
 }
 
 .skill-marquee-track {
@@ -125,8 +125,8 @@
 }
 
 .skill-marquee:focus-visible {
-    outline: 0.125rem solid var(--colour-accent);
-    outline-offset: -0.125rem;
+    /* Inset the shared ring so the circle's overflow mask does not hide it. */
+    outline-offset: -8px;
 }
 
 .skill-marquee-sequence {

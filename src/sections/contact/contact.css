@@ -211,8 +211,7 @@ textarea.contact-form-field { resize: none; }
 .contact-link:is(:hover, :focus-visible) .contact-social-label { opacity: 1; }
 
 .contact-link:focus-visible {
-    outline: 0.2rem solid var(--colour-accent);
-    outline-offset: 0.2rem;
+    outline: none;
 }
 
 .contact-circle-anchor { display: contents; }
