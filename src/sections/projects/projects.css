@@ -29,15 +29,24 @@
     font-size: clamp(4rem, 10.5vw, 10rem);
     transform: translateX(-50%);
     white-space: nowrap;
+    clip-path: inset(0);
 }
 
-.project-title,
+/* Keep the heading mask fixed while its text enters from below and closes downward. */
+.project-title-text {
+    display: block;
+    transform: translateY(110%);
+    transition: transform var(--scene-visual-duration) ease;
+}
+
+.project-copy-visible .project-title-text { transform: translateY(0); }
+
 .project-detail-link {
     opacity: 0;
     transition: opacity var(--scene-visual-duration) ease;
 }
 
-.project-copy-visible :is(.project-title, .project-detail-link) { opacity: 1; }
+.project-copy-visible .project-detail-link { opacity: 1; }
 
 .project-ring {
     --project-stage-one-size: var(--project-ring-1-size);
@@ -322,12 +331,87 @@
     stroke-width: var(--icon-stroke-width);
 }
 
-@media (max-width: 48rem) {
-    :root { --project-circle-size: 57.6vw; }
+.project-detail-label { display: none; }
 
-    .project-selected-summary { font-size: clamp(0.625rem, 1.8vmin, 1rem); }
+@media (--narrow-layout) {
+    :root { --project-circle-size: min(82vw, 30rem); }
 
-    .project-title { font-size: clamp(2.5rem, 12vw, 4rem); }
+    .project-container {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+        padding: var(--scene-top-space) var(--section-padding-inline) calc(var(--scene-bottom-space) + 1rem);
+    }
+
+    .project-container .project-title {
+        position: relative;
+        z-index: 1;
+        inset: auto;
+        margin-bottom: calc(-0.4em - 1.5rem);
+        font-size: clamp(2.5rem, 11vw, 5rem);
+        text-align: center;
+        transform: none;
+    }
+
+    .project-circle-anchor {
+        margin-inline: auto;
+        width: var(--project-circle-size);
+        aspect-ratio: 1;
+    }
+
+    .project-composition {
+        position: relative;
+        flex: none;
+        height: calc(var(--project-circle-size) + 7rem);
+    }
+
+    /* Measure resolved CSS dimensions without duplicating responsive formulas in JavaScript. */
+    .project-selector-sizing {
+        position: absolute;
+        visibility: hidden;
+        width: clamp(3rem, 13vw, 4.5rem);
+        height: clamp(4.5rem, 13vw, 6rem);
+        pointer-events: none;
+    }
+
+    .project-selector {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transform: scale(0);
+        transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease;
+    }
+
+    .project-selector svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .project-selector circle { fill: none; stroke: var(--colour-line); stroke-width: var(--orbit-ring-width); }
+    .project-selector .project-link {
+        position: absolute;
+        transform: translate(-50%, -50%);
+    }
+
+    .project-description { display: grid; gap: 0.75rem; opacity: 0; transition: opacity var(--scene-visual-duration) ease; }
+    .project-description h3 { font-size: clamp(1.5rem, 5vw, 2rem); }
+    .project-copy-visible :is(.project-selector, .project-description) { opacity: 1; }
+    .project-copy-visible .project-selector { transform: scale(1); }
+
+    .project-container .project-detail-link {
+        position: relative;
+        inset: auto;
+        align-self: stretch;
+        width: 100%;
+        max-width: 100%;
+        min-height: 2.75em;
+        aspect-ratio: auto;
+        margin-top: auto;
+        font-size: var(--text-body);
+        padding: 0.75em 3.5em;
+        border-radius: 999px;
+        transform: none;
+    }
+
+    .project-container .project-detail-label { display: inline; color: inherit; font-size: inherit; text-transform: none; }
+    .project-detail-link svg { position: absolute; right: 1em; top: 50%; width: 2em; height: 2em; transform: translateY(-50%); }
 }
 
 @media (max-height: 32rem) {
@@ -338,9 +422,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .project-title,
+    .project-title-text,
     .project-detail-link,
     .project-selected-content { transition: none; }
+    .project-selector,
+    .project-description { transition: none; }
 
     .project-content-visible .project-ring::before,
     .project-content-visible .project-item,

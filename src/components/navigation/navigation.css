@@ -257,15 +257,25 @@
     transition: clip-path 180ms ease;
 }
 
-:is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover::before,
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible::before {
     border-radius: 0.5rem;
     transform: rotate(45deg);
 }
 
-:is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover .navigation-label,
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible .navigation-label {
     clip-path: inset(0);
+}
+
+/* Touch browsers can retain :hover after a tap; only hover-capable inputs get these effects. */
+@media (hover: hover) {
+    :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover::before {
+        border-radius: 0.5rem;
+        transform: rotate(45deg);
+    }
+
+    :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover .navigation-label {
+        clip-path: inset(0);
+    }
 }
 
 .navigation-link:focus-visible {
@@ -296,4 +306,66 @@
 /* Reserve the shortest and narrow viewports for scene controls and meaningful content. */
 @media (max-width: 48rem), (max-height: 27rem) {
     .navigation-docked .navigation-copyright { display: none; }
+}
+
+/* Keep one navigation tree, with no Home orbit or rail travel at narrow widths. */
+@media (--narrow-layout) {
+    .navigation-container.navigation-controlled {
+        z-index: 10;
+        inset: auto 0 0;
+        width: 100%;
+        aspect-ratio: auto;
+        padding: 0.5rem max(1rem, env(safe-area-inset-right)) calc(0.75rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+        background: var(--colour-background);
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        animation: none;
+    }
+
+    .navigation-list { display: flex; justify-content: space-around; }
+
+    .navigation-controlled .navigation-item {
+        position: static;
+        transform: none;
+    }
+
+    .navigation-controlled .navigation-theme-slot,
+    .navigation-controlled .navigation-copyright { display: none; }
+
+    .navigation-controlled .navigation-label {
+        display: block;
+        top: auto;
+        bottom: calc(100% + 0.5rem);
+        left: 50%;
+        max-width: min(12rem, calc(100vw - 2rem));
+        font-size: 0.875rem;
+        text-align: center;
+        clip-path: inset(100% 0 0);
+        opacity: 0;
+        visibility: visible;
+        transform: translate(-50%, 0.75rem);
+        transition: none;
+    }
+
+    .navigation-controlled:not(.navigation-busy) .navigation-link:focus-visible .navigation-label {
+        clip-path: inset(0);
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+}
+
+@media (--narrow-layout) and (hover: hover) {
+    .navigation-controlled:not(.navigation-busy) .navigation-link:hover .navigation-label {
+        clip-path: inset(0);
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@media (--narrow-layout) and (prefers-reduced-motion: no-preference) {
+    .navigation-controlled .navigation-label {
+        transition: transform 180ms ease, opacity 180ms ease, clip-path 180ms ease;
+    }
 }

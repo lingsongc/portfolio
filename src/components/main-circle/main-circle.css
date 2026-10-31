@@ -20,6 +20,9 @@
     background-color: var(--colour-circle-void);
 }
 
+/* Native section scrolling carries this layer without waiting for JavaScript scroll events. */
+.main-circle-scrolling { position: absolute; }
+
 .main-circle-image,
 .main-circle-photo {
     position: absolute;

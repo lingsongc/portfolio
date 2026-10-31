@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { ScenePanelOverlay } from "../../components/scene-panel/ScenePanel";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import { projects, type Project } from "../../data/projects";
@@ -7,12 +7,14 @@ import type { SceneLifecycleControl } from "../../types/scene";
 import { ProjectOrbit, type ProjectOrbitTransitionState } from "./ProjectOrbit";
 
 type ProjectsProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
+    narrowLayout: boolean;
     lifecycle: SceneLifecycleControl;
     onMainCircleImageChange: MainCircleImagePublisher;
 };
 
 // Coordinates project selection, orbit visibility, and the main-circle image.
-export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) {
+export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircleImageChange }: ProjectsProps) {
     const [summaryContainer, setSummaryContainer] = useState<HTMLDivElement | null>(null);
     const summaryTextRef = useRef<HTMLParagraphElement>(null);
     const [activeProjectId, setActiveProjectId] = useState(projects[0].id);
@@ -24,8 +26,8 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
             ? "exiting"
             : "idle";
     useEffect(() => {
-        onMainCircleImageChange(projectImage(activeProject));
-    }, [activeProject, onMainCircleImageChange]);
+        onMainCircleImageChange(projectImage(activeProject, narrowLayout));
+    }, [activeProject, narrowLayout, onMainCircleImageChange]);
 
     // The overlay host mounts after the section, so wait for its actual DOM node.
     useLayoutEffect(() => {
@@ -72,14 +74,26 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
             className={`project-container${transitionState === "visible" ? " project-copy-visible" : ""}`}
             aria-labelledby="project-title"
         >
-            <h2 id="project-title" className="project-title" tabIndex={-1}>Projects</h2>
-            <ProjectOrbit
+            <h2 id="project-title" className="project-title" tabIndex={-1}>
+                <span className="project-title-text">Projects</span>
+            </h2>
+            {narrowLayout ? (
+                <>
+                    <ProjectOrbit narrowLayout circleAnchorRef={circleAnchorRef} projects={projects}
+                        activeProjectId={activeProjectId} interactive={lifecycle.phase === "idle"}
+                        onProjectSelect={selectProject} />
+                    <div className="project-description" aria-live="polite">
+                        <h3>{activeProject.name}</h3>
+                        <p>{activeProject.summary}</p>
+                    </div>
+                </>
+            ) : <ProjectOrbit
                 activeProjectId={activeProjectId}
                 projects={projects}
                 transitionState={transitionState}
                 onProjectSelect={selectProject}
-            />
-            <ScenePanelOverlay>
+            />}
+            {!narrowLayout && <ScenePanelOverlay>
                 <div
                     className={`project-selected-content${transitionState === "idle" ? "" : ` project-selected-content-${transitionState}`}`}
                     aria-live="polite"
@@ -90,12 +104,13 @@ export function Projects({ lifecycle, onMainCircleImageChange }: ProjectsProps) 
                         <p ref={summaryTextRef}>{activeProject.summary}</p>
                     </div>
                 </div>
-            </ScenePanelOverlay>
+            </ScenePanelOverlay>}
             <a
                 className="action-button project-detail-link"
                 href={activeProject.href}
                 aria-label={`View ${activeProject.name} project details`}
             >
+                <span className="project-detail-label">View Project</span>
                 <IconArrowUpRight aria-hidden="true" />
             </a>
         </section>
@@ -128,11 +143,11 @@ function centerProjectSummary(container: HTMLElement, paragraph: HTMLElement) {
 }
 
 // Creates the image data published for a selected project.
-function projectImage(project: Project): ImageDescriptor {
+function projectImage(project: Project, narrowLayout: boolean): ImageDescriptor {
     return {
         src: `/projects/${project.id}.png`,
         alt: "",
         objectPosition: "center",
-        presentation: { shade: "cap" },
+        presentation: { shade: "cap", shadeOpacity: narrowLayout ? 0.24 : undefined },
     };
 }

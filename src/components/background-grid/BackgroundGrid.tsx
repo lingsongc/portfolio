@@ -10,6 +10,7 @@ const TEAR_EDGE_FADE_STROKE = 32;
 
 type BackgroundGridProps = {
     circleGeometry?: MainCircleEndpoint | null;
+    circleMaskId?: string;
 };
 
 export type BackgroundGridHandle = {
@@ -25,7 +26,7 @@ type FeedbackAnimation = {
 
 // Renders a fixed SVG grid that bends and fades around the main circle.
 export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridProps>(function BackgroundGrid(
-    { circleGeometry = null },
+    { circleGeometry = null, circleMaskId },
     ref,
 ) {
     const linesRef = useRef<SVGGElement>(null);
@@ -39,7 +40,8 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
     const renderRef = useRef<(() => void) | null>(null);
     const renderSignatureRef = useRef("");
     const filterId = useId();
-    const maskId = useId();
+    const generatedMaskId = useId();
+    const maskId = circleMaskId ?? generatedMaskId;
     const tearPathId = useId();
     const tearEdgeFilterId = useId();
     const tearMaskId = useId();

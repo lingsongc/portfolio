@@ -1,29 +1,47 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import type { Project } from "../../data/projects";
 import {
     fitProjectAngleToViewport,
+    narrowProjectLayout,
     projectOrbitAngle,
     type ProjectPlanetStyle,
-} from "./projectOrbitGeometry";
+} from "./projectGeometry";
 
 const PROJECT_RING_COUNT = 3;
 
 export type ProjectOrbitTransitionState = "idle" | "visible" | "exiting";
 
-type ProjectOrbitProps = {
+type WideProjectOrbitProps = {
     activeProjectId: string;
     projects: readonly Project[];
     transitionState: ProjectOrbitTransitionState;
     onProjectSelect: (project: Project) => void;
 };
 
+type NarrowProjectOrbitProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
+    projects: readonly Project[];
+    activeProjectId: string;
+    interactive: boolean;
+    onProjectSelect: (project: Project) => void;
+};
+
+type ProjectOrbitProps =
+    | (WideProjectOrbitProps & { narrowLayout?: false })
+    | (NarrowProjectOrbitProps & { narrowLayout: true });
+
+// Selects the wide or narrow ring composition while keeping layout-specific measurements local.
+export function ProjectOrbit(props: ProjectOrbitProps) {
+    return props.narrowLayout ? <NarrowProjectOrbit {...props} /> : <WideProjectOrbit {...props} />;
+}
+
 // Renders project controls across three rings and keeps them inside the viewport.
-export function ProjectOrbit({
+function WideProjectOrbit({
     activeProjectId,
     projects,
     transitionState,
     onProjectSelect,
-}: ProjectOrbitProps) {
+}: WideProjectOrbitProps) {
     const orbitRef = useRef<HTMLDivElement>(null);
     const ringRefs = useRef<Array<HTMLSpanElement | null>>([]);
     const planetRefs = useRef<Array<HTMLLIElement | null>>([]);
@@ -107,6 +125,57 @@ export function ProjectOrbit({
                     );
                 })}
             </ul>
+        </div>
+    );
+}
+
+// Measures the main-image anchor and places a complete selector around that exact center.
+function NarrowProjectOrbit({ circleAnchorRef, projects, activeProjectId, interactive, onProjectSelect }: NarrowProjectOrbitProps) {
+    const compositionRef = useRef<HTMLDivElement>(null);
+    const sizingRef = useRef<HTMLDivElement>(null);
+    const [layout, setLayout] = useState<ReturnType<typeof narrowProjectLayout> | null>(null);
+
+    useLayoutEffect(() => {
+        const composition = compositionRef.current;
+        const anchor = circleAnchorRef.current;
+        const sizing = sizingRef.current;
+        if (!composition || !anchor || !sizing) return;
+        const measure = () => {
+            const size = sizing.getBoundingClientRect();
+            // Wide CSS can replace narrow sizing before React unmounts this observer.
+            if (size.width <= 0 || size.height <= 0) return;
+            const next = narrowProjectLayout(projects.length, composition.getBoundingClientRect().width,
+                anchor.getBoundingClientRect().width, size.width, size.height);
+            setLayout(current => JSON.stringify(current) === JSON.stringify(next) ? current : next);
+        };
+        const observer = new ResizeObserver(measure);
+        observer.observe(composition);
+        observer.observe(anchor);
+        observer.observe(sizing);
+        measure();
+        return () => observer.disconnect();
+    }, [circleAnchorRef, projects.length]);
+
+    return (
+        <div className="project-composition" ref={compositionRef} style={{ height: layout?.height }}>
+            <div ref={circleAnchorRef} className="project-circle-anchor" aria-hidden="true" />
+            <div className="project-selector-sizing" ref={sizingRef} aria-hidden="true" />
+            {layout && <div className="project-selector" role="group" aria-label="Project selection"
+                style={{ transformOrigin: `${layout.center.x}px ${layout.center.y}px` }}>
+                <svg aria-hidden="true">
+                    {layout.radii.map(radius => <circle key={radius} cx={layout.center.x} cy={layout.center.y} r={radius} />)}
+                </svg>
+                {projects.map((project, index) => {
+                    const planet = layout.planets[index];
+                    return <button className="project-link" key={project.id} type="button"
+                        style={{ left: planet.x, top: planet.y, width: layout.planetSize,
+                            outlineWidth: Math.min(3, layout.planetSize / 20), outlineOffset: Math.min(3, layout.planetSize / 20) }}
+                        aria-label={project.name} aria-pressed={project.id === activeProjectId}
+                        disabled={!interactive} onClick={() => onProjectSelect(project)}>
+                        <img className="project-image" src={`/projects/${project.id}.png`} alt="" />
+                    </button>;
+                })}
+            </div>}
         </div>
     );
 }

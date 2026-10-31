@@ -1,11 +1,13 @@
 import { IconVectorBezier } from "@tabler/icons-react";
-import { useId, type CSSProperties } from "react";
+import { useId, useState, type CSSProperties, type RefObject } from "react";
 import { skills } from "../../data/skills";
 import { useDocumentVisible } from "../../motion/useDocumentVisible";
 import type { MainCircleEndpoint } from "../../types/mainCircle";
 import type { SceneLifecycleControl } from "../../types/scene";
 
 type SkillsProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
+    narrowLayout: boolean;
     circleGeometry: MainCircleEndpoint | null;
     lifecycle: SceneLifecycleControl;
 };
@@ -40,12 +42,12 @@ const skillGroups = skills.reduce<SkillGroup[]>((groups, skill) => {
 }, []);
 
 // Renders the accessible Skills content and its circle-aligned visual marquee.
-export function Skills({ circleGeometry, lifecycle }: SkillsProps) {
+export function Skills({ circleAnchorRef, narrowLayout, circleGeometry, lifecycle }: SkillsProps) {
     const documentVisible = useDocumentVisible();
     const motionActive = lifecycle.active && lifecycle.phase === "idle" && documentVisible && !lifecycle.reducedMotion;
     const contentVisible = lifecycle.active === true
         && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
-    const circleStyle = circleGeometry as CSSProperties | undefined;
+    const circleStyle = narrowLayout ? undefined : circleGeometry as CSSProperties | undefined;
 
     return (
         <section
@@ -53,27 +55,31 @@ export function Skills({ circleGeometry, lifecycle }: SkillsProps) {
             aria-labelledby="skill-title"
         >
             <div className="skill-introduction">
-                <h2 id="skill-title" tabIndex={-1}>Skills</h2>
-                <p className="skill-description">
-                    I work across software development, interface design, and visual storytelling.
-                </p>
-                <ul className="skill-category-list" aria-label="Skill categories">
-                    {skillGroups.map((group) => (
-                        <li key={group.category}>{group.category}</li>
-                    ))}
-                </ul>
+                <h2 id="skill-title" className="skill-title" tabIndex={-1}>Skills</h2>
+                <div className="skill-description-content">
+                    <p className="skill-description">
+                        I work across software development, interface design, and visual storytelling.
+                    </p>
+                    <ul className="skill-category-list" aria-label="Skill categories">
+                        {skillGroups.map((group) => (
+                            <li key={group.category}>{group.category}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
-            <div className="skill-circle" style={circleStyle}>
-                <div className="skill-marquee-stack">
-                    {skillGroups.map((group, groupIndex) => (
-                        <SkillMarquee
-                            direction={groupIndex % 2 === 0 ? "right" : "left"}
-                            group={group}
-                            index={groupIndex}
-                            key={group.category}
-                        />
-                    ))}
+            <div className="skill-circle-anchor" ref={circleAnchorRef}>
+                <div className="skill-circle" style={circleStyle}>
+                    <div className="skill-marquee-stack">
+                        {skillGroups.map((group, groupIndex) => (
+                            <SkillMarquee
+                                direction={groupIndex % 2 === 0 ? "right" : "left"}
+                                group={group}
+                                index={groupIndex}
+                                key={group.category}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -106,6 +112,7 @@ function SkillMarquee({
     group: SkillGroup;
     index: number;
 }) {
+    const [paused, setPaused] = useState(false);
     const minimumItemsPerSequence = 8;
     const repeatCount = Math.max(2, Math.ceil(minimumItemsPerSequence / group.skills.length));
     const repeatedSkills = Array.from({ length: repeatCount }, () => group.skills).flat();
@@ -113,10 +120,17 @@ function SkillMarquee({
 
     return (
         <div
-            className={`skill-marquee skill-marquee-${direction}`}
+            className={`skill-marquee skill-marquee-${direction}${paused ? " skill-marquee-paused" : ""}`}
             style={{ "--skill-marquee-duration": `${durationSeconds}s` } as CSSProperties}
-            role="group"
-            aria-label={`${group.category} marquee`}
+            role="button"
+            aria-label={`${group.category} marquee; toggle pause`}
+            aria-pressed={paused}
+            onClick={() => setPaused((current) => !current)}
+            onKeyDown={(event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                setPaused((current) => !current);
+            }}
             tabIndex={0}
         >
             <div className="skill-marquee-track" aria-hidden="true">

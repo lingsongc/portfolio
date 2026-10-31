@@ -32,6 +32,8 @@
     line-height: var(--body-line-height);
 }
 
+.skill-description-content { display: grid; gap: 1.5rem; }
+
 .skill-category-list {
     display: grid;
     gap: 0.45rem;
@@ -116,7 +118,11 @@
 
 .skill-motion-active .skill-marquee-track { animation-play-state: running; }
 
-.skill-motion-active .skill-marquee:is(:hover, :focus-within) .skill-marquee-track { animation-play-state: paused; }
+.skill-motion-active .skill-marquee:is(.skill-marquee-paused, :focus-visible) .skill-marquee-track { animation-play-state: paused; }
+
+@media (hover: hover) {
+    .skill-motion-active .skill-marquee:hover .skill-marquee-track { animation-play-state: paused; }
+}
 
 .skill-marquee:focus-visible {
     outline: 0.125rem solid var(--colour-accent);
@@ -172,38 +178,93 @@
     to { transform: translateX(0); }
 }
 
-@media (max-width: 64rem) {
-    .skill-introduction {
-        align-self: start;
-        width: min(30rem, calc(100vw - 2 * var(--section-padding-inline) - 4rem));
+.skill-circle-anchor { display: contents; }
+
+@media (--narrow-layout) {
+    :root { --skill-circle-size: min(calc(100vw - 2 * var(--section-padding-inline)), 36rem); }
+
+    .skill-container {
+        --skill-title-size: clamp(3rem, 8vw, 5rem);
+        --skill-content-gap: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        height: 100dvh;
+        padding: var(--scene-top-space) var(--section-padding-inline) 0;
     }
 
-    .skill-description { max-width: 24rem; }
-}
-
-@media (max-width: 48rem) {
-    .skill-container { align-items: start; }
+    /* Give up centering space before introducing overflow for the description. */
+    .skill-container::before {
+        order: 1;
+        flex: 0 1 max(0px, calc(50dvh - var(--skill-circle-size) / 2 - var(--scene-top-space) - var(--skill-title-size) * 1.1 - var(--skill-content-gap)));
+        min-height: 0;
+        content: "";
+    }
 
     .skill-introduction {
-        width: calc(100% - 3.5rem);
-        gap: 0.75rem;
+        display: contents;
     }
+
+    .skill-title { flex: none; margin-bottom: var(--skill-content-gap); font-size: var(--skill-title-size); }
+    .skill-description-content { order: 3; flex: none; gap: 1rem; padding-bottom: var(--scene-bottom-space); }
+
+    /* Split the introduction around the circle while preserving its shared scene reveal. */
+    .skill-title,
+    .skill-description-content {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-1.5rem);
+        transition: opacity var(--scene-visual-duration) ease, transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
+    }
+
+    .skill-content-visible :is(.skill-title, .skill-description-content) {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(0);
+        transition-delay: 0s;
+    }
+
+    .skill-description { max-width: none; }
 
     .skill-category-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem 1rem;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem 1rem;
+        font-size: clamp(0.75rem, 2.3vw, 0.875rem);
+        letter-spacing: 0.04em;
     }
 
-    .skill-category-list li::before { width: 0.75rem; }
+    .skill-category-list li { align-items: start; gap: 0.5rem; }
+    .skill-category-list li::before { flex: 0 0 0.75rem; margin-top: 0.65em; }
 
-    .skill-marquee-stack {
-        width: 190%;
+    .skill-circle-anchor {
+        order: 2;
+        position: relative;
+        display: block;
+        flex: none;
+        align-self: center;
+        width: var(--skill-circle-size);
+        aspect-ratio: 1;
+        margin-bottom: var(--skill-content-gap);
     }
+
+    .skill-circle {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .skill-marquee-stack { width: 150%; height: 68%; }
+    .skill-marquee-item { font-size: clamp(1rem, 5cqi, 2rem); gap: 0.5rem; }
+    .skill-marquee-logo { width: clamp(1.5rem, 7cqi, 2.75rem); height: clamp(1.5rem, 7cqi, 2.75rem); }
+    .skill-marquee-sequence { gap: 1rem; padding-inline: 0.5rem; }
+    .skill-marquee-item::after { width: 0.2rem; margin-left: 0.5rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .skill-introduction,
+    .skill-title,
+    .skill-description-content,
     .skill-circle { transition: none; }
 
     .skill-marquee-track {

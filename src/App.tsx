@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
 import { BackgroundGrid, type BackgroundGridHandle } from "./components/background-grid/BackgroundGrid";
 import { MainCircle } from "./components/main-circle/MainCircle";
 import { useMainCircle } from "./components/main-circle/useMainCircle";
@@ -7,6 +7,7 @@ import { ScenePanel } from "./components/scene-panel/ScenePanel";
 import { resolveMainCircleSceneEndpoint } from "./motion/sceneCircleGeometry";
 import { useSlideshowCoordinator } from "./motion/useSlideshowCoordinator";
 import { useSceneInput } from "./motion/useSceneInput";
+import { useNarrowLayout } from "./motion/useNarrowLayout";
 import { About } from "./sections/about/About";
 import { Contact } from "./sections/contact/Contact";
 import { Experience } from "./sections/experience/Experience";
@@ -38,10 +39,18 @@ const sceneCircleSizeProperties: Record<SceneId, string> = {
 
 // Composes the six viewport Sections around one page-level slideshow coordinator.
 export default function App() {
+    const circleFadeMaskId = useId();
     const activeSceneScrollerRef = useRef<HTMLDivElement>(null);
     const backgroundGridRef = useRef<BackgroundGridHandle>(null);
     const experienceOrbitRef = useRef<HTMLElement>(null);
     const circleMeasureRef = useRef<HTMLDivElement>(null);
+    const homeCircleRef = useRef<HTMLDivElement>(null);
+    const aboutCircleRef = useRef<HTMLDivElement>(null);
+    const experienceCircleRef = useRef<HTMLDivElement>(null);
+    const projectCircleRef = useRef<HTMLDivElement>(null);
+    const skillCircleRef = useRef<HTMLDivElement>(null);
+    const contactCircleRef = useRef<HTMLDivElement>(null);
+    const narrowLayout = useNarrowLayout();
     const slideshow = useSlideshowCoordinator();
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
@@ -59,6 +68,7 @@ export default function App() {
     const sceneInput = useSceneInput({
         activeScrollerRef: activeSceneScrollerRef,
         currentSceneId: slideshow.currentSceneId,
+        scrollNavigationEnabled: !narrowLayout,
         onWheelFeedbackChange: updateWheelFeedback,
         phase: slideshow.phase,
         requestScene: slideshow.requestScene,
@@ -71,11 +81,20 @@ export default function App() {
         measure.style.width = `var(${sceneCircleSizeProperties[sceneId]})`;
         const circleWidth = measure.getBoundingClientRect().width;
         const narrowLayout = getComputedStyle(measure).getPropertyValue("--scene-layout-narrow").trim() === "1";
+        const anchors: Partial<Record<SceneId, HTMLDivElement | null>> = {
+            home: homeCircleRef.current, about: aboutCircleRef.current, experience: experienceCircleRef.current,
+            projects: projectCircleRef.current,
+            skills: skillCircleRef.current,
+            contact: contactCircleRef.current,
+        };
+        const anchor = anchors[sceneId];
+        const anchorBounds = anchor?.getBoundingClientRect();
         return resolveMainCircleSceneEndpoint(sceneId, {
             viewportWidth: window.innerWidth,
             viewportHeight: window.innerHeight,
             circleWidth,
             narrowLayout,
+            narrowCenter: anchorBounds ? { top: anchorBounds.top + anchorBounds.height / 2, left: anchorBounds.left + anchorBounds.width / 2 } : undefined,
             experienceCenter: experienceBounds
                 ? {
                     top: experienceBounds.top + experienceBounds.height / 2,
@@ -92,6 +111,8 @@ export default function App() {
         travelProgress: slideshow.travelProgress,
         layoutVersion: slideshow.settledVersion,
         resolveEndpoint: resolveCircleEndpoint,
+        activeScrollerRef: activeSceneScrollerRef,
+        scrollWithContent: narrowLayout,
     });
 
     // Gives each Section a stable descriptor publisher without exposing the registry.
@@ -138,7 +159,7 @@ export default function App() {
 
     return (
         <>
-            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} />
+            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId} />
 
             <main className="slideshow-stage">
                 <div ref={circleMeasureRef} className="slideshow-circle-measure" aria-hidden="true" />
@@ -155,6 +176,7 @@ export default function App() {
 
                 <MainCircle
                     geometry={mainCircle.geometry}
+                    scrollPlacement={mainCircle.scrollPlacement}
                     image={mainCircle.image}
                     imageVisible={mainCircle.imageVisible}
                 />
@@ -166,6 +188,7 @@ export default function App() {
                     overflowRef={activeSceneScrollerRef}
                 >
                     <Home
+                        circleAnchorRef={homeCircleRef}
                         lifecycle={slideshow.lifecycleFor("home")}
                         onMainCircleImageChange={publishHomeImage}
                     />
@@ -178,6 +201,8 @@ export default function App() {
                     overflowRef={activeSceneScrollerRef}
                 >
                     <About
+                        circleAnchorRef={aboutCircleRef}
+                        narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("about")}
                         onMainCircleImageChange={publishAboutImage}
                     />
@@ -188,9 +213,13 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="experience-title"
                     overflowRef={activeSceneScrollerRef}
-                    scrollable={false}
+                    scrollable={narrowLayout}
                 >
                     <Experience
+                        circleAnchorRef={experienceCircleRef}
+                        circleGeometry={mainCircle.geometry}
+                        circleFadeMaskId={circleFadeMaskId}
+                        narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("experience")}
                         orbitRef={experienceOrbitRef}
                         onMainCircleImageChange={publishExperienceImage}
@@ -202,9 +231,11 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="project-title"
                     overflowRef={activeSceneScrollerRef}
-                    scrollable={false}
+                    scrollable={narrowLayout}
                 >
                     <Projects
+                        circleAnchorRef={projectCircleRef}
+                        narrowLayout={narrowLayout}
                         lifecycle={slideshow.lifecycleFor("projects")}
                         onMainCircleImageChange={publishProjectImage}
                     />
@@ -217,6 +248,8 @@ export default function App() {
                     overflowRef={activeSceneScrollerRef}
                 >
                     <Skills
+                        circleAnchorRef={skillCircleRef}
+                        narrowLayout={narrowLayout}
                         circleGeometry={mainCircle.geometry}
                         lifecycle={slideshow.lifecycleFor("skills")}
                     />
@@ -228,7 +261,7 @@ export default function App() {
                     headingFocusTargetId="contact-title"
                     overflowRef={activeSceneScrollerRef}
                 >
-                    <Contact lifecycle={slideshow.lifecycleFor("contact")} />
+                    <Contact circleAnchorRef={contactCircleRef} lifecycle={slideshow.lifecycleFor("contact")} />
                 </ScenePanel>
             </main>
         </>

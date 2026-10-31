@@ -6,6 +6,9 @@ import { useDocumentVisible } from "../../motion/useDocumentVisible";
 import type { ImageDescriptor, MainCircleImagePublisher } from "../../types/images";
 import type { SceneLifecycleControl } from "../../types/scene";
 import { ExperienceOrbit } from "./ExperienceOrbit";
+import { ExperienceStrip } from "./ExperienceStrip";
+import { ScenePanelOverlay } from "../../components/scene-panel/ScenePanel";
+import type { MainCircleEndpoint } from "../../types/mainCircle";
 
 type ExperienceType = "experience" | "education";
 
@@ -17,13 +20,17 @@ const educationEvents = education.map(({ id, institution, qualification, ...even
 }));
 const eventsByType = { experience: experienceEvents, education: educationEvents };
 type ExperienceProps = {
+    circleAnchorRef: RefObject<HTMLDivElement | null>;
+    circleGeometry: MainCircleEndpoint | null;
+    circleFadeMaskId: string;
+    narrowLayout: boolean;
     lifecycle: SceneLifecycleControl;
     orbitRef: RefObject<HTMLElement | null>;
     onMainCircleImageChange: MainCircleImagePublisher;
 };
 
 // Coordinates the shared Experience and Education timeline, content, and image.
-export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: ExperienceProps) {
+export function Experience({ circleAnchorRef, circleGeometry, circleFadeMaskId, narrowLayout, lifecycle, orbitRef, onMainCircleImageChange }: ExperienceProps) {
     const documentVisible = useDocumentVisible();
     const motionActive = lifecycle.active && lifecycle.phase === "idle" && documentVisible && !lifecycle.reducedMotion;
     const [experienceType, setExperienceType] = useState<ExperienceType>("experience");
@@ -83,6 +90,21 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                         </h2>
                     </div>
                 </header>
+                {narrowLayout && (
+                    <div className="experience-image-row">
+                        <div ref={circleAnchorRef} className="experience-circle-anchor" aria-hidden="true" />
+                        <ExperienceStrip
+                            key={experienceType}
+                            activeEntryId={activeEvent.id}
+                            entries={activeEvents}
+                            imagePath={(id) => eventImagePath(experienceType, id)}
+                            interactive={lifecycle.active && lifecycle.phase === "idle"}
+                            label={experienceType}
+                            onEntrySelect={activateEvent}
+                            reducedMotion={lifecycle.reducedMotion}
+                        />
+                    </div>
+                )}
                 
                 <div className="experience-content-region">
                     <article
@@ -115,7 +137,21 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                 </div>
             </div>
 
-            <ExperienceOrbit
+            {narrowLayout && circleGeometry && (
+                <ScenePanelOverlay>
+                    <svg className={`experience-strip-line${contentVisible ? " experience-strip-line-visible" : ""}`} aria-hidden="true">
+                        <line
+                            x1={circleGeometry.left}
+                            x2="100%"
+                            y1={circleGeometry.top}
+                            y2={circleGeometry.top}
+                            mask={`url(#${circleFadeMaskId})`}
+                        />
+                    </svg>
+                </ScenePanelOverlay>
+            )}
+
+            {!narrowLayout && <ExperienceOrbit
                 activeEntryId={activeEvent.id}
                 contentVisible={contentVisible}
                 entries={activeEvents}
@@ -126,7 +162,7 @@ export function Experience({ lifecycle, orbitRef, onMainCircleImageChange }: Exp
                 orbitRef={orbitRef}
                 onEntrySelect={activateEvent}
                 reducedMotion={lifecycle.reducedMotion}
-            />
+            />}
         </section>
     );
 }

@@ -64,15 +64,46 @@
     font-size: var(--text-body);
 }
 
-@media (max-width: 48rem) {
-    :root { --about-circle-size: 95vw; }
+.about-circle-anchor { display: none; }
+
+@media (--narrow-layout) {
+    :root {
+        --about-circle-size: 160vw;
+        --about-visible-arc: 36dvh;
+        /* Lower the subject as the top crop grows, without exposing the photo's lower edge. */
+        --about-image-transform: translate(-5%, max(0px, calc(38% - var(--about-visible-arc) * 0.9)));
+    }
+
     .about-container {
-        --about-circle-arc: 28.5vw;
+        --about-content-top-space: calc(var(--about-visible-arc) + 2rem);
+        --about-content-bottom-space: calc(var(--scene-bottom-space) + 1rem);
+        position: relative;
+        display: block;
+        padding: var(--about-content-top-space) var(--section-padding-inline) var(--about-content-bottom-space);
+    }
+
+    .about-circle-anchor {
+        position: absolute;
+        display: block;
+        top: calc(var(--about-visible-arc) - var(--about-circle-size));
+        left: 50%;
+        width: var(--about-circle-size);
+        aspect-ratio: 1;
+        transform: translateX(-50%);
     }
 
     .about-text {
-        width: min(65vw, calc(100% - 1.5rem));
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        min-height: max(0px, calc(100dvh - var(--about-content-top-space) - var(--about-content-bottom-space)));
+        gap: 1.5rem;
     }
+
+    /* Absorb only unused height; taller content carries the action along with its own scroller. */
+    .about-resume-link { margin-top: auto; }
+
+    .about-statistic-amount { font-size: clamp(2.5rem, 12vw, 5rem); }
 }
 
 @media (prefers-reduced-motion: reduce) {

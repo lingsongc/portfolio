@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { preload } from "react-dom";
 import type { ImageDescriptor } from "../../types/images";
-import type { MainCircleEndpoint } from "../../types/mainCircle";
+import type { MainCircleEndpoint, MainCircleScrollPlacement } from "../../types/mainCircle";
 import type { SceneId, ScenePhase } from "../../types/scene";
-import { MAIN_CIRCLE_TRAVEL_DURATION_MS, mainCircleTravelAtTime } from "./mainCircleGeometry";
+import { MAIN_CIRCLE_TRAVEL_DURATION_MS, mainCircleTravelAtTime, mainCircleInScrollContent } from "./mainCircleGeometry";
 
 type MainCircleOptions = {
     currentSceneId: SceneId;
@@ -12,9 +12,11 @@ type MainCircleOptions = {
     travelProgress: number;
     layoutVersion: number;
     resolveEndpoint: (sceneId: SceneId) => MainCircleEndpoint;
+    activeScrollerRef?: RefObject<HTMLDivElement | null>;
+    scrollWithContent?: boolean;
 };
 
-type EndpointSnapshot = { from: MainCircleEndpoint; to: MainCircleEndpoint };
+type EndpointSnapshot = { from: MainCircleEndpoint; to: MainCircleEndpoint; scrollPlacement: MainCircleScrollPlacement | null };
 type SceneImageRegistry = Partial<Record<SceneId, ImageDescriptor>>;
 
 // Owns the persistent circle's endpoint snapshot, shared geometry, and image registry.
@@ -25,16 +27,23 @@ export function useMainCircle({
     travelProgress,
     layoutVersion,
     resolveEndpoint,
+    activeScrollerRef,
+    scrollWithContent = false,
 }: MainCircleOptions) {
     const [endpoints, setEndpoints] = useState<EndpointSnapshot | null>(null);
     const [images, setImages] = useState<SceneImageRegistry>({});
+    const renderedEndpointRef = useRef<MainCircleEndpoint | null>(null);
 
     useLayoutEffect(() => {
         void layoutVersion;
-        const from = resolveEndpoint(currentSceneId);
+        const from = phase === "moving" && renderedEndpointRef.current
+            ? renderedEndpointRef.current : resolveEndpoint(currentSceneId);
         const to = phase === "moving" && requestedSceneId ? resolveEndpoint(requestedSceneId) : from;
-        setEndpoints({ from, to });
-    }, [currentSceneId, layoutVersion, phase, requestedSceneId, resolveEndpoint]);
+        // Transfer the image only after opening finishes, so changing hosts cannot interrupt its fade.
+        const scrollPlacement = scrollWithContent && (phase === "idle" || phase === "closing")
+            ? measureScrollPlacement(from, activeScrollerRef?.current) : null;
+        setEndpoints({ from, to, scrollPlacement });
+    }, [activeScrollerRef, currentSceneId, layoutVersion, phase, requestedSceneId, resolveEndpoint, scrollWithContent]);
 
     // Derive every frame from the coordinator's clock without scheduling a second render.
     const snapshot = useMemo(() => endpoints ? mainCircleTravelAtTime(
@@ -43,6 +52,29 @@ export function useMainCircle({
         (phase === "moving" ? travelProgress : phase === "opening" ? 1 : 0) * MAIN_CIRCLE_TRAVEL_DURATION_MS,
         smoothDirectTravelEase,
     ) : null, [endpoints, phase, travelProgress]);
+    renderedEndpointRef.current = snapshot?.endpoint ?? null;
+
+    // Track only the explicit scene scroller; resize recovery can enable it after a wide layout.
+    useLayoutEffect(() => {
+        if (phase === "moving") return;
+        const scroller = activeScrollerRef?.current;
+        if (!scroller) return;
+        const measure = () => {
+            const endpoint = resolveEndpoint(currentSceneId);
+            const scrollPlacement = scrollWithContent && (phase === "idle" || phase === "closing")
+                ? measureScrollPlacement(endpoint, scroller) : null;
+            setEndpoints({ from: endpoint, to: endpoint, scrollPlacement });
+        };
+        const observer = new ResizeObserver(measure);
+        if (scroller.firstElementChild) observer.observe(scroller.firstElementChild);
+        scroller.addEventListener("scroll", measure, { passive: true });
+        document.fonts.addEventListener("loadingdone", measure);
+        return () => {
+            observer.disconnect();
+            scroller.removeEventListener("scroll", measure);
+            document.fonts.removeEventListener("loadingdone", measure);
+        };
+    }, [activeScrollerRef, currentSceneId, layoutVersion, phase, resolveEndpoint, scrollWithContent]);
 
     const publishSceneImage = useCallback((sceneId: SceneId, image: ImageDescriptor | null) => {
         setImages((current) => updateSceneImage(current, sceneId, image));
@@ -58,7 +90,17 @@ export function useMainCircle({
         currentSceneId, phase,
     }), [currentSceneId, images, phase]);
 
-    return { geometry: snapshot?.endpoint ?? null, easedTravelProgress: snapshot?.easedProgress ?? 0, ...imageState, publishSceneImage };
+    return { geometry: snapshot?.endpoint ?? null, scrollPlacement: endpoints?.scrollPlacement ?? null,
+        easedTravelProgress: snapshot?.easedProgress ?? 0, ...imageState, publishSceneImage };
+}
+
+// Capture content placement with its matching viewport measurement, never with a later scroll offset.
+function measureScrollPlacement(endpoint: MainCircleEndpoint, host: HTMLDivElement | null | undefined): MainCircleScrollPlacement | null {
+    if (!host) return null;
+    const bounds = host.getBoundingClientRect();
+    return { host, geometry: mainCircleInScrollContent(endpoint, {
+        top: bounds.top, left: bounds.left, scrollTop: host.scrollTop, scrollLeft: host.scrollLeft,
+    }) };
 }
 
 // Retains outgoing content invisibly over the void until the destination opens.

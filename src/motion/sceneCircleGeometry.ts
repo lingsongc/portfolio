@@ -7,6 +7,7 @@ export type MainCircleSceneLayout = {
     viewportHeight: number;
     circleWidth: number;
     narrowLayout: boolean;
+    narrowCenter?: { top: number; left: number };
     experienceCenter: { top: number; left: number };
 };
 
@@ -14,6 +15,7 @@ export type MainCircleSceneLayout = {
 export function resolveMainCircleSceneEndpoint(sceneId: SceneId, layout: MainCircleSceneLayout): MainCircleEndpoint {
     const { viewportWidth, viewportHeight, circleWidth, narrowLayout } = layout;
     const center = { width: circleWidth, top: viewportHeight / 2, left: viewportWidth / 2 };
+    if (narrowLayout && layout.narrowCenter) return { width: circleWidth, ...layout.narrowCenter };
     switch (sceneId) {
         case "home":
         case "projects":

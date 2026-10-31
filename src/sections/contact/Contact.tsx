@@ -1,14 +1,16 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 import type { SceneLifecycleControl } from "../../types/scene";
 import { contactProfiles, type ContactProfile } from "../../data/contact";
-import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, type ContactOffset } from "./contactGeometry";
+import { contactFittedFinalOffset, contactInitialOffset, contactProfileDiameter, contactRowOffset, type ContactOffset } from "./contactGeometry";
 import { ContactForm } from "./ContactForm";
 
-type ContactProps = { lifecycle: SceneLifecycleControl };
-type ContactLayout = { orbitSize: number; viewportWidth: number; viewportHeight: number; stacked: boolean };
+type ContactProps = { circleAnchorRef: RefObject<HTMLDivElement | null>; lifecycle: SceneLifecycleControl };
+type ContactLayout = {
+    orbitSize: number; viewportWidth: number; viewportHeight: number;
+    row: { diameter: number; clearance: number } | null;
+};
 type ContactProfileLayout = {
     offset: ContactOffset;
-    mobileOffset: ContactOffset;
     diameterRatio: number;
 };
 type ProfileStyle = CSSProperties & {
@@ -19,16 +21,17 @@ type ProfileStyle = CSSProperties & {
 };
 
 const contactProfileLayouts: Record<ContactProfile["id"], ContactProfileLayout> = {
-    github: { offset: [-0.62, -0.54], mobileOffset: [-0.28, -0.84], diameterRatio: 1 / 3 },
-    instagram: { offset: [-0.73, 0.12], mobileOffset: [0.28, -0.84], diameterRatio: 5 / 12 },
-    linkedin: { offset: [0.68, 0.4], mobileOffset: [-0.28, 0.84], diameterRatio: 7 / 15 },
-    email: { offset: [0.7, -0.32], mobileOffset: [0.28, 0.84], diameterRatio: 0.3 },
+    github: { offset: [-0.62, -0.54], diameterRatio: 1 / 3 },
+    instagram: { offset: [-0.73, 0.12], diameterRatio: 5 / 12 },
+    linkedin: { offset: [0.68, 0.4], diameterRatio: 7 / 15 },
+    email: { offset: [0.7, -0.32], diameterRatio: 0.3 },
 };
 
 // Coordinates the circular prototype form and measured four-profile split.
-export function Contact({ lifecycle }: ContactProps) {
+export function Contact({ circleAnchorRef, lifecycle }: ContactProps) {
     const orbitRef = useRef<HTMLDivElement>(null);
-    const [layout, setLayout] = useState<ContactLayout>({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0, stacked: false });
+    const profileMeasureRef = useRef<HTMLDivElement>(null);
+    const [layout, setLayout] = useState<ContactLayout>({ orbitSize: 0, viewportWidth: 0, viewportHeight: 0, row: null });
     const visible = lifecycle.active && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
 
     useLayoutEffect(() => {
@@ -38,10 +41,15 @@ export function Contact({ lifecycle }: ContactProps) {
             orbitSize: orbit.offsetWidth,
             viewportWidth: window.innerWidth,
             viewportHeight: window.innerHeight,
-            stacked: getComputedStyle(orbit).getPropertyValue("--contact-layout-stacked").trim() === "1",
+            row: getComputedStyle(orbit).getPropertyValue("--scene-layout-narrow").trim() === "1" && profileMeasureRef.current
+                ? {
+                    diameter: profileMeasureRef.current.offsetWidth,
+                    clearance: profileMeasureRef.current.offsetHeight,
+                } : null,
         });
         const observer = new ResizeObserver(measure);
         observer.observe(orbit);
+        if (profileMeasureRef.current) observer.observe(profileMeasureRef.current);
         // Phone height changes can move the viewport bounds without resizing the orbit.
         window.addEventListener("resize", measure);
         measure();
@@ -53,7 +61,9 @@ export function Contact({ lifecycle }: ContactProps) {
 
     return (
         <section id="contact" className={`contact-container${visible ? " contact-content-visible" : ""}`} aria-labelledby="contact-title">
+            <div className="contact-circle-anchor" ref={circleAnchorRef}>
             <div ref={orbitRef} className={`contact-orbit${visible ? " contact-split-visible" : ""}`}>
+                <div className="contact-profile-measure" ref={profileMeasureRef} aria-hidden="true" />
                 <svg width="0" height="0" aria-hidden="true">
                     <defs>
                         <filter id="contact-goo" x="-50%" y="-50%" width="200%" height="200%" colorInterpolationFilters="sRGB">
@@ -79,23 +89,27 @@ export function Contact({ lifecycle }: ContactProps) {
                 </nav>
             </div>
             <ContactForm />
+            </div>
         </section>
     );
 }
 
 // Publishes the measured start and fitted endpoint as CSS variables.
 function profileStyle(profile: ContactProfile, layout: ContactLayout): ProfileStyle {
-    const { orbitSize, viewportWidth, viewportHeight, stacked } = layout;
+    const { orbitSize, viewportWidth, viewportHeight, row } = layout;
     const placement = contactProfileLayouts[profile.id];
-    // Use two rows wherever the viewport has insufficient space beside the form.
-    const offset = stacked ? placement.mobileOffset : placement.offset;
-    const diameter = contactProfileDiameter(placement.diameterRatio, orbitSize, viewportWidth, viewportHeight, stacked);
+    // Narrow profiles share one row; desktop profiles retain their radial positions.
+    const rowOffset = row ? contactRowOffset(contactProfiles.indexOf(profile), contactProfiles.length, orbitSize, row.diameter, viewportWidth, row.clearance) : null;
+    const offset: ContactOffset = rowOffset && orbitSize > 0
+        ? [rowOffset[0] / orbitSize, rowOffset[1] / orbitSize]
+        : placement.offset;
+    const diameter = row?.diameter ?? contactProfileDiameter(placement.diameterRatio, viewportWidth, viewportHeight);
     const diameterRatio = orbitSize > 0 ? diameter / orbitSize : placement.diameterRatio;
     return {
         width: `${diameter}px`,
         "--contact-initial-x": `${contactInitialOffset(offset, diameterRatio, orbitSize, 0)}px`,
         "--contact-initial-y": `${contactInitialOffset(offset, diameterRatio, orbitSize, 1)}px`,
-        "--contact-final-x": `${contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 0, stacked ? 48 : 64)}px`,
-        "--contact-final-y": `${contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 1, stacked ? 4 : 24)}px`,
+        "--contact-final-x": `${rowOffset?.[0] ?? contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 0)}px`,
+        "--contact-final-y": `${rowOffset?.[1] ?? contactFittedFinalOffset(offset, diameterRatio, orbitSize, viewportWidth, viewportHeight, 1)}px`,
     };
 }
