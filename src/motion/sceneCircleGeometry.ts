@@ -8,6 +8,7 @@ export type MainCircleSceneLayout = {
     circleWidth: number;
     narrowLayout: boolean;
     narrowCenter?: { top: number; left: number };
+    aboutCenter?: { top: number; left: number };
     experienceCenter: { top: number; left: number };
 };
 
@@ -22,6 +23,7 @@ export function resolveMainCircleSceneEndpoint(sceneId: SceneId, layout: MainCir
         case "contact":
             return center;
         case "about":
+            if (layout.aboutCenter) return { width: circleWidth, ...layout.aboutCenter };
             return { ...center, left: circleWidth * (narrowLayout ? -0.2 : -0.1) };
         case "experience":
             return { width: circleWidth, ...layout.experienceCenter };

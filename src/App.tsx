@@ -95,6 +95,9 @@ export default function App() {
             viewportHeight: window.innerHeight,
             circleWidth,
             narrowLayout,
+            aboutCenter: sceneId === "about" && anchorBounds
+                ? { top: anchorBounds.top + anchorBounds.height / 2, left: anchorBounds.left + anchorBounds.width / 2 }
+                : undefined,
             narrowCenter: anchorBounds ? { top: anchorBounds.top + anchorBounds.height / 2, left: anchorBounds.left + anchorBounds.width / 2 } : undefined,
             experienceCenter: experienceBounds
                 ? {
