@@ -22,6 +22,8 @@ export function Navigation({
     const currentYear = new Date().getFullYear();
     const activeSection = sceneControl.currentSceneId;
     const busy = sceneControl.busy;
+    const travelling = sceneControl.phase === "closing" || sceneControl.phase === "moving";
+    const requestedSection = travelling ? sceneControl.destinationSceneId : null;
     const visibleSections = navigationSections.filter((section) => section.id !== "home");
     const transientMarkers = sceneControl.destinationSceneId
         ? transientRailMarkerProgress(
@@ -72,8 +74,12 @@ export function Navigation({
                     return (
                         <li className="navigation-item" key={section.id}>
                             <a
-                                className={`navigation-link${activeSection === section.id
+                                className={`navigation-link${!travelling && activeSection === section.id
                                     ? " navigation-link-active"
+                                    : ""}${requestedSection === section.id
+                                    ? " navigation-link-requested"
+                                    : ""}${sceneControl.phase === "opening" && activeSection === section.id
+                                    ? " navigation-link-arriving"
                                     : ""}${markerProgress > 0
                                     ? " navigation-link-travelling"
                                     : ""}`}
@@ -113,16 +119,15 @@ function controlledNavigationClasses(sceneControl: NavigationSceneControl) {
     return " navigation-docked navigation-effects-ready";
 }
 
-// Calculates visual-only intermediate marker fills in direct travel order.
+// Calculates visual-only white marker fills for every scene on the travel path, in travel order.
 export function transientRailMarkerProgress(fromSceneId: SceneId, toSceneId: SceneId, easedProgress: number) {
     const fromIndex = sceneOrder.indexOf(fromSceneId);
     const toIndex = sceneOrder.indexOf(toSceneId);
     const distance = Math.abs(toIndex - fromIndex);
-    if (distance <= 1) return [];
+    if (distance === 0) return [];
     const direction = toIndex > fromIndex ? 1 : -1;
     const progress = clamp(easedProgress, 0, 1);
-    return Array.from({ length: distance - 1 }, (_, index) => {
-        const ordinal = index + 1;
+    return Array.from({ length: distance + 1 }, (_, ordinal) => {
         return {
             sceneId: sceneOrder[fromIndex + ordinal * direction],
             progress: clamp(1 - Math.abs(progress - ordinal / distance) * distance, 0, 1),

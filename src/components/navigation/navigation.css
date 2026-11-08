@@ -193,8 +193,6 @@
     border-radius: 50%;
     text-decoration: none;
     pointer-events: none;
-    /* Touch browsers paint their tap flash over the link's whole box, including the clipped label. */
-    -webkit-tap-highlight-color: transparent;
 }
 
 .navigation-home-ready .navigation-link,
@@ -220,19 +218,25 @@
     transition: background-color 180ms ease, border-radius 180ms ease, transform 180ms ease;
 }
 
-.navigation-link::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: var(--navigation-button-size);
-    border-radius: 50%;
-    aspect-ratio: 1;
-    background-color: var(--colour-text);
-    content: "";
-    opacity: var(--navigation-travel-progress, 0);
-    transform: translate(-50%, -50%);
-    transition: opacity calc(var(--scene-travel-duration) * 0.08) linear;
-    pointer-events: none;
+.navigation-link::before {
+    background-color: color-mix(
+        in srgb,
+        var(--colour-text) calc(var(--navigation-travel-progress, 0) * 100%),
+        var(--colour-background)
+    );
+}
+
+.navigation-link-travelling::before {
+    transition: background-color calc(var(--scene-travel-duration) * 0.08) linear, border-radius 180ms ease, transform 180ms ease;
+}
+
+.navigation-link-requested::before {
+    border-radius: 0.5rem;
+    transform: rotate(45deg);
+}
+
+.navigation-link-arriving::before {
+    transition-duration: var(--scene-visual-duration);
 }
 
 .navigation-link-active::before {

@@ -8,6 +8,8 @@ html {
     font-family: var(--font-text);
     font-size: 100%;
     line-height: 1.6;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -20,6 +22,11 @@ main {
     position: relative;
     z-index: 0;
     overflow: clip;
+}
+
+::selection {
+    background-color: var(--colour-logo);
+    color: var(--colour-text);
 }
 
 h1,
