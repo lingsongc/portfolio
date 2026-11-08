@@ -1,6 +1,7 @@
 import { type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import { sceneOrder, type SceneId, type ScenePhase } from "../../types/scene";
 import { navigationSections } from "./navigationSections";
+import { ThemeButton } from "./ThemeButton";
 
 export type NavigationSceneControl = {
     busy: boolean;
@@ -65,7 +66,9 @@ export function Navigation({
                 <span className="navigation-copyright-rights"> All Rights Reserved.</span>
             </small>
             <ul className="navigation-list">
-                <li className="navigation-item navigation-theme-slot" aria-hidden="true" />
+                <li className="navigation-item navigation-theme-slot">
+                    <ThemeButton busy={busy} />
+                </li>
 
                 {visibleSections.map((section) => {
                     const markerProgress = transientMarkers.find(
