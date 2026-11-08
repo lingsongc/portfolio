@@ -44,7 +44,8 @@ const skillGroups = skills.reduce<SkillGroup[]>((groups, skill) => {
 // Renders the accessible Skills content and its circle-aligned visual marquee.
 export function Skills({ circleAnchorRef, narrowLayout, circleGeometry, lifecycle }: SkillsProps) {
     const documentVisible = useDocumentVisible();
-    const motionActive = lifecycle.active && lifecycle.phase === "idle" && documentVisible && !lifecycle.reducedMotion;
+    // Keep rows moving throughout the opening and closing fades, pausing only when inactive.
+    const motionActive = lifecycle.active && documentVisible && !lifecycle.reducedMotion;
     const contentVisible = lifecycle.active === true
         && (lifecycle.phase === "opening" || lifecycle.phase === "idle");
     const circleStyle = narrowLayout ? undefined : circleGeometry as CSSProperties | undefined;
@@ -55,8 +56,8 @@ export function Skills({ circleAnchorRef, narrowLayout, circleGeometry, lifecycl
             aria-labelledby="skill-title"
         >
             <div className="skill-introduction">
-                <h2 id="skill-title" className="skill-title" tabIndex={-1}>Skills</h2>
-                <div className="skill-description-content">
+                <h2 id="skill-title" className="skill-title reveal-clip" data-reveal-open={contentVisible} tabIndex={-1}>Skills</h2>
+                <div className="skill-description-content reveal-clip" data-reveal-open={contentVisible}>
                     <p className="skill-description">
                         I work across software development, interface design, and visual storytelling.
                     </p>
