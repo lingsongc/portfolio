@@ -51,14 +51,16 @@
     --contact-form-gap: calc(var(--contact-circle-size) * 0.018);
     --contact-field-height: max(2.75rem, calc(var(--contact-circle-size) * 0.065));
     --contact-field-radius: calc(var(--contact-field-height) / 2);
+    --contact-idle-opacity: 0.5;
+    --contact-message-size: clamp(0.75rem, 1.5vmin, 0.9375rem);
 
     position: absolute;
     top: 22%;
     left: 14%;
     display: grid;
     width: 72%;
-    height: 66%;
-    grid-template-rows: auto minmax(3rem, 1fr) auto;
+    height: 68%;
+    grid-template-rows: auto minmax(3rem, 1fr) auto auto;
     gap: var(--contact-form-gap);
 }
 
@@ -73,7 +75,7 @@
     min-width: 0;
     min-height: 0;
     padding: 0.5rem 1rem;
-    border: 3px solid var(--colour-text);
+    border: 3px solid color-mix(in srgb, var(--colour-text) calc(var(--contact-idle-opacity) * 100%), transparent);
     border-radius: var(--contact-field-radius);
     outline: none;
     background: transparent;
@@ -82,10 +84,61 @@
     transition: border-color 200ms ease;
 }
 
-.contact-form-field::placeholder { color: inherit; }
-.contact-form-field:is(:hover, :focus) { border-color: var(--colour-accent); }
+.contact-form-field::placeholder { color: inherit; opacity: 0.5; }
+.contact-form-field:is(:hover, :focus) { border-color: var(--colour-text); }
+.contact-form-field[aria-invalid="true"] { border-color: var(--colour-accent); }
 input.contact-form-field { height: var(--contact-field-height); }
 textarea.contact-form-field { resize: none; }
+
+textarea.contact-form-field { scrollbar-color: auto; }
+textarea.contact-form-field::-webkit-scrollbar { width: 0.875rem; }
+textarea.contact-form-field::-webkit-scrollbar-button { display: none; }
+textarea.contact-form-field::-webkit-scrollbar-track {
+    margin-block: calc(var(--contact-field-radius) / 2);
+    background: transparent;
+}
+
+textarea.contact-form-field::-webkit-scrollbar-thumb {
+    border: 0.25rem solid transparent;
+    border-radius: 999px;
+    background-color: var(--colour-line);
+    background-clip: padding-box;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    textarea.contact-form-field {
+        scrollbar-color: var(--colour-line) transparent;
+        scrollbar-width: thin;
+    }
+}
+
+/* Equal side columns center the error on the form; when space is tight, the empty
+   left column gives way first so the error never overlaps the count. */
+.contact-form-message {
+    display: grid;
+    grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+    column-gap: 0.5rem;
+    margin-top: calc(var(--contact-form-gap) * -0.6);
+    padding-inline: 1rem;
+    font-size: var(--contact-message-size);
+    line-height: 1.5;
+}
+
+.contact-form-error {
+    grid-column: 2;
+    min-height: 1.5em;
+    color: var(--colour-accent);
+    font-size: inherit;
+    line-height: inherit;
+    text-align: center;
+}
+
+.contact-form-count {
+    grid-column: 3;
+    justify-self: end;
+    color: var(--colour-text-muted);
+    font-variant-numeric: tabular-nums;
+}
 
 .contact-form-send {
     width: 43%;
@@ -95,7 +148,15 @@ textarea.contact-form-field { resize: none; }
     justify-self: center;
     padding-block: 0.5rem;
     text-transform: uppercase;
+    transition: opacity 200ms ease;
 }
+
+.contact-form-send:disabled {
+    cursor: default;
+    opacity: var(--contact-idle-opacity);
+}
+
+.contact-form-send:disabled::before { transform: translateY(-101%); }
 
 .contact-blob-layer,
 .contact-link-layer {
@@ -245,6 +306,7 @@ textarea.contact-form-field { resize: none; }
     .contact-profile-measure { width: var(--contact-profile-size); height: var(--contact-row-clearance); }
     .contact-form { overflow-y: auto; padding: 4px; scrollbar-width: thin; }
     .contact-form-field { padding-inline: 0.75rem; font-size: 1rem; }
+    .contact-form-message { padding-inline: 0.75rem; font-size: 0.75rem; }
     .contact-form-send { min-width: 9rem; font-size: 0.875rem; }
     .contact-link { font-size: 0.625rem; }
     .contact-social-label { display: none; }
