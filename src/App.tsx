@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useRef } from "react";
 import { BackgroundGrid, type BackgroundGridHandle } from "./components/background-grid/BackgroundGrid";
+import { HomeButton } from "./components/home-button/HomeButton";
 import { MainCircle } from "./components/main-circle/MainCircle";
 import { useMainCircle } from "./components/main-circle/useMainCircle";
 import { Navigation } from "./components/navigation/Navigation";
@@ -163,6 +164,11 @@ export default function App() {
 
             <main className="slideshow-stage">
                 <div ref={circleMeasureRef} className="slideshow-circle-measure" aria-hidden="true" />
+                <HomeButton
+                    busy={slideshow.busy}
+                    active={slideshow.currentSceneId === "home"}
+                    onHomeRequest={() => requestScene("home")}
+                />
                 <Navigation
                     sceneControl={{
                         busy: slideshow.busy,

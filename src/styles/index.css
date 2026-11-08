@@ -6,6 +6,7 @@
 @import "../components/scene-panel/scene-panel.css";
 @import "../components/main-circle/main-circle.css";
 @import "../components/navigation/navigation.css";
+@import "../components/home-button/home-button.css";
 @import "../sections/home/home.css";
 @import "../sections/about/about.css";
 @import "../sections/experience/experience.css";

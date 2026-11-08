@@ -44,7 +44,7 @@
     :root {
         --scene-layout-narrow: 1;
         --section-padding-inline: clamp(1.25rem, 5vw, 2.5rem);
-        --scene-top-space: max(2rem, env(safe-area-inset-top));
+        --scene-top-space: calc(5rem + env(safe-area-inset-top));
         --scene-bottom-space: calc(5.5rem + env(safe-area-inset-bottom));
         --home-circle-size: clamp(10rem, 54vw, 21rem);
     }
