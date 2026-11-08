@@ -284,8 +284,10 @@
     height: 44%;
     padding: clamp(0.75rem, 2vmin, 1.25rem);
     color: var(--colour-text);
-    font-size: clamp(0.75rem, 1.7vmin, 0.95rem);
-    line-height: 1.5;
+    /* Match body copy, but shrink with the circle once it can no longer hold the summary.
+       0.038 leaves about 5% margin for the current summaries; lower it if a longer one overflows. */
+    font-size: min(var(--text-body), calc(var(--project-circle-size) * 0.038));
+    line-height: var(--body-line-height);
     text-align: center;
 }
 

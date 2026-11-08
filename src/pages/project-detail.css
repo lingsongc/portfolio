@@ -70,4 +70,11 @@
 
 .project-detail-figure figcaption { color: var(--colour-text-muted); }
 
+/* Match list copy to the shared paragraph text used by About and Experience. */
+.project-detail-content li {
+    font-size: var(--text-body);
+    font-weight: var(--body-font-weight);
+    line-height: var(--body-line-height);
+}
+
 .project-detail-content :is(p, li, a) { overflow-wrap: anywhere; }
