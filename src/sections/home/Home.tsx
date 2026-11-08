@@ -53,7 +53,9 @@ export function Home({ circleAnchorRef, lifecycle, onMainCircleImageChange }: Ho
                         </span>
                     </span>
                 </h1>
-                <p className="home-description">{homeDetails.introduction}</p>
+                <p className="home-description">
+                    <span className="home-description-value">{homeDetails.introduction}</span>
+                </p>
             </div>
         </section>
     );

@@ -89,10 +89,16 @@
     font-size: clamp(1.25rem, 2vw, 1.5rem);
     text-align: center;
     transform: translateX(-50%);
-    transition: opacity var(--scene-visual-duration) ease;
+    clip-path: inset(0 -0.2em);
 }
 
-.home-exiting .home-description { opacity: 0; }
+/* Keep the caption's mask fixed while its text slides down from above on entry. */
+.home-description-value {
+    display: block;
+    transition: transform var(--scene-visual-duration) ease;
+}
+
+.home-exiting .home-description-value { transform: translateY(-100%); }
 
 .home-circle-anchor { display: none; }
 
@@ -156,7 +162,7 @@
 @media (prefers-reduced-motion: reduce) {
     .home-navigation-ring,
     .home-name-value,
-    .home-description {
+    .home-description-value {
         transition: none;
     }
 }
