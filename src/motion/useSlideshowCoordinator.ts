@@ -55,7 +55,7 @@ export function useSlideshowCoordinator() {
             const tick = (now: number) => {
                 const current = stateRef.current;
                 if (current.phase !== visualPhase) return;
-                const progress = clamp((now - startedAt) / scenePhaseDuration(visualPhase), 0, 1);
+                const progress = clamp((now - startedAt) / SCENE_VISUAL_DURATION_MS, 0, 1);
                 if (visualPhase === "closing" && current.source === "wheel") setTearProgress(sceneTearProgress(visualPhase, now - startedAt, current.source));
                 if (progress >= 1) {
                     commit(visualPhase === "closing"
@@ -210,11 +210,6 @@ export function initialSceneIdFromHash(hash: string): SceneId { return sceneIdFr
 export function sceneUrl(sceneId: SceneId, location: Pick<Location, "pathname" | "search">) { return `${location.pathname}${location.search}#${sceneId}`; }
 // Bounds clock progress so delayed frames cannot overshoot the destination.
 function clamp(value: number, minimum: number, maximum: number) { return Math.min(Math.max(value, minimum), maximum); }
-
-// Section closing and opening stay at 400ms regardless of the request source.
-export function scenePhaseDuration(phase: ScenePhase) {
-    return phase === "moving" ? MAIN_CIRCLE_TRAVEL_DURATION_MS : SCENE_VISUAL_DURATION_MS;
-}
 
 // Shares the 600ms wheel tear across closing and the first 200ms of circle movement.
 export function sceneTearProgress(phase: ScenePhase, elapsedMs: number, source: SceneRequestSource | null) {

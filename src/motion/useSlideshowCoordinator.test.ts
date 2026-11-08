@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-    scenePhaseDuration,
     sceneTearProgress,
     advanceSceneTransition,
     createSceneTransitionState,
@@ -75,27 +74,23 @@ describe("layout recovery", () => {
     });
 });
 
-// The wheel tear continues into movement without extending the section close.
-describe("phase timing", () => {
-    it("keeps non-wheel closing at 400ms", () => {
+// Keeps request sources available to distinguish wheel tears from ordinary navigation.
+describe("request sources", () => {
+    it("retains every non-wheel source through closing", () => {
         for (const source of ["navigation", "keyboard", "touch", "history"] as const) {
             const request = source === "navigation" || source === "history"
                 ? { kind: "direct" as const, destinationSceneId: "projects" as const, source }
                 : { kind: "adjacent" as const, direction: "forward" as const, source };
             const transition = requestSceneTransition(createSceneTransitionState("about"), request).state;
             expect(transition).toMatchObject({ source });
-            expect(scenePhaseDuration(transition.phase)).toBe(400);
         }
     });
 
-    it("starts circle movement after the standard 400ms close even for wheel requests", () => {
+    it("retains the wheel source through closing", () => {
         const transition = requestSceneTransition(createSceneTransitionState("about"), {
             kind: "adjacent", direction: "backward", source: "wheel",
         }).state;
         expect(transition).toMatchObject({ source: "wheel", phase: "closing" });
-        expect(scenePhaseDuration(transition.phase)).toBe(400);
-        expect(scenePhaseDuration("moving")).toBe(1000);
-        expect(scenePhaseDuration("opening")).toBe(400);
     });
 });
 

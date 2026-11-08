@@ -105,7 +105,8 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
             const freshPaths = freshGridRef.current.paths;
             syncPaths(lines, tear.span > 0 && tear.oldOpacity > 0
                 ? createWarpedGridPaths(innerWidth, innerHeight, circle, GRID_SPACING, tear) : freshPaths);
-            syncPaths(freshLines, freshPaths);
+            // The second layer needs current paths only when its fade becomes visible.
+            if (tear.newOpacity > 0) syncPaths(freshLines, freshPaths);
             lines.setAttribute("opacity", String(tear.oldOpacity));
             freshLines.setAttribute("opacity", String(tear.newOpacity));
             edge.setAttribute("d", tear.edgeOpacity > 0 ? createTearEdgePath(tear, circle) : "");
