@@ -46,6 +46,8 @@
         --section-padding-inline: clamp(1.25rem, 5vw, 2.5rem);
         --scene-top-space: calc(5rem + env(safe-area-inset-top));
         --scene-bottom-space: calc(5.5rem + env(safe-area-inset-bottom));
+        --navigation-bar-height: calc(0.5rem + var(--navigation-link-size) + 0.75rem + env(safe-area-inset-bottom));
+        --scene-fade-size: 2rem;
         --home-circle-size: clamp(10rem, 54vw, 21rem);
     }
 }

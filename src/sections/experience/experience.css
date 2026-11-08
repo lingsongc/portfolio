@@ -494,7 +494,8 @@
         display: block;
         height: 100dvh;
         min-height: 32rem;
-        padding: var(--scene-top-space) var(--section-padding-inline) var(--scene-bottom-space);
+        /* Let the reading scroller reach the navigation row; the scene mask fades it out there. */
+        padding: var(--scene-top-space) var(--section-padding-inline) var(--navigation-bar-height);
         container-type: normal;
     }
 
@@ -503,7 +504,13 @@
     .experience-copy::after { display: none; }
     /* Reserve the final heading height while its label sizes transition on resize. */
     .experience-header { flex: none; height: calc(var(--experience-title-size) * 1.1); max-width: 100%; }
-    .experience-content-region { width: 100%; align-items: start; }
+    /* The scroller clips its own copy, so the region can let the focus ring sit in the section padding. */
+    .experience-content-region { width: 100%; align-items: start; overflow: visible; }
+    /* Use the full section width, and let the last line scroll clear of the bottom fade. */
+    .experience-text { padding: 0 0 var(--scene-fade-size); border-radius: 0; }
+    .experience-text:focus-visible { outline-offset: 4px; }
+    /* Open the reveal clip past the box edge so it does not cut off the outside focus ring. */
+    .experience-content-visible .experience-text { clip-path: inset(-8px); }
     .experience-event-title { font-size: clamp(1.5rem, 5vw, 2.25rem); }
     .experience-event-metadata { gap: 0.75rem; flex-direction: column; margin-top: 1rem; }
     .experience-highlights li { column-gap: 0.5rem; }
