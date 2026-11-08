@@ -47,6 +47,7 @@ export function ExperienceOrbit({
     reducedMotion,
 }: ExperienceOrbitProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [planetLayerElement, setPlanetLayerElement] = useState<HTMLDivElement | null>(null);
     const interactiveRef = useRef(interactive);
     const targetIndexRef = useRef(0);
     const activateRef = useRef(onEntrySelect);
@@ -117,19 +118,23 @@ export function ExperienceOrbit({
             syncTargetIndex();
         };
         scrollArea.addEventListener("wheel", handleWheel, { passive: false });
+        // The portal's visible buttons are siblings of the native scroller, so share its wheel gate.
+        planetLayerElement?.addEventListener("wheel", handleWheel, { passive: false });
         scrollArea.addEventListener("scroll", scheduleTargetSync, { passive: true });
         scrollArea.addEventListener("scrollend", handleScrollEnd);
         return () => {
             window.clearTimeout(scrollEndTimer);
             scrollArea.removeEventListener("wheel", handleWheel);
+            planetLayerElement?.removeEventListener("wheel", handleWheel);
             scrollArea.removeEventListener("scroll", scheduleTargetSync);
             scrollArea.removeEventListener("scrollend", handleScrollEnd);
         };
-    }, [entries.length]);
+    }, [entries.length, planetLayerElement]);
 
     // The panel's sibling overlay host lets planets pass in front of the main circle.
     const planetLayer = (
         <div
+            ref={setPlanetLayerElement}
             className={`experience-orbit-planets${contentVisible ? " experience-orbit-planets-visible" : ""}${interactive ? " experience-orbit-planets-ready" : ""}`}
             style={experienceOrbitLayerStyles}
         >

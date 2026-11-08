@@ -92,7 +92,9 @@ export function Navigation({
                                 onClick={(event) => handleNavigationClick(event, section.id)}
                                 onKeyDown={(event) => handleNavigationKeyDown(event, section.id)}
                             >
-                                <span className="navigation-label">{section.label}</span>
+                                <span className="navigation-label reveal-clip">
+                                    <span className="navigation-label-value reveal-slide">{section.label}</span>
+                                </span>
                             </a>
                         </li>
                     );

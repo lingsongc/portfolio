@@ -245,12 +245,13 @@
 }
 
 .navigation-label {
+    --reveal-duration: 0ms;
+    --reveal-closed-clip: var(--navigation-label-hidden);
     position: absolute;
     z-index: 1;
     top: 50%;
     left: 50%;
     width: max-content;
-    clip-path: var(--navigation-label-hidden);
     font-size: var(--text-body);
     font-weight: 700;
     transform: var(--navigation-label-position);
@@ -259,9 +260,11 @@
 }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-label {
+    --reveal-duration: 180ms;
     visibility: visible;
-    transition: clip-path 180ms ease;
 }
+
+.navigation-label-value { display: block; }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible::before {
     border-radius: 0.5rem;
@@ -269,7 +272,7 @@
 }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible .navigation-label {
-    clip-path: inset(0);
+    --reveal-closed-clip: inset(0);
 }
 
 /* Touch browsers can retain :hover after a tap; only hover-capable inputs get these effects. */
@@ -280,7 +283,7 @@
     }
 
     :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover .navigation-label {
-        clip-path: inset(0);
+        --reveal-closed-clip: inset(0);
     }
 }
 
@@ -290,8 +293,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .navigation-link::before,
-    .navigation-theme-slot::before,
-    .navigation-label {
+    .navigation-theme-slot::before {
         transition: none;
     }
 
@@ -338,6 +340,9 @@
     .navigation-controlled .navigation-copyright { display: none; }
 
     .navigation-controlled .navigation-label {
+        --reveal-duration: 0ms;
+        --reveal-closed-clip: inset(100% 0 0);
+        --reveal-slide-y: 0.75rem;
         display: block;
         top: auto;
         bottom: calc(100% + 0.5rem);
@@ -345,31 +350,31 @@
         max-width: min(12rem, calc(100vw - 2rem));
         font-size: 0.875rem;
         text-align: center;
-        clip-path: inset(100% 0 0);
         opacity: 0;
         visibility: visible;
-        transform: translate(-50%, 0.75rem);
-        transition: none;
+        transform: translateX(-50%);
     }
 
     .navigation-controlled:not(.navigation-busy) .navigation-link:focus-visible .navigation-label {
-        clip-path: inset(0);
+        --reveal-closed-clip: inset(0);
+        --reveal-slide-y: 0rem;
         opacity: 1;
-        transform: translate(-50%, 0);
     }
 
 }
 
 @media (--narrow-layout) and (hover: hover) {
     .navigation-controlled:not(.navigation-busy) .navigation-link:hover .navigation-label {
-        clip-path: inset(0);
+        --reveal-closed-clip: inset(0);
+        --reveal-slide-y: 0rem;
         opacity: 1;
-        transform: translate(-50%, 0);
     }
 }
 
 @media (--narrow-layout) and (prefers-reduced-motion: no-preference) {
     .navigation-controlled .navigation-label {
-        transition: transform 180ms ease, opacity 180ms ease, clip-path 180ms ease;
+        --reveal-duration: 180ms;
+        /* The label's opacity fade accompanies its shared clip and inner slide. */
+        transition: clip-path var(--reveal-duration) ease, opacity var(--reveal-duration) ease;
     }
 }

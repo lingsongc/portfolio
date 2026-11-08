@@ -227,12 +227,16 @@ function isInteractiveInputTarget(target: EventTarget | null) {
     return target.closest("a, button, input, textarea, select, option, [contenteditable]:not([contenteditable='false']), [role='button'], [role='slider'], [role='listbox']") !== null;
 }
 
-// Orders the target's nested viewport before the active Section viewport.
+// Preserves every nested reading boundary before falling back to the active scene.
 function inputScrollOwners(target: EventTarget | null, activeScroller: HTMLElement | null) {
-    const nestedOwner = target instanceof Element ? target.closest<HTMLElement>("[data-scene-scroll-owner]") : null;
-    return nestedOwner && nestedOwner !== activeScroller
-        ? [nestedOwner, ...(activeScroller ? [activeScroller] : [])]
-        : activeScroller ? [activeScroller] : [];
+    const owners: HTMLElement[] = [];
+    let owner = target instanceof Element ? target.closest<HTMLElement>("[data-scene-scroll-owner]") : null;
+    while (owner && owner !== activeScroller) {
+        owners.push(owner);
+        owner = owner.parentElement?.closest<HTMLElement>("[data-scene-scroll-owner]") ?? null;
+    }
+    if (activeScroller) owners.push(activeScroller);
+    return owners;
 }
 
 // Returns the first viewport that can still move in the requested direction.

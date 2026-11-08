@@ -34,12 +34,9 @@
 
 /* Keep the heading mask fixed while its text enters from below and closes downward. */
 .project-title-text {
+    --reveal-slide-y: 110%;
     display: block;
-    transform: translateY(110%);
-    transition: transform var(--scene-visual-duration) ease;
 }
-
-.project-copy-visible .project-title-text { transform: translateY(0); }
 
 .project-detail-link {
     opacity: 0;
@@ -421,7 +418,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .project-title-text,
     .project-detail-link,
     .project-selected-content { transition: none; }
     .project-selector,

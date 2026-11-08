@@ -18,6 +18,7 @@ export function ContactForm() {
     const [previewed, setPreviewed] = useState(false);
     const canSend = Object.values(values).every((value) => value.trim() !== "");
 
+    // Clears stale validation and preview feedback when its source field changes.
     const updateField = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const field = event.currentTarget.name as ContactFormField;
         const value = event.currentTarget.value;
@@ -26,6 +27,7 @@ export function ContactForm() {
         setPreviewed(false);
     };
 
+    // Validates the local preview without delivering data or navigating away.
     const previewMessage = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!canSend) return;

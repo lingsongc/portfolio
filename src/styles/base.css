@@ -1,3 +1,4 @@
+/* Owns document defaults, element typography, selection colour, and fallback keyboard focus. */
 * {
     box-sizing: border-box;
 }

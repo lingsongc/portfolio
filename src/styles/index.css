@@ -1,3 +1,4 @@
+/* Imports global foundations and feature styles in their deliberate cascade order. */
 @import "./tokens.css";
 @import "./base.css";
 @import "../app.css";

@@ -260,6 +260,7 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="skill-title"
                     overflowRef={activeSceneScrollerRef}
+                    foreground
                 >
                     <Skills
                         circleAnchorRef={skillCircleRef}
@@ -274,6 +275,7 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="contact-title"
                     overflowRef={activeSceneScrollerRef}
+                    foreground
                 >
                     <Contact circleAnchorRef={contactCircleRef} lifecycle={slideshow.lifecycleFor("contact")} />
                 </ScenePanel>

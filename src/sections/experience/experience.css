@@ -48,29 +48,14 @@
     clip-path: inset(0 0 -1rem);
 }
 
-.experience-header-content,
-.experience-text {
-    visibility: hidden;
-    transition: visibility 0s linear var(--scene-visual-duration);
-}
-
 .experience-header-content {
-    transform: translateY(-110%);
-    transition: transform var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
+    --reveal-slide-y: -110%;
+    visibility: hidden;
 }
 
 .experience-text {
-    clip-path: inset(50% 0);
-    transition: clip-path var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
+    --reveal-closed-clip: inset(50% 0);
 }
-
-.experience-content-visible :is(.experience-header-content, .experience-text) {
-    visibility: visible;
-    transition-delay: 0s;
-}
-
-.experience-content-visible .experience-header-content { transform: translateY(0); }
-.experience-content-visible .experience-text { clip-path: inset(0); }
 
 .experience-content-region {
     display: flex;
@@ -510,7 +495,7 @@
     .experience-text { padding: 0 0 var(--scene-fade-size); border-radius: 0; }
     .experience-text:focus-visible { outline-offset: 4px; }
     /* Open the reveal clip past the box edge so it does not cut off the outside focus ring. */
-    .experience-content-visible .experience-text { clip-path: inset(-8px); }
+    .experience-text { --reveal-open-clip: inset(-8px); }
     .experience-event-title { font-size: clamp(1.5rem, 5vw, 2.25rem); }
     .experience-event-metadata { gap: 0.75rem; flex-direction: column; margin-top: 1rem; }
     .experience-highlights li { column-gap: 0.5rem; }
@@ -633,10 +618,4 @@
     .experience-orbit-front-path,
     .experience-orbit-planets { transition: none; }
 
-    .experience-header-content,
-    .experience-text {
-        clip-path: inset(0);
-        transform: none;
-        transition: none;
-    }
 }

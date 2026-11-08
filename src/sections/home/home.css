@@ -41,6 +41,7 @@
 }
 
 .home-name-left {
+    --reveal-slide-x: 100%;
     grid-column: 1;
     grid-row: 1;
     align-self: center;
@@ -50,6 +51,7 @@
 }
 
 .home-name-right {
+    --reveal-slide-x: -100%;
     grid-column: 3;
     grid-row: 1;
     display: grid;
@@ -61,21 +63,12 @@
 
 .home-name-value {
     display: block;
-    transition: transform var(--scene-visual-duration) ease;
 }
 
 .home-name-right .home-name-value {
     display: grid;
     height: 100%;
     align-content: space-between;
-}
-
-.home-exiting .home-name-left .home-name-value {
-    transform: translateX(100%);
-}
-
-.home-exiting .home-name-right .home-name-value {
-    transform: translateX(-100%);
 }
 
 .home-description {
@@ -94,11 +87,9 @@
 
 /* Keep the caption's mask fixed while its text slides down from above on entry. */
 .home-description-value {
+    --reveal-slide-y: -100%;
     display: block;
-    transition: transform var(--scene-visual-duration) ease;
 }
-
-.home-exiting .home-description-value { transform: translateY(-100%); }
 
 .home-circle-anchor { display: none; }
 
@@ -160,9 +151,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .home-navigation-ring,
-    .home-name-value,
-    .home-description-value {
+    .home-navigation-ring {
         transition: none;
     }
 }

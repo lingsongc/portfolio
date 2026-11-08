@@ -26,15 +26,6 @@
     width: min(42rem, calc(100% - 2 * var(--about-content-gap)));
     min-width: 0;
     gap: clamp(1.5rem, 3vw, 2.5rem);
-    visibility: hidden;
-    clip-path: inset(0 50%);
-    transition: clip-path var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
-}
-
-.about-content-visible .about-text {
-    visibility: visible;
-    clip-path: inset(0);
-    transition-delay: 0s;
 }
 
 .about-description {
@@ -121,11 +112,4 @@
     .about-resume-link { margin-top: auto; }
 
     .about-statistic-amount { font-size: clamp(2.5rem, 12vw, 5rem); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .about-text {
-        clip-path: inset(0);
-        transition: none;
-    }
 }

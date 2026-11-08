@@ -21,8 +21,8 @@ type ProfileStyle = CSSProperties & {
 };
 
 const contactProfileLayouts: Record<ContactProfile["id"], ContactProfileLayout> = {
-    github: { offset: [-0.62, -0.54], diameterRatio: 1 / 3 },
-    instagram: { offset: [-0.73, 0.12], diameterRatio: 5 / 12 },
+    github: { offset: [-0.62, -0.46], diameterRatio: 1 / 3 },
+    instagram: { offset: [-0.73, 0.3], diameterRatio: 5 / 12 },
     linkedin: { offset: [0.68, 0.4], diameterRatio: 7 / 15 },
     email: { offset: [0.7, -0.32], diameterRatio: 0.3 },
 };

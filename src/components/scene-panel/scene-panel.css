@@ -71,6 +71,9 @@ body:has(.slideshow-stage) {
             #000 calc(var(--navigation-bar-height) + var(--scene-fade-size))
         );
     }
+
+    /* Image-free foreground scenes must reveal above the stage-hosted void during opening. */
+    .scene-panel-foreground > .scene-panel-overflow { z-index: 3; }
 }
 
 /* Programmatic heading focus preserves screen-reader context without a wheel-triggered ring. */

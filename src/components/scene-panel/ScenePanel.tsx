@@ -8,6 +8,7 @@ export type ScenePanelProps = {
     headingFocusTargetId: string;
     overflowRef?: RefObject<HTMLDivElement | null>;
     scrollable?: boolean;
+    foreground?: boolean;
 };
 
 // Provides one stacked scene with active semantics and local overflow ownership.
@@ -18,6 +19,7 @@ export function ScenePanel({
     headingFocusTargetId,
     overflowRef,
     scrollable = true,
+    foreground = false,
 }: ScenePanelProps) {
     const localOverflowRef = useRef<HTMLDivElement>(null);
     const [overlayHost, setOverlayHost] = useState<HTMLDivElement | null>(null);
@@ -40,7 +42,7 @@ export function ScenePanel({
 
     return (
         <div
-            className={`scene-panel${active ? " scene-panel-active" : ""}${scrollable ? " scene-panel-scrollable" : ""}`}
+            className={`scene-panel${active ? " scene-panel-active" : ""}${scrollable ? " scene-panel-scrollable" : ""}${foreground ? " scene-panel-foreground" : ""}`}
             aria-hidden={!active}
             inert={!active || !interactive}
         >

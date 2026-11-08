@@ -1,4 +1,4 @@
-/* root */
+/* Defines shared colour, typography, timing, and responsive layout tokens. */
 
 :root {
     /* Keep these phase lengths aligned with the coordinator and circle travel clocks. */

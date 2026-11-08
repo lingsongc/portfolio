@@ -1,4 +1,36 @@
-/* shared */
+/* Owns presentation classes shared by multiple sections and persistent controls. */
+
+/* Slide an inner layer beneath its owner's fixed mask; the owner supplies the closed offset. */
+.reveal-slide {
+    transform: translate(var(--reveal-slide-x, 0%), var(--reveal-slide-y, 0%));
+    transition: transform var(--reveal-duration, var(--scene-visual-duration)) ease,
+        visibility 0s linear var(--reveal-duration, var(--scene-visual-duration));
+}
+
+.reveal-slide[data-reveal-open="true"] {
+    transform: translate(0, 0);
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+/* Reveal stationary content by opening its clip; bounds also support one-sided navigation labels. */
+.reveal-clip {
+    visibility: hidden;
+    clip-path: var(--reveal-closed-clip, inset(0 50%));
+    transition: clip-path var(--reveal-duration, var(--scene-visual-duration)) ease,
+        visibility 0s linear var(--reveal-duration, var(--scene-visual-duration));
+}
+
+.reveal-clip[data-reveal-open="true"] {
+    visibility: visible;
+    clip-path: var(--reveal-open-clip, inset(0));
+    transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-slide,
+    .reveal-clip { transition: none; }
+}
 
 .action-button {
     position: relative;
