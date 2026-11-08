@@ -166,7 +166,8 @@ export default function App() {
     return (
         <>
             <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId}
-                closingProgress={slideshow.phase === "closing" && slideshow.source === "wheel" ? slideshow.closingProgress : null}
+                tearProgress={slideshow.source === "wheel" && (slideshow.phase === "closing" || slideshow.phase === "moving")
+                    && slideshow.tearProgress < 1 ? slideshow.tearProgress : null}
                 tearDirection={slideshow.direction === "backward" ? -1 : 1} />
 
             <main className="slideshow-stage">

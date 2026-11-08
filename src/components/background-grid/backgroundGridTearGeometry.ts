@@ -18,18 +18,19 @@ export function createGridTear(
     width: number,
     height: number,
     preview: number,
-    closingProgress: number | null = null,
+    transitionProgress: number | null = null,
     direction: 1 | -1 = preview < 0 ? -1 : 1,
 ): GridTear {
     const intent = Math.min(1, Math.abs(preview));
     const previewSpan = height * 0.15 * (1 - Math.pow(1 - intent, 2));
     const travel = height + Math.cbrt((width / 2 + PHYSICS_SPACING * 4) * Math.sqrt(3) * height * height);
-    const p = closingProgress === null ? 0 : Math.pow(Math.min(1, Math.max(0, closingProgress)), 2);
-    const span = closingProgress === null ? previewSpan
+    const p = transitionProgress === null ? 0 : Math.pow(Math.min(1, Math.max(0, transitionProgress)), 2);
+    const span = transitionProgress === null ? previewSpan
         : previewSpan + (travel - previewSpan) * Math.min(1, p / 0.88);
     // Noise uses distance travelled, so it cannot jump when a partial preview commits.
     const progress = travel > 0 ? span / travel * 0.88 : 0;
-    const fade = Math.min(1, Math.max(0, (p - 0.52) / 0.42));
+    // Fade from 360ms to about 582ms without extending the 600ms tear clock.
+    const fade = Math.min(1, Math.max(0, (p - 0.36) / 0.58));
     const oldOpacity = p > 0.80 ? Math.max(0, 1 - (p - 0.80) / 0.16) : 1;
     return {
         width, height, direction, span, progress, oldOpacity,

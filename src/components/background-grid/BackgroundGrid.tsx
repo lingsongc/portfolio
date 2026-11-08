@@ -9,7 +9,7 @@ const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 type BackgroundGridProps = {
     circleGeometry?: MainCircleEndpoint | null;
     circleMaskId?: string;
-    closingProgress?: number | null;
+    tearProgress?: number | null;
     tearDirection?: 1 | -1;
 };
 
@@ -21,7 +21,7 @@ type FeedbackAnimation = { durationMs: number; from: number; startedAt: number; 
 
 // Renders circle lensing, partial wheel feedback, and the coordinator-driven tear on one grid.
 export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridProps>(function BackgroundGrid(
-    { circleGeometry = null, circleMaskId, closingProgress = null, tearDirection = 1 }, ref,
+    { circleGeometry = null, circleMaskId, tearProgress = null, tearDirection = 1 }, ref,
 ) {
     const linesRef = useRef<SVGGElement>(null);
     const freshLinesRef = useRef<SVGGElement>(null);
@@ -31,7 +31,7 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
     const feedbackFrameRef = useRef(0);
     const feedbackProgressRef = useRef(0);
     const committedPreviewRef = useRef(0);
-    const closingRef = useRef(false);
+    const committedRef = useRef(false);
     const renderRef = useRef<(() => void) | null>(null);
     const freshGridRef = useRef<{ signature: string; paths: string[] } | null>(null);
     const filterId = useId();
@@ -51,8 +51,8 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
 
     useImperativeHandle(ref, () => ({
         setScrollFeedback(progress, durationMs) {
-            // Input cleanup must never reset a tear already owned by the closing phase.
-            if (closingRef.current) return;
+            // Input cleanup must never reset a tear already owned by the coordinator.
+            if (committedRef.current) return;
             const target = Math.min(1, Math.max(-1, progress));
             if (!feedbackAnimationRef.current && feedbackProgressRef.current === target) return;
             cancelAnimationFrame(feedbackFrameRef.current);
@@ -72,17 +72,17 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
     // Releases the temporary wheel animation when its owner unmounts.
     useEffect(() => () => cancelAnimationFrame(feedbackFrameRef.current), []);
 
-    // Freeze the painted preview before input cleanup runs, then use only the close clock.
+    // Freeze the painted preview before input cleanup runs, then follow the coordinator across closing and movement.
     useLayoutEffect(() => {
-        const closing = closingProgress !== null;
-        if (closing !== closingRef.current) {
+        const committed = tearProgress !== null;
+        if (committed !== committedRef.current) {
             cancelAnimationFrame(feedbackFrameRef.current);
             feedbackAnimationRef.current = null;
-            if (closing) {
+            if (committed) {
                 const preview = feedbackProgressRef.current;
                 committedPreviewRef.current = Math.sign(preview) === tearDirection ? preview : 0;
             } else feedbackProgressRef.current = 0;
-            closingRef.current = closing;
+            committedRef.current = committed;
         }
         const lines = linesRef.current;
         const freshLines = freshLinesRef.current;
@@ -100,8 +100,8 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
                 freshGridRef.current = { signature, paths: createWarpedGridPaths(innerWidth, innerHeight, circle, GRID_SPACING) };
             }
             const tear = createGridTear(innerWidth, innerHeight,
-                closing ? committedPreviewRef.current : feedbackProgressRef.current,
-                closingProgress, closing ? tearDirection : feedbackProgressRef.current < 0 ? -1 : 1);
+                committed ? committedPreviewRef.current : feedbackProgressRef.current,
+                tearProgress, committed ? tearDirection : feedbackProgressRef.current < 0 ? -1 : 1);
             const freshPaths = freshGridRef.current.paths;
             syncPaths(lines, tear.span > 0 && tear.oldOpacity > 0
                 ? createWarpedGridPaths(innerWidth, innerHeight, circle, GRID_SPACING, tear) : freshPaths);
@@ -123,7 +123,7 @@ export const BackgroundGrid = forwardRef<BackgroundGridHandle, BackgroundGridPro
             document.removeEventListener("visibilitychange", render);
             if (renderRef.current === render) renderRef.current = null;
         };
-    }, [circleGeometry, closingProgress, tearDirection]);
+    }, [circleGeometry, tearProgress, tearDirection]);
 
     return (
         <svg className="background-grid" aria-hidden="true">

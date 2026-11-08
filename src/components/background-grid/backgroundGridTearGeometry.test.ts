@@ -44,6 +44,14 @@ describe("grid tear geometry", () => {
         }
     });
 
+    it("gives the fresh grid a longer fade within the same tear duration", () => {
+        expect(createGridTear(1440, 900, 0, 0.6, 1).newOpacity).toBe(0);
+        const duringFade = createGridTear(1440, 900, 0, 0.75, 1).newOpacity;
+        expect(duringFade).toBeGreaterThan(0.2);
+        expect(duringFade).toBeLessThan(0.5);
+        expect(createGridTear(1440, 900, 0, 0.97, 1).newOpacity).toBe(1);
+    });
+
     it("accelerates upward and finishes with only the fresh grid", () => {
         const start = createGridTear(1440, 900, 0);
         const half = createGridTear(1440, 900, 0, 0.5, 1);

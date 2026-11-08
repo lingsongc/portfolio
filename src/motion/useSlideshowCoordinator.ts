@@ -11,7 +11,7 @@ type CoordinatorState = SceneTransitionState & { settledVersion: number; travelP
 
 // Owns slideshow state, phase timing, URL behavior, recovery, and reduced motion.
 export function useSlideshowCoordinator() {
-    const [closingProgress, setClosingProgress] = useState(0);
+    const [tearProgress, setTearProgress] = useState(0);
     const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const [state, setState] = useState<CoordinatorState>(() => ({ ...createSceneTransitionState(initialSceneIdFromHash(window.location.hash)), settledVersion: 0, travelProgress: 0 }));
     const stateRef = useRef(state);
@@ -47,16 +47,16 @@ export function useSlideshowCoordinator() {
     useEffect(() => {
         cancelAnimationFrame(phaseFrameRef.current);
         cancelAnimationFrame(travelFrameRef.current);
-        setClosingProgress(0);
+        if (state.phase !== "moving") setTearProgress(0);
         if (state.phase === "closing" || state.phase === "opening") {
             const visualPhase = state.phase;
             const startedAt = performance.now();
-            // Closing publishes tear progress on each paint; opening only waits for the section CSS.
+            // The tear starts during closing and continues on the existing movement clock.
             const tick = (now: number) => {
                 const current = stateRef.current;
                 if (current.phase !== visualPhase) return;
-                const progress = clamp((now - startedAt) / scenePhaseDuration(visualPhase, current.source), 0, 1);
-                if (visualPhase === "closing" && current.source === "wheel") setClosingProgress(progress);
+                const progress = clamp((now - startedAt) / scenePhaseDuration(visualPhase), 0, 1);
+                if (visualPhase === "closing" && current.source === "wheel") setTearProgress(sceneTearProgress(visualPhase, now - startedAt, current.source));
                 if (progress >= 1) {
                     commit(visualPhase === "closing"
                         ? { ...advanceSceneTransition(current), settledVersion: current.settledVersion, travelProgress: 0 }
@@ -72,6 +72,7 @@ export function useSlideshowCoordinator() {
                 const current = stateRef.current;
                 if (current.phase !== "moving") return;
                 const progress = clamp((now - startedAt) / MAIN_CIRCLE_TRAVEL_DURATION_MS, 0, 1);
+                if (current.source === "wheel") setTearProgress(sceneTearProgress("moving", now - startedAt, current.source));
                 if (progress >= 1) {
                     commit({ ...advanceSceneTransition(current), settledVersion: current.settledVersion, travelProgress: 1 });
                     return;
@@ -167,7 +168,7 @@ export function useSlideshowCoordinator() {
         reducedMotion,
     }), [reducedMotion, state.currentSceneId, state.phase]);
 
-    return { ...state, closingProgress, activeSceneId: state.phase === "moving" ? null : state.currentSceneId, busy: state.phase !== "idle", lifecycleFor, reducedMotion, requestScene };
+    return { ...state, tearProgress, activeSceneId: state.phase === "moving" ? null : state.currentSceneId, busy: state.phase !== "idle", lifecycleFor, reducedMotion, requestScene };
 }
 
 // Creates the completed scene state used by initialization and recovery.
@@ -210,8 +211,15 @@ export function sceneUrl(sceneId: SceneId, location: Pick<Location, "pathname" |
 // Bounds clock progress so delayed frames cannot overshoot the destination.
 function clamp(value: number, minimum: number, maximum: number) { return Math.min(Math.max(value, minimum), maximum); }
 
-// Only wheel commitments extend closing for the tear; other navigation keeps the standard close.
-export function scenePhaseDuration(phase: ScenePhase, source: SceneRequestSource | null = null) {
-    if (phase === "closing" && source === "wheel") return 600;
+// Section closing and opening stay at 400ms regardless of the request source.
+export function scenePhaseDuration(phase: ScenePhase) {
     return phase === "moving" ? MAIN_CIRCLE_TRAVEL_DURATION_MS : SCENE_VISUAL_DURATION_MS;
+}
+
+// Shares the 600ms wheel tear across closing and the first 200ms of circle movement.
+export function sceneTearProgress(phase: ScenePhase, elapsedMs: number, source: SceneRequestSource | null) {
+    if (source !== "wheel" || (phase !== "closing" && phase !== "moving")) return 0;
+    const elapsed = phase === "closing" ? Math.min(elapsedMs, SCENE_VISUAL_DURATION_MS)
+        : SCENE_VISUAL_DURATION_MS + elapsedMs;
+    return clamp(elapsed / 600, 0, 1);
 }

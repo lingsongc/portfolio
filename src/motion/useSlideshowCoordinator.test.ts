@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     scenePhaseDuration,
+    sceneTearProgress,
     advanceSceneTransition,
     createSceneTransitionState,
     initialSceneIdFromHash,
@@ -74,7 +75,7 @@ describe("layout recovery", () => {
     });
 });
 
-// The tear extends closing without slowing section CSS fades or the opening phase.
+// The wheel tear continues into movement without extending the section close.
 describe("phase timing", () => {
     it("keeps non-wheel closing at 400ms", () => {
         for (const source of ["navigation", "keyboard", "touch", "history"] as const) {
@@ -83,17 +84,35 @@ describe("phase timing", () => {
                 : { kind: "adjacent" as const, direction: "forward" as const, source };
             const transition = requestSceneTransition(createSceneTransitionState("about"), request).state;
             expect(transition).toMatchObject({ source });
-            expect(scenePhaseDuration(transition.phase, transition.source)).toBe(400);
+            expect(scenePhaseDuration(transition.phase)).toBe(400);
         }
     });
 
-    it("reserves 600ms for tearing before the 1000ms circle movement", () => {
+    it("starts circle movement after the standard 400ms close even for wheel requests", () => {
         const transition = requestSceneTransition(createSceneTransitionState("about"), {
             kind: "adjacent", direction: "backward", source: "wheel",
         }).state;
         expect(transition).toMatchObject({ source: "wheel", phase: "closing" });
-        expect(scenePhaseDuration(transition.phase, transition.source)).toBe(600);
+        expect(scenePhaseDuration(transition.phase)).toBe(400);
         expect(scenePhaseDuration("moving")).toBe(1000);
         expect(scenePhaseDuration("opening")).toBe(400);
+    });
+});
+
+// Pins the overlap boundary so the tear neither restarts nor finishes early during movement.
+describe("overlapping tear clock", () => {
+    it("continues seamlessly for the first 200ms of circle movement", () => {
+        expect(sceneTearProgress("closing", 400, "wheel")).toBeCloseTo(2 / 3);
+        expect(sceneTearProgress("moving", 0, "wheel")).toBeCloseTo(2 / 3);
+        expect(sceneTearProgress("moving", 100, "wheel")).toBeCloseTo(5 / 6);
+        expect(sceneTearProgress("moving", 200, "wheel")).toBe(1);
+        expect(sceneTearProgress("moving", 1000, "wheel")).toBe(1);
+    });
+
+    it("never starts a tear for non-wheel navigation or after opening", () => {
+        expect(sceneTearProgress("closing", 200, "navigation")).toBe(0);
+        expect(sceneTearProgress("moving", 100, "keyboard")).toBe(0);
+        expect(sceneTearProgress("opening", 100, "wheel")).toBe(0);
+        expect(sceneTearProgress("idle", 0, null)).toBe(0);
     });
 });
