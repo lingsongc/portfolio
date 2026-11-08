@@ -7,9 +7,7 @@ import {
     touchDragIntent, touchVerticalProgress, WHEEL_INTENT_PAUSE_MS, WHEEL_INTENT_THRESHOLD,
 } from "./sceneInputModel";
 
-const WHEEL_FEEDBACK_RESET_MS = 180;
 const WHEEL_FEEDBACK_EVENT_MS = 140;
-const WHEEL_FEEDBACK_HOLD_MS = 60;
 const WHEEL_FEEDBACK_RETURN_MS = 300;
 
 type SceneInputOptions = {
@@ -43,20 +41,18 @@ export function useSceneInput({
     const touchGestureRef = useRef<TouchGesture | null>(null);
     const previousPhaseRef = useRef(phase);
     const intentTimerRef = useRef<number | undefined>(undefined);
-    const commitTimerRef = useRef<number | undefined>(undefined);
     const neutralTimerRef = useRef<number | undefined>(undefined);
 
     // Cancels accumulated browser-event state before a direct request or phase change.
-    const cancelPendingInput = useCallback(() => {
+    const cancelPendingInput = useCallback((clearFeedback = true) => {
         window.clearTimeout(intentTimerRef.current);
-        window.clearTimeout(commitTimerRef.current);
         window.clearTimeout(neutralTimerRef.current);
         intentTimerRef.current = undefined;
-        commitTimerRef.current = undefined;
         neutralTimerRef.current = undefined;
         wheelIntentRef.current = createWheelIntentState();
         touchGestureRef.current = null;
-        onWheelFeedbackChange(0, WHEEL_FEEDBACK_RESET_MS);
+        // Direct controls must clear immediately; only wheel commits retain the painted preview.
+        if (clearFeedback) onWheelFeedbackChange(0, 0);
     }, [onWheelFeedbackChange]);
 
     // Clears pending timers and gesture state when the hook unmounts.
@@ -66,7 +62,7 @@ export function useSceneInput({
     useEffect(() => {
         const previousPhase = previousPhaseRef.current;
         previousPhaseRef.current = phase;
-        if (phase !== "idle" || !scrollNavigationEnabled) cancelPendingInput();
+        if (phase !== "idle" || !scrollNavigationEnabled) cancelPendingInput(phase !== "closing");
         else if (previousPhase !== "idle") {
             // A completed transition must observe a quiet interval before accepting momentum.
             wheelIntentRef.current = createWheelIntentState(true, performance.now());
@@ -127,12 +123,8 @@ export function useSceneInput({
             }
             window.clearTimeout(intentTimerRef.current);
             const committedDirection = update.committedDirection;
-            onWheelFeedbackChange(committedDirection === "forward" ? 1 : -1, WHEEL_FEEDBACK_EVENT_MS);
-            commitTimerRef.current = window.setTimeout(() => {
-                commitTimerRef.current = undefined;
-                onWheelFeedbackChange(0, WHEEL_FEEDBACK_RESET_MS);
-                requestScene({ kind: "adjacent", direction: committedDirection, source: "wheel" });
-            }, WHEEL_FEEDBACK_EVENT_MS + WHEEL_FEEDBACK_HOLD_MS);
+            // Start closing on the committing notch; the grid captures its painted preview.
+            requestScene({ kind: "adjacent", direction: committedDirection, source: "wheel" });
         };
 
         window.addEventListener("wheel", handleWheel, { passive: false });
@@ -140,7 +132,6 @@ export function useSceneInput({
         return () => {
             window.removeEventListener("wheel", handleWheel);
             window.clearTimeout(intentTimerRef.current);
-            window.clearTimeout(commitTimerRef.current);
             window.clearTimeout(neutralTimerRef.current);
         };
     }, [activeScrollerRef, currentSceneId, onWheelFeedbackChange, phase, requestScene, scrollNavigationEnabled]);

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef } from "react";
 import { BackgroundGrid, type BackgroundGridHandle } from "./components/background-grid/BackgroundGrid";
 import { HomeButton } from "./components/home-button/HomeButton";
 import { MainCircle } from "./components/main-circle/MainCircle";
@@ -62,10 +62,12 @@ export default function App() {
             slideshow.reducedMotion ? 0 : durationMs,
         );
     }, [slideshow.reducedMotion]);
-    // Removes any active deformation immediately when reduced motion becomes preferred.
-    useEffect(() => {
-        if (slideshow.reducedMotion) backgroundGridRef.current?.setScrollFeedback(0, 0);
-    }, [slideshow.reducedMotion]);
+    // Reduced motion and non-wheel requests clear partial feedback before the next paint.
+    useLayoutEffect(() => {
+        if (slideshow.reducedMotion || (slideshow.phase === "closing" && slideshow.source !== "wheel")) {
+            backgroundGridRef.current?.setScrollFeedback(0, 0);
+        }
+    }, [slideshow.reducedMotion, slideshow.phase, slideshow.source]);
     const sceneInput = useSceneInput({
         activeScrollerRef: activeSceneScrollerRef,
         currentSceneId: slideshow.currentSceneId,
@@ -163,7 +165,9 @@ export default function App() {
 
     return (
         <>
-            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId} />
+            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId}
+                closingProgress={slideshow.phase === "closing" && slideshow.source === "wheel" ? slideshow.closingProgress : null}
+                tearDirection={slideshow.direction === "backward" ? -1 : 1} />
 
             <main className="slideshow-stage">
                 <div ref={circleMeasureRef} className="slideshow-circle-measure" aria-hidden="true" />

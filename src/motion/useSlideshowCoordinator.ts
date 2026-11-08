@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MAIN_CIRCLE_TRAVEL_DURATION_MS } from "../components/main-circle/mainCircleGeometry";
-import { sceneOrder, type SceneDirection, type SceneId, type SceneLifecycleControl, type SceneRequest, type SceneRequestResult } from "../types/scene";
+import { sceneOrder, type SceneDirection, type SceneId, type SceneLifecycleControl, type ScenePhase, type SceneRequest, type SceneRequestResult, type SceneRequestSource } from "../types/scene";
 
 const SCENE_VISUAL_DURATION_MS = 400;
 
 export type SceneTransitionState =
-    | { currentSceneId: SceneId; direction: null; phase: "idle"; requestedSceneId: null }
-    | { currentSceneId: SceneId; direction: SceneDirection; phase: "closing" | "moving" | "opening"; requestedSceneId: SceneId };
+    | { currentSceneId: SceneId; direction: null; source: null; phase: "idle"; requestedSceneId: null }
+    | { currentSceneId: SceneId; direction: SceneDirection; source: SceneRequestSource; phase: "closing" | "moving" | "opening"; requestedSceneId: SceneId };
 type CoordinatorState = SceneTransitionState & { settledVersion: number; travelProgress: number };
 
 // Owns slideshow state, phase timing, URL behavior, recovery, and reduced motion.
 export function useSlideshowCoordinator() {
+    const [closingProgress, setClosingProgress] = useState(0);
     const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     const [state, setState] = useState<CoordinatorState>(() => ({ ...createSceneTransitionState(initialSceneIdFromHash(window.location.hash)), settledVersion: 0, travelProgress: 0 }));
     const stateRef = useRef(state);
@@ -46,14 +47,17 @@ export function useSlideshowCoordinator() {
     useEffect(() => {
         cancelAnimationFrame(phaseFrameRef.current);
         cancelAnimationFrame(travelFrameRef.current);
+        setClosingProgress(0);
         if (state.phase === "closing" || state.phase === "opening") {
             const visualPhase = state.phase;
             const startedAt = performance.now();
-            // A paint-aligned clock keeps the CSS transition active without updating React on every frame.
+            // Closing publishes tear progress on each paint; opening only waits for the section CSS.
             const tick = (now: number) => {
                 const current = stateRef.current;
                 if (current.phase !== visualPhase) return;
-                if (now - startedAt >= SCENE_VISUAL_DURATION_MS) {
+                const progress = clamp((now - startedAt) / scenePhaseDuration(visualPhase, current.source), 0, 1);
+                if (visualPhase === "closing" && current.source === "wheel") setClosingProgress(progress);
+                if (progress >= 1) {
                     commit(visualPhase === "closing"
                         ? { ...advanceSceneTransition(current), settledVersion: current.settledVersion, travelProgress: 0 }
                         : { ...createSceneTransitionState(current.requestedSceneId), settledVersion: current.settledVersion, travelProgress: 0 });
@@ -163,12 +167,12 @@ export function useSlideshowCoordinator() {
         reducedMotion,
     }), [reducedMotion, state.currentSceneId, state.phase]);
 
-    return { ...state, activeSceneId: state.phase === "moving" ? null : state.currentSceneId, busy: state.phase !== "idle", lifecycleFor, reducedMotion, requestScene };
+    return { ...state, closingProgress, activeSceneId: state.phase === "moving" ? null : state.currentSceneId, busy: state.phase !== "idle", lifecycleFor, reducedMotion, requestScene };
 }
 
 // Creates the completed scene state used by initialization and recovery.
 export function createSceneTransitionState(currentSceneId: SceneId): SceneTransitionState {
-    return { currentSceneId, direction: null, phase: "idle", requestedSceneId: null };
+    return { currentSceneId, direction: null, source: null, phase: "idle", requestedSceneId: null };
 }
 
 // Invalidates endpoint measurements on resize, including when no transition is active.
@@ -186,7 +190,7 @@ export function requestSceneTransition(state: SceneTransitionState, request: Sce
     if (destinationSceneId === state.currentSceneId) return { result: { status: "ignored", reason: "same-scene" } as const, state };
     const direction = sceneOrder.indexOf(destinationSceneId) > currentIndex ? "forward" as const : "backward" as const;
     const result = { status: "accepted" as const, destinationSceneId, direction };
-    return { result, state: { currentSceneId: state.currentSceneId, direction, phase: "closing" as const, requestedSceneId: destinationSceneId } };
+    return { result, state: { currentSceneId: state.currentSceneId, direction, source: request.source, phase: "closing" as const, requestedSceneId: destinationSceneId } };
 }
 
 // Advances one completed phase without activating intermediate scenes.
@@ -205,3 +209,9 @@ export function initialSceneIdFromHash(hash: string): SceneId { return sceneIdFr
 export function sceneUrl(sceneId: SceneId, location: Pick<Location, "pathname" | "search">) { return `${location.pathname}${location.search}#${sceneId}`; }
 // Bounds clock progress so delayed frames cannot overshoot the destination.
 function clamp(value: number, minimum: number, maximum: number) { return Math.min(Math.max(value, minimum), maximum); }
+
+// Only wheel commitments extend closing for the tear; other navigation keeps the standard close.
+export function scenePhaseDuration(phase: ScenePhase, source: SceneRequestSource | null = null) {
+    if (phase === "closing" && source === "wheel") return 600;
+    return phase === "moving" ? MAIN_CIRCLE_TRAVEL_DURATION_MS : SCENE_VISUAL_DURATION_MS;
+}
