@@ -88,7 +88,11 @@
 .contact-form-field:is(:hover, :focus) { border-color: var(--colour-text); }
 .contact-form-field[aria-invalid="true"] { border-color: var(--colour-accent); }
 input.contact-form-field { height: var(--contact-field-height); }
-textarea.contact-form-field { resize: none; }
+textarea.contact-form-field {
+    /* Match the inputs' centered text inset, allowing for the line height and two 3px borders. */
+    padding-block: max(0.5rem, calc((var(--contact-field-height) - 1.5em - 6px) / 2));
+    resize: none;
+}
 
 textarea.contact-form-field { scrollbar-color: auto; }
 textarea.contact-form-field::-webkit-scrollbar { width: 0.875rem; }
@@ -144,10 +148,10 @@ textarea.contact-form-field::-webkit-scrollbar-thumb {
     width: 43%;
     min-width: 8rem;
     max-width: 100%;
-    min-height: 2.75rem;
+    height: var(--contact-field-height);
+    min-height: var(--contact-field-height);
     justify-self: center;
     padding-block: 0.5rem;
-    text-transform: uppercase;
     transition: opacity 200ms ease;
 }
 
@@ -250,7 +254,7 @@ textarea.contact-form-field::-webkit-scrollbar-thumb {
         linear-gradient(145deg, #3051f1 10%, #c92bb7 70%);
 }
 
-.contact-link:is(:hover, :focus-visible) { box-shadow: inset 0 0 0 4px #fff; }
+.contact-link:is(:hover, :focus-visible) { box-shadow: inset 0 0 0 4px var(--colour-text); }
 
 .contact-social-icon {
     width: 50%;

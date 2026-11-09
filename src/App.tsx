@@ -190,6 +190,7 @@ export default function App() {
 
                 <MainCircle
                     transitioning={slideshow.busy}
+                    surfaceCovered={slideshow.currentSceneId === "contact"}
                     geometry={mainCircle.geometry}
                     scrollPlacement={mainCircle.scrollPlacement}
                     image={mainCircle.image}

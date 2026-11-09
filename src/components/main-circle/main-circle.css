@@ -25,6 +25,9 @@
     background-color: var(--colour-circle-transition);
 }
 
+/* A second opaque silhouette beneath a smoothed edge creates a dark fringe at rest. */
+.main-circle-container[data-covered="true"] .main-circle-mask { background-color: transparent; }
+
 /* Native section scrolling carries this layer without waiting for JavaScript scroll events. */
 .main-circle-scrolling { position: absolute; }
 

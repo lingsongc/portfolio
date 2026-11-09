@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { IconRocket } from "@tabler/icons-react";
+import { IconArrowUpRight } from "@tabler/icons-react";
 
 // Upper bounds for each field; 254 is the longest valid email address.
 const nameMaxLength = 100;
@@ -71,7 +71,7 @@ export function ContactForm() {
                 </div>
                 <button className="action-button action-button-pill contact-form-send" type="submit" disabled={!canSend}>
                     Send
-                    <IconRocket aria-hidden="true" />
+                    <IconArrowUpRight aria-hidden="true" />
                 </button>
                 <p className="visually-hidden" role="status">
                     {previewed ? "Preview only. No message was sent." : ""}

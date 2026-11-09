@@ -321,7 +321,7 @@
     border-radius: 50%;
     aspect-ratio: 1;
     place-items: center;
-    color: var(--colour-text);
+    color: #fff;
     opacity: 0;
     transform: translateX(-50%);
     transition: opacity 200ms ease;

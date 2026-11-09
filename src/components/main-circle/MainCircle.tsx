@@ -9,6 +9,7 @@ type MainCircleProps = {
     image: ImageDescriptor | null;
     imageVisible?: boolean;
     transitioning: boolean;
+    surfaceCovered?: boolean;
     scrollPlacement?: MainCircleScrollPlacement | null;
 };
 
@@ -18,6 +19,7 @@ export function MainCircle({
     image,
     imageVisible = true,
     transitioning,
+    surfaceCovered = false,
     scrollPlacement = null,
 }: MainCircleProps) {
     const imageRef = useRef<HTMLImageElement>(null);
@@ -41,6 +43,7 @@ export function MainCircle({
     const circle = (
         <div className={`main-circle-container${scrollPlacement ? " main-circle-scrolling" : ""}`}
             data-transitioning={transitioning}
+            data-covered={!transitioning && (surfaceCovered || (imageVisible && contentReady))}
             style={scrollPlacement?.geometry ?? geometry ?? undefined}>
             <div className="main-circle-mask">
                 {image && (
