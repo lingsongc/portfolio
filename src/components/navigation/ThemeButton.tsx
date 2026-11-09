@@ -1,19 +1,14 @@
-import { useLayoutEffect, useState } from "react";
 import { IconCircleFilled, IconMoonFilled } from "@tabler/icons-react";
 
 type ThemeButtonProps = {
     busy: boolean;
+    lightMode: boolean;
+    onToggle: (button: HTMLButtonElement) => void;
 };
 
-// Switches the document palette and keeps the center symbol in sync with the active theme.
-export function ThemeButton({ busy }: ThemeButtonProps) {
-    const [lightMode, setLightMode] = useState(false);
+// Renders the theme action and its matching icon, supplying the control as the reveal origin.
+export function ThemeButton({ busy, lightMode, onToggle }: ThemeButtonProps) {
     const ModeIcon = lightMode ? IconCircleFilled : IconMoonFilled;
-
-    // Apply the palette before paint so its icon and colours change together without a fade.
-    useLayoutEffect(() => {
-        document.documentElement.dataset.theme = lightMode ? "light" : "dark";
-    }, [lightMode]);
 
     return (
         <button
@@ -22,7 +17,7 @@ export function ThemeButton({ busy }: ThemeButtonProps) {
             aria-label={lightMode ? "Switch to dark mode" : "Switch to light mode"}
             aria-disabled={busy || undefined}
             tabIndex={busy ? -1 : undefined}
-            onClick={() => { if (!busy) setLightMode((current) => !current); }}
+            onClick={(event) => { if (!busy) onToggle(event.currentTarget); }}
         >
             <svg className="navigation-theme-star" viewBox="0 0 56 56" aria-hidden="true">
                 {/* Cover both squares' internal strokes together to leave one opaque perimeter. */}

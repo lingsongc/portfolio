@@ -14,11 +14,15 @@ export type NavigationSceneControl = {
 
 type NavigationProps = {
     sceneControl: NavigationSceneControl;
+    lightMode: boolean;
+    onThemeToggle: (button: HTMLButtonElement) => void;
 };
 
 // Renders the persistent section navigation and its matching visual rail.
 export function Navigation({
     sceneControl,
+    lightMode,
+    onThemeToggle,
 }: NavigationProps) {
     const currentYear = new Date().getFullYear();
     const activeSection = sceneControl.currentSceneId;
@@ -67,7 +71,7 @@ export function Navigation({
             </small>
             <ul className="navigation-list">
                 <li className="navigation-item navigation-theme-slot">
-                    <ThemeButton busy={busy} />
+                    <ThemeButton busy={busy} lightMode={lightMode} onToggle={onThemeToggle} />
                 </li>
 
                 {visibleSections.map((section) => {

@@ -228,7 +228,11 @@
 
 .navigation-theme-icon { position: relative; }
 
+.navigation-theme-button:focus-visible { outline: none; }
+
 .navigation-theme-button:focus-visible .navigation-theme-star { transform: rotate(90deg); }
+
+.navigation-theme-button:focus-visible .navigation-theme-icon { color: var(--colour-accent); }
 
 @media (hover: hover) {
     .navigation-theme-button:hover .navigation-theme-star { transform: rotate(90deg); }
