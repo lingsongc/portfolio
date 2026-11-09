@@ -62,6 +62,6 @@ button {
 }
 
 :focus-visible {
-    outline: 4px solid rgb(203 184 220 / 75%);
+    outline: 4px solid var(--colour-text-muted);
     outline-offset: 4px;
 }

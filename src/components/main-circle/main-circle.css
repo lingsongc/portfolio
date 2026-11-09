@@ -20,6 +20,11 @@
     background-color: var(--colour-circle-void);
 }
 
+/* The coordinator's lifecycle selects the travel fill without changing resting scene colours. */
+.main-circle-container[data-transitioning="true"] .main-circle-mask {
+    background-color: var(--colour-circle-transition);
+}
+
 /* Native section scrolling carries this layer without waiting for JavaScript scroll events. */
 .main-circle-scrolling { position: absolute; }
 

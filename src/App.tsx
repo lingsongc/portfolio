@@ -189,6 +189,7 @@ export default function App() {
                 />
 
                 <MainCircle
+                    transitioning={slideshow.busy}
                     geometry={mainCircle.geometry}
                     scrollPlacement={mainCircle.scrollPlacement}
                     image={mainCircle.image}

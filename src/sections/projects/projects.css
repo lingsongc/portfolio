@@ -273,6 +273,7 @@
 }
 
 .project-selected-summary {
+    --colour-text: var(--colour-text-on-dark);
     position: absolute;
     top: 50%;
     right: 0;

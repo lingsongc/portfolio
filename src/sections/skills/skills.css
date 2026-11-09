@@ -55,6 +55,7 @@
 }
 
 .skill-circle {
+    --colour-text: var(--colour-text-on-dark);
     position: fixed;
     z-index: 3;
     top: 50%;
