@@ -110,7 +110,7 @@ export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircl
                 href={activeProject.href}
                 aria-label={`View ${activeProject.name} project details`}
             >
-                <span className="project-detail-label">View Project</span>
+                <span>View Project</span>
                 <IconArrowUpRight aria-hidden="true" />
             </a>
         </section>

@@ -284,31 +284,50 @@ textarea.contact-form-field::-webkit-scrollbar-thumb {
 
 @media (--narrow-layout) {
     :root {
-        --contact-circle-size: 90vw;
+        --contact-visible-arc: max(34rem, 76dvh);
+        --contact-circle-size: max(320vw, calc(var(--contact-visible-arc) + 8rem));
+        --contact-heading-size: clamp(2rem, 8vw, 3.5rem);
         --contact-profile-size: min(16vw, 5rem);
         --contact-row-clearance: 2rem;
     }
 
     .contact-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: var(--scene-top-space) var(--section-padding-inline) var(--scene-bottom-space);
+        display: block;
+        min-height: max(100dvh, calc(var(--contact-visible-arc) + var(--contact-row-clearance) + var(--contact-profile-size) + var(--scene-bottom-space)));
+        padding: 0;
     }
 
+    /* Measure the full circle even though only its broad lower arc is inside the viewport. */
     .contact-circle-anchor {
-        position: relative;
+        position: absolute;
         display: block;
-        flex: none;
+        top: calc(var(--contact-visible-arc) - var(--contact-circle-size));
+        left: 50%;
         width: var(--contact-circle-size);
         height: var(--contact-circle-size);
-        margin-bottom: calc(var(--contact-row-clearance) + var(--contact-profile-size));
+        transform: translateX(-50%);
     }
 
     .contact-orbit { inset: 0; }
     .contact-profile-measure { width: var(--contact-profile-size); height: var(--contact-row-clearance); }
-    .contact-form { overflow-y: auto; padding: 4px; scrollbar-width: thin; }
+    .contact-content h2 {
+        top: calc(var(--contact-circle-size) - var(--contact-visible-arc) + var(--scene-top-space));
+        font-size: var(--contact-heading-size);
+    }
+
+    /* Keep controls within the screen width while Comments absorbs the taller visible surface. */
+    .contact-form {
+        --contact-form-gap: 0.75rem;
+        --contact-field-height: clamp(2.75rem, 6.5dvh, 3.5rem);
+        top: calc(var(--contact-circle-size) - var(--contact-visible-arc) + var(--scene-top-space) + var(--contact-heading-size) * 1.1 + 1.5rem);
+        left: 50%;
+        width: calc(100vw - 2 * var(--section-padding-inline));
+        height: calc(var(--contact-visible-arc) - var(--scene-top-space) - var(--contact-heading-size) * 1.1 - 1.5rem - 3.5rem);
+        overflow-y: auto;
+        padding: 4px;
+        scrollbar-width: thin;
+        transform: translateX(-50%);
+    }
     .contact-form-field { padding-inline: 0.75rem; font-size: 1rem; }
     .contact-form-message { padding-inline: 0.75rem; font-size: 0.75rem; }
     .contact-form-send { min-width: 9rem; font-size: 0.875rem; }

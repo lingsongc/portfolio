@@ -328,7 +328,7 @@
     stroke-width: var(--icon-stroke-width);
 }
 
-.project-container .project-detail-label { display: none; }
+.project-detail-link > span { display: none; }
 
 @media (--narrow-layout) {
     :root { --project-circle-size: min(82vw, 30rem); }
@@ -407,7 +407,7 @@
         transform: none;
     }
 
-    .project-container .project-detail-label { display: inline; color: inherit; font-size: inherit; text-transform: none; }
+    .project-container .project-detail-link > span { display: inline; color: inherit; font-size: inherit; text-transform: none; }
     .project-detail-link svg { position: absolute; right: 1em; top: 50%; width: 2em; height: 2em; transform: translateY(-50%); }
 }
 

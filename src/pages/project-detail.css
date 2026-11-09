@@ -43,12 +43,6 @@
     font-size: var(--text-subtitle);
 }
 
-.project-detail-label {
-    color: var(--colour-text-muted);
-    font-size: var(--text-small);
-    text-transform: uppercase;
-}
-
 .project-detail-image {
     width: clamp(8rem, 20vw, 14rem);
     aspect-ratio: 1;

@@ -63,7 +63,7 @@ export function ContactForm() {
 
                 <div className="contact-form-message">
                     <p className="contact-form-error" id="contact-form-error" aria-live="polite">
-                        {invalidField === "email" ? "Enter a valid email." : ""}
+                        {invalidField === "email" ? "Enter a valid email." : "Form not supported yet."}
                     </p>
                     <span className="contact-form-count" id="contact-comments-count">
                         {values.comments.length}/{commentsMaxLength}
