@@ -30,6 +30,12 @@ describe("scene circle endpoints", () => {
         expect(resolveMainCircleSceneEndpoint("experience", layout)).toEqual({ width: 720, top: 602, left: 1047 });
     });
 
+    it("lets About's measured CSS anchor shift the circle to protect its text column", () => {
+        const measuredLayout = { ...layout, aboutCenter: { top: 624, left: -440 } };
+        expect(resolveMainCircleSceneEndpoint("about", measuredLayout))
+            .toEqual({ width: 720, top: 624, left: -440 });
+    });
+
     it("keeps the Skills left edge at forty percent of viewport width", () => {
         const endpoint = resolveMainCircleSceneEndpoint("skills", layout);
         expect(endpoint.left - endpoint.width / 2).toBe(576);

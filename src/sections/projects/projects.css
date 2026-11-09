@@ -34,12 +34,9 @@
 
 /* Keep the heading mask fixed while its text enters from below and closes downward. */
 .project-title-text {
+    --reveal-slide-y: 110%;
     display: block;
-    transform: translateY(110%);
-    transition: transform var(--scene-visual-duration) ease;
 }
-
-.project-copy-visible .project-title-text { transform: translateY(0); }
 
 .project-detail-link {
     opacity: 0;
@@ -276,6 +273,7 @@
 }
 
 .project-selected-summary {
+    --colour-text: var(--colour-text-on-dark);
     position: absolute;
     top: 50%;
     right: 0;
@@ -284,8 +282,10 @@
     height: 44%;
     padding: clamp(0.75rem, 2vmin, 1.25rem);
     color: var(--colour-text);
-    font-size: clamp(0.75rem, 1.7vmin, 0.95rem);
-    line-height: 1.5;
+    /* Match body copy, but shrink with the circle once it can no longer hold the summary.
+       0.038 leaves about 5% margin for the current summaries; lower it if a longer one overflows. */
+    font-size: min(var(--text-body), calc(var(--project-circle-size) * 0.038));
+    line-height: var(--body-line-height);
     text-align: center;
 }
 
@@ -328,7 +328,7 @@
     stroke-width: var(--icon-stroke-width);
 }
 
-.project-detail-label { display: none; }
+.project-detail-link > span { display: none; }
 
 @media (--narrow-layout) {
     :root { --project-circle-size: min(82vw, 30rem); }
@@ -407,7 +407,7 @@
         transform: none;
     }
 
-    .project-container .project-detail-label { display: inline; color: inherit; font-size: inherit; text-transform: none; }
+    .project-container .project-detail-link > span { display: inline; color: inherit; font-size: inherit; text-transform: none; }
     .project-detail-link svg { position: absolute; right: 1em; top: 50%; width: 2em; height: 2em; transform: translateY(-50%); }
 }
 
@@ -419,7 +419,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .project-title-text,
     .project-detail-link,
     .project-selected-content { transition: none; }
     .project-selector,

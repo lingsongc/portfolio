@@ -29,7 +29,9 @@ export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive
         let timer = 0;
         let targetIndex = 0;
         let wheelBoundary = createExperienceWheelBoundaryState();
+        // Measures one thumbnail interval, including the CSS-controlled gap.
         const step = () => (buttonsRef.current[1]?.offsetLeft ?? 0) - (buttonsRef.current[0]?.offsetLeft ?? 0);
+        // Restores the selected entry's leading snap position after mounting or resizing.
         const alignSelection = () => {
             const index = Math.max(0, entries.findIndex(({ id }) => id === selectedRef.current));
             targetIndex = index;
@@ -44,11 +46,11 @@ export function ExperienceStrip({ activeEntryId, entries, imagePath, interactive
             targetIndex = snappedEntryIndex(strip.scrollLeft, step(), entries.length);
             latestRef.current.onEntrySelect(targetIndex);
         };
-        // Fall back to 180ms of quiet when the browser omits or delays scrollend.
+        // Fall back to 200ms of quiet when the browser omits or delays scrollend.
         const scroll = () => {
             scrollingRef.current = true;
             window.clearTimeout(timer);
-            timer = window.setTimeout(settle, 180);
+            timer = window.setTimeout(settle, 200);
         };
         // Reuse the desktop selector's boundary gate so momentum cannot escape into scene navigation.
         const handleWheel = (event: WheelEvent) => {

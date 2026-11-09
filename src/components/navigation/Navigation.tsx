@@ -1,6 +1,7 @@
 import { type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 import { sceneOrder, type SceneId, type ScenePhase } from "../../types/scene";
 import { navigationSections } from "./navigationSections";
+import { ThemeButton } from "./ThemeButton";
 
 export type NavigationSceneControl = {
     busy: boolean;
@@ -13,15 +14,21 @@ export type NavigationSceneControl = {
 
 type NavigationProps = {
     sceneControl: NavigationSceneControl;
+    lightMode: boolean;
+    onThemeToggle: (button: HTMLButtonElement) => void;
 };
 
 // Renders the persistent section navigation and its matching visual rail.
 export function Navigation({
     sceneControl,
+    lightMode,
+    onThemeToggle,
 }: NavigationProps) {
     const currentYear = new Date().getFullYear();
     const activeSection = sceneControl.currentSceneId;
     const busy = sceneControl.busy;
+    const travelling = sceneControl.phase === "closing" || sceneControl.phase === "moving";
+    const requestedSection = travelling ? sceneControl.destinationSceneId : null;
     const visibleSections = navigationSections.filter((section) => section.id !== "home");
     const transientMarkers = sceneControl.destinationSceneId
         ? transientRailMarkerProgress(
@@ -63,7 +70,9 @@ export function Navigation({
                 <span className="navigation-copyright-rights"> All Rights Reserved.</span>
             </small>
             <ul className="navigation-list">
-                <li className="navigation-item navigation-theme-slot" aria-hidden="true" />
+                <li className="navigation-item navigation-theme-slot">
+                    <ThemeButton busy={busy} lightMode={lightMode} onToggle={onThemeToggle} />
+                </li>
 
                 {visibleSections.map((section) => {
                     const markerProgress = transientMarkers.find(
@@ -72,8 +81,12 @@ export function Navigation({
                     return (
                         <li className="navigation-item" key={section.id}>
                             <a
-                                className={`navigation-link${activeSection === section.id
+                                className={`navigation-link${!travelling && activeSection === section.id
                                     ? " navigation-link-active"
+                                    : ""}${requestedSection === section.id
+                                    ? " navigation-link-requested"
+                                    : ""}${sceneControl.phase === "opening" && activeSection === section.id
+                                    ? " navigation-link-arriving"
                                     : ""}${markerProgress > 0
                                     ? " navigation-link-travelling"
                                     : ""}`}
@@ -86,7 +99,9 @@ export function Navigation({
                                 onClick={(event) => handleNavigationClick(event, section.id)}
                                 onKeyDown={(event) => handleNavigationKeyDown(event, section.id)}
                             >
-                                <span className="navigation-label">{section.label}</span>
+                                <span className="navigation-label reveal-clip">
+                                    <span className="navigation-label-value reveal-slide">{section.label}</span>
+                                </span>
                             </a>
                         </li>
                     );
@@ -113,16 +128,15 @@ function controlledNavigationClasses(sceneControl: NavigationSceneControl) {
     return " navigation-docked navigation-effects-ready";
 }
 
-// Calculates visual-only intermediate marker fills in direct travel order.
+// Calculates visual-only white marker fills for every scene on the travel path, in travel order.
 export function transientRailMarkerProgress(fromSceneId: SceneId, toSceneId: SceneId, easedProgress: number) {
     const fromIndex = sceneOrder.indexOf(fromSceneId);
     const toIndex = sceneOrder.indexOf(toSceneId);
     const distance = Math.abs(toIndex - fromIndex);
-    if (distance <= 1) return [];
+    if (distance === 0) return [];
     const direction = toIndex > fromIndex ? 1 : -1;
     const progress = clamp(easedProgress, 0, 1);
-    return Array.from({ length: distance - 1 }, (_, index) => {
-        const ordinal = index + 1;
+    return Array.from({ length: distance + 1 }, (_, ordinal) => {
         return {
             sceneId: sceneOrder[fromIndex + ordinal * direction],
             progress: clamp(1 - Math.abs(progress - ordinal / distance) * distance, 0, 1),
@@ -130,6 +144,7 @@ export function transientRailMarkerProgress(fromSceneId: SceneId, toSceneId: Sce
     });
 }
 
+// Keeps visual marker progress within the requested interval.
 function clamp(value: number, minimum: number, maximum: number) {
     return Math.min(Math.max(value, minimum), maximum);
 }

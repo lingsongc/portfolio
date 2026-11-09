@@ -21,6 +21,7 @@ export type ScrollBoundarySnapshot = {
     scrollTop: number;
 };
 
+// Starts an empty gesture, optionally requiring a quiet interval before new intent.
 export function createWheelIntentState(
     neutralRequired = false,
     lastInputAt: number | null = null,
@@ -64,10 +65,12 @@ export function applyWheelIntent(state: WheelIntentState, impulse: number, now: 
     };
 }
 
+// Extends the quiet interval while momentum from an owned gesture is still arriving.
 export function noteWheelActivity(state: WheelIntentState, now: number): WheelIntentState {
     return state.neutralRequired ? { ...state, lastInputAt: now } : state;
 }
 
+// Allows new intent only after the previous gesture has remained quiet long enough.
 export function releaseWheelNeutrality(state: WheelIntentState, now: number): WheelIntentState {
     if (!state.neutralRequired || state.lastInputAt === null) return state;
     return now - state.lastInputAt >= WHEEL_INTENT_PAUSE_MS
@@ -88,26 +91,31 @@ export function touchDragIntent(startX: number, startY: number, currentX: number
     return { axis: "vertical" as const, progress: touchVerticalProgress(startY, currentY) };
 }
 
+// Expresses vertical travel as a signed fraction of the release threshold.
 export function touchVerticalProgress(startY: number, currentY: number) {
     return clamp((startY - currentY) / TOUCH_INTENT_THRESHOLD_PX, -1, 1);
 }
 
+// Commits only a released drag that reached the full navigation threshold.
 export function releasedTouchDirection(progress: number): SceneDirection | null {
     if (Math.abs(progress) < 1) return null;
     return progress > 0 ? "forward" : "backward";
 }
 
+// Recognizes the directional reading keys shared by scrolling and scene navigation.
 export function keyboardSceneDirection(key: string): SceneDirection | null {
     if (key === "ArrowDown" || key === "PageDown") return "forward";
     if (key === "ArrowUp" || key === "PageUp") return "backward";
     return null;
 }
 
+// Rejects travel beyond either end of the slideshow.
 export function isTerminalSceneDirection(sceneId: SceneId, direction: SceneDirection) {
     const index = sceneOrder.indexOf(sceneId);
     return direction === "backward" ? index === 0 : index === sceneOrder.length - 1;
 }
 
+// Checks a local scroll boundary with tolerance for fractional browser offsets.
 export function canScrollScene(
     { clientHeight, scrollHeight, scrollTop }: ScrollBoundarySnapshot,
     direction: SceneDirection,
@@ -118,6 +126,7 @@ export function canScrollScene(
         : scrollTop > 1;
 }
 
+// Gives the nearest reading area with remaining space priority over its ancestors.
 export function firstScrollableOwnerIndex(
     owners: readonly ScrollBoundarySnapshot[],
     direction: SceneDirection,
@@ -126,10 +135,12 @@ export function firstScrollableOwnerIndex(
     return index === -1 ? null : index;
 }
 
+// Keeps arrow-key steps small while paging through most of the available reading height.
 export function keyboardScrollDistance(key: string, clientHeight: number) {
     return key === "PageUp" || key === "PageDown" ? Math.max(1, clientHeight * 0.85) : 40;
 }
 
+// Bounds normalized gesture values and accumulated intent.
 function clamp(value: number, minimum: number, maximum: number) {
     return Math.min(Math.max(value, minimum), maximum);
 }

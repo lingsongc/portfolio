@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+    sceneTearProgress,
     advanceSceneTransition,
     createSceneTransitionState,
     initialSceneIdFromHash,
@@ -60,15 +61,53 @@ describe("slideshow coordinator model", () => {
 describe("layout recovery", () => {
     it("invalidates an idle scene's endpoint measurement", () => {
         expect(settleSceneLayout({
-            currentSceneId: "about", requestedSceneId: null, phase: "idle", direction: null,
+            currentSceneId: "about", requestedSceneId: null, phase: "idle", direction: null, source: null,
             settledVersion: 2, travelProgress: 0,
         })).toMatchObject({ currentSceneId: "about", phase: "idle", settledVersion: 3, travelProgress: 0 });
     });
 
     it("settles interrupted movement at the requested destination", () => {
         expect(settleSceneLayout({
-            currentSceneId: "about", requestedSceneId: "skills", phase: "moving", direction: "forward",
+            currentSceneId: "about", requestedSceneId: "skills", phase: "moving", direction: "forward", source: "wheel",
             settledVersion: 2, travelProgress: 0.3,
         })).toMatchObject({ currentSceneId: "skills", requestedSceneId: null, phase: "idle", settledVersion: 3, travelProgress: 0 });
+    });
+});
+
+// Keeps request sources available to distinguish wheel tears from ordinary navigation.
+describe("request sources", () => {
+    it("retains every non-wheel source through closing", () => {
+        for (const source of ["navigation", "keyboard", "touch", "history"] as const) {
+            const request = source === "navigation" || source === "history"
+                ? { kind: "direct" as const, destinationSceneId: "projects" as const, source }
+                : { kind: "adjacent" as const, direction: "forward" as const, source };
+            const transition = requestSceneTransition(createSceneTransitionState("about"), request).state;
+            expect(transition).toMatchObject({ source });
+        }
+    });
+
+    it("retains the wheel source through closing", () => {
+        const transition = requestSceneTransition(createSceneTransitionState("about"), {
+            kind: "adjacent", direction: "backward", source: "wheel",
+        }).state;
+        expect(transition).toMatchObject({ source: "wheel", phase: "closing" });
+    });
+});
+
+// Pins the overlap boundary so the tear neither restarts nor finishes early during movement.
+describe("overlapping tear clock", () => {
+    it("continues seamlessly for the first 200ms of circle movement", () => {
+        expect(sceneTearProgress("closing", 400, "wheel")).toBeCloseTo(2 / 3);
+        expect(sceneTearProgress("moving", 0, "wheel")).toBeCloseTo(2 / 3);
+        expect(sceneTearProgress("moving", 100, "wheel")).toBeCloseTo(5 / 6);
+        expect(sceneTearProgress("moving", 200, "wheel")).toBe(1);
+        expect(sceneTearProgress("moving", 1000, "wheel")).toBe(1);
+    });
+
+    it("never starts a tear for non-wheel navigation or after opening", () => {
+        expect(sceneTearProgress("closing", 200, "navigation")).toBe(0);
+        expect(sceneTearProgress("moving", 100, "keyboard")).toBe(0);
+        expect(sceneTearProgress("opening", 100, "wheel")).toBe(0);
+        expect(sceneTearProgress("idle", 0, null)).toBe(0);
     });
 });

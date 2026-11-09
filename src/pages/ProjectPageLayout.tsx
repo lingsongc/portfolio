@@ -29,7 +29,6 @@ export function ProjectPageLayout({ project }: ProjectPageLayoutProps) {
                 </a>
                 <article className="project-detail-content">
                     <img className="project-detail-image" src={`/projects/${project.id}.png`} alt="" />
-                    <p className="project-detail-label">Project</p>
                     <h1>{project.name}</h1>
                     <p>{study.overview || project.summary}</p>
                     {textSections.filter(({ text }) => text.trim()).map(({ title, text }) => (

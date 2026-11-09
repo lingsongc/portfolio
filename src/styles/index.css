@@ -1,3 +1,4 @@
+/* Imports global foundations and feature styles in their deliberate cascade order. */
 @import "./tokens.css";
 @import "./base.css";
 @import "../app.css";
@@ -6,6 +7,8 @@
 @import "../components/scene-panel/scene-panel.css";
 @import "../components/main-circle/main-circle.css";
 @import "../components/navigation/navigation.css";
+@import "../components/navigation/theme-transition.css";
+@import "../components/home-button/home-button.css";
 @import "../sections/home/home.css";
 @import "../sections/about/about.css";
 @import "../sections/experience/experience.css";
@@ -13,3 +16,4 @@
 @import "../sections/skills/skills.css";
 @import "../sections/contact/contact.css";
 @import "../pages/project-detail.css";
+@import "../pages/not-found/not-found.css";

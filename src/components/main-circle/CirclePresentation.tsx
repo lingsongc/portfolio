@@ -32,7 +32,7 @@ export function CircleShade({ variant = "sphere", opacity: opacityOverride }: Ci
     return (
         <svg className="main-circle-shade" viewBox="0 0 100 100" aria-hidden="true">
             {bands.map(({ path, opacity }) => (
-                <path d={path} fill="var(--colour-background)" fillRule="evenodd" opacity={opacityOverride ?? opacity} key={path} />
+                <path d={path} fill="var(--colour-image-shade)" fillRule="evenodd" opacity={opacityOverride ?? opacity} key={path} />
             ))}
         </svg>
     );

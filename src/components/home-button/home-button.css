@@ -1,0 +1,50 @@
+/* Keep the supplied mark transparent over both the grid and scene images. */
+.home-button {
+    position: fixed;
+    z-index: 11;
+    top: calc(var(--navigation-rail-inset) + var(--navigation-link-size) / 2 - 1.75rem + env(safe-area-inset-top));
+    left: calc(1rem + env(safe-area-inset-left));
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+}
+
+.home-button img {
+    display: block;
+    width: 3rem;
+    height: auto;
+    transition: transform 200ms ease;
+}
+
+.home-button:focus-visible { outline: none; }
+
+.home-button:not([aria-disabled="true"]):focus-visible img {
+    transform: rotate(15deg);
+}
+
+.home-button:not([aria-disabled="true"]):hover img {
+    transform: rotate(15deg);
+}
+
+
+.home-button[aria-disabled="true"] { cursor: default; }
+
+@media (--narrow-layout) {
+    .home-button {
+        top: calc(0.5rem + env(safe-area-inset-top));
+        left: calc(0.5rem + env(safe-area-inset-left));
+        border-radius: 0.75rem;
+    }
+
+    .home-button img { width: 2.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-button img { transition: none; }
+}

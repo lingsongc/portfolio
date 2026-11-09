@@ -142,7 +142,10 @@
     to { opacity: 1; }
 }
 
-.navigation-docked .navigation-theme-slot { top: 0; }
+/* Equal rail insets give the theme symbol matching top and right clearance. */
+.navigation-docked .navigation-theme-slot {
+    top: env(safe-area-inset-top);
+}
 .navigation-docked .navigation-item:nth-child(2) { bottom: calc(4 * (var(--navigation-link-size) + var(--navigation-link-gap))); }
 .navigation-docked .navigation-item:nth-child(3) { bottom: calc(3 * (var(--navigation-link-size) + var(--navigation-link-gap))); }
 .navigation-docked .navigation-item:nth-child(4) { bottom: calc(2 * (var(--navigation-link-size) + var(--navigation-link-gap))); }
@@ -184,6 +187,60 @@
     place-items: center;
 }
 
+.navigation-theme-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--colour-text);
+    cursor: pointer;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+}
+
+.navigation-busy .navigation-theme-button { pointer-events: none; }
+
+.navigation-theme-star {
+    position: absolute;
+    width: 3rem;
+    height: 3rem;
+    transition: transform 200ms ease;
+}
+
+.navigation-theme-outline {
+    fill: currentColor;
+    stroke: currentColor;
+    /* The opaque interior covers half of this stroke, leaving the shared 4px border. */
+    stroke-width: calc(var(--orbit-ring-width) * 2);
+}
+
+/* Keep the navigation border and corner radius unchanged when the canvas shrinks. */
+.navigation-theme-outline rect { vector-effect: non-scaling-stroke; }
+
+.navigation-theme-surface { fill: var(--colour-background); }
+
+.navigation-theme-icon {
+    position: relative;
+    transition: color 200ms ease;
+}
+
+.navigation-theme-button:focus-visible { outline: none; }
+
+.navigation-theme-button:focus-visible .navigation-theme-star { transform: rotate(90deg); }
+
+.navigation-theme-button:focus-visible .navigation-theme-icon { color: var(--colour-accent); }
+
+@media (hover: hover) {
+    .navigation-theme-button:hover .navigation-theme-star { transform: rotate(90deg); }
+}
+
 .navigation-link {
     position: relative;
     display: grid;
@@ -206,8 +263,7 @@
     pointer-events: none;
 }
 
-.navigation-link::before,
-.navigation-theme-slot::before {
+.navigation-link::before {
     display: block;
     width: var(--navigation-button-size);
     aspect-ratio: 1;
@@ -215,22 +271,28 @@
     border-radius: 50%;
     background-color: var(--colour-background);
     content: "";
-    transition: background-color 180ms ease, border-radius 180ms ease, transform 180ms ease;
+    transition: background-color 200ms ease, border-radius 200ms ease, transform 200ms ease;
 }
 
-.navigation-link::after {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: var(--navigation-button-size);
-    border-radius: 50%;
-    aspect-ratio: 1;
-    background-color: var(--colour-text);
-    content: "";
-    opacity: var(--navigation-travel-progress, 0);
-    transform: translate(-50%, -50%);
-    transition: opacity calc(var(--scene-travel-duration) * 0.08) linear;
-    pointer-events: none;
+.navigation-link::before {
+    background-color: color-mix(
+        in srgb,
+        var(--colour-text) calc(var(--navigation-travel-progress, 0) * 100%),
+        var(--colour-background)
+    );
+}
+
+.navigation-link-travelling::before {
+    transition: border-radius 200ms ease, transform 200ms ease;
+}
+
+.navigation-link-requested::before {
+    border-radius: 0.5rem;
+    transform: rotate(45deg);
+}
+
+.navigation-link-arriving::before {
+    transition-duration: var(--scene-visual-duration);
 }
 
 .navigation-link-active::before {
@@ -239,12 +301,13 @@
 }
 
 .navigation-label {
+    --reveal-duration: 0ms;
+    --reveal-closed-clip: var(--navigation-label-hidden);
     position: absolute;
     z-index: 1;
     top: 50%;
     left: 50%;
     width: max-content;
-    clip-path: var(--navigation-label-hidden);
     font-size: var(--text-body);
     font-weight: 700;
     transform: var(--navigation-label-position);
@@ -253,9 +316,11 @@
 }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-label {
+    --reveal-duration: 200ms;
     visibility: visible;
-    transition: clip-path 180ms ease;
 }
+
+.navigation-label-value { display: block; }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible::before {
     border-radius: 0.5rem;
@@ -263,7 +328,7 @@
 }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:focus-visible .navigation-label {
-    clip-path: inset(0);
+    --reveal-closed-clip: inset(0);
 }
 
 /* Touch browsers can retain :hover after a tap; only hover-capable inputs get these effects. */
@@ -274,7 +339,7 @@
     }
 
     :is(.navigation-home-ready, .navigation-effects-ready) .navigation-link:hover .navigation-label {
-        clip-path: inset(0);
+        --reveal-closed-clip: inset(0);
     }
 }
 
@@ -284,8 +349,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .navigation-link::before,
-    .navigation-theme-slot::before,
-    .navigation-label {
+    .navigation-theme-star,
+    .navigation-theme-icon {
         transition: none;
     }
 
@@ -315,7 +380,6 @@
         width: 100%;
         aspect-ratio: auto;
         padding: 0.5rem max(1rem, env(safe-area-inset-right)) calc(0.75rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-        background: var(--colour-background);
         opacity: 1;
         visibility: visible;
         transform: none;
@@ -329,10 +393,27 @@
         transform: none;
     }
 
-    .navigation-controlled .navigation-theme-slot,
     .navigation-controlled .navigation-copyright { display: none; }
 
+    /* One theme control moves out of the bottom row into the logo's top band. */
+    .navigation-controlled .navigation-theme-slot {
+        position: fixed;
+        top: calc(0.5rem + env(safe-area-inset-top));
+        right: calc(0.5rem + env(safe-area-inset-right));
+        bottom: auto;
+        left: auto;
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+
+    .navigation-theme-star { width: 2.5rem; height: 2.5rem; }
+
+    .navigation-theme-icon { width: 1.25rem; height: 1.25rem; }
+
     .navigation-controlled .navigation-label {
+        --reveal-duration: 0ms;
+        --reveal-closed-clip: inset(100% 0 0);
+        --reveal-slide-y: 0.75rem;
         display: block;
         top: auto;
         bottom: calc(100% + 0.5rem);
@@ -340,31 +421,31 @@
         max-width: min(12rem, calc(100vw - 2rem));
         font-size: 0.875rem;
         text-align: center;
-        clip-path: inset(100% 0 0);
         opacity: 0;
         visibility: visible;
-        transform: translate(-50%, 0.75rem);
-        transition: none;
+        transform: translateX(-50%);
     }
 
     .navigation-controlled:not(.navigation-busy) .navigation-link:focus-visible .navigation-label {
-        clip-path: inset(0);
+        --reveal-closed-clip: inset(0);
+        --reveal-slide-y: 0rem;
         opacity: 1;
-        transform: translate(-50%, 0);
     }
 
 }
 
 @media (--narrow-layout) and (hover: hover) {
     .navigation-controlled:not(.navigation-busy) .navigation-link:hover .navigation-label {
-        clip-path: inset(0);
+        --reveal-closed-clip: inset(0);
+        --reveal-slide-y: 0rem;
         opacity: 1;
-        transform: translate(-50%, 0);
     }
 }
 
 @media (--narrow-layout) and (prefers-reduced-motion: no-preference) {
     .navigation-controlled .navigation-label {
-        transition: transform 180ms ease, opacity 180ms ease, clip-path 180ms ease;
+        --reveal-duration: 200ms;
+        /* The label's opacity fade accompanies its shared clip and inner slide. */
+        transition: clip-path var(--reveal-duration) ease, opacity var(--reveal-duration) ease;
     }
 }

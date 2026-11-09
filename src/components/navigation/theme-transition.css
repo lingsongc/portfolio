@@ -1,0 +1,18 @@
+/* Freeze decorative motion and suppress component colour fades while capturing the two palettes. */
+:root[data-theme-revealing] *,
+:root[data-theme-revealing] *::before,
+:root[data-theme-revealing] *::after {
+    animation-play-state: paused !important;
+    transition: none !important;
+}
+
+:root[data-theme-revealing]::view-transition-group(root),
+:root[data-theme-revealing]::view-transition-old(root),
+:root[data-theme-revealing]::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+:root[data-theme-revealing]::view-transition-image-pair(root) { isolation: auto; }
+:root[data-theme-revealing]::view-transition-old(root) { z-index: 0; }
+:root[data-theme-revealing]::view-transition-new(root) { z-index: 1; }

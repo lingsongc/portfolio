@@ -1,4 +1,4 @@
-/* root */
+/* Defines shared colour, typography, timing, and responsive layout tokens. */
 
 :root {
     /* Keep these phase lengths aligned with the coordinator and circle travel clocks. */
@@ -11,9 +11,13 @@
     --colour-text: #f7f1e8;
     --colour-text-muted: #b9aabd;
     --colour-accent: #f15153;
+    --colour-logo: #7916fa;
     --colour-line: #725d7b;
     --colour-image-blank: #d6d1c9;
     --colour-circle-void: #000;
+    --colour-circle-transition: #000;
+    --colour-text-on-dark: #f7f1e8;
+    --colour-image-shade: #120818;
 
     --font-statement: "Notable", "Arial Black", sans-serif;
     --font-title: "Sora", Arial, sans-serif;
@@ -39,13 +43,29 @@
     --navigation-rail-inset: 0.625rem;
 }
 
+/* The theme button selects this palette; preference persistence remains deferred. */
+:root[data-theme="light"] {
+    color-scheme: light;
+    --colour-circle-void: #fff;
+    --colour-circle-transition: #fff;
+    --colour-background: #f5f3fa;
+    --colour-surface: #e9e3f1;
+    --colour-text: #24152f;
+    --colour-text-muted: #6e6179;
+    --colour-accent: #f15153;
+    --colour-line: #a698b3;
+    --colour-image-blank: #e2dce9;
+}
+
 /* The named query is expanded from narrowLayoutWidth in vite.config.ts. */
 @media (--narrow-layout) {
     :root {
         --scene-layout-narrow: 1;
         --section-padding-inline: clamp(1.25rem, 5vw, 2.5rem);
-        --scene-top-space: max(2rem, env(safe-area-inset-top));
+        --scene-top-space: calc(5rem + env(safe-area-inset-top));
         --scene-bottom-space: calc(5.5rem + env(safe-area-inset-bottom));
+        --navigation-bar-height: calc(0.5rem + var(--navigation-link-size) + 0.75rem + env(safe-area-inset-bottom));
+        --scene-fade-size: 2rem;
         --home-circle-size: clamp(10rem, 54vw, 21rem);
     }
 }

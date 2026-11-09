@@ -15,7 +15,10 @@
     stroke-opacity: 0.32;
 }
 
-.background-grid-tear-reveal {
-    fill: var(--colour-accent);
-    opacity: 0.5;
+.background-grid-tear-edge {
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }

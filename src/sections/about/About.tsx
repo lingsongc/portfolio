@@ -40,7 +40,7 @@ export function About({ circleAnchorRef, narrowLayout, lifecycle, onMainCircleIm
             aria-labelledby="about-title"
         >
             <div ref={circleAnchorRef} className="about-circle-anchor" aria-hidden="true" />
-            <div className="about-text">
+            <div className="about-text reveal-clip" data-reveal-open={contentVisible}>
                 <h2 id="about-title" tabIndex={-1}>About Me</h2>
                 <div className="about-description">
                     {paragraphs.map((paragraph) => (

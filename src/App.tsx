@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useId, useRef } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef } from "react";
 import { BackgroundGrid, type BackgroundGridHandle } from "./components/background-grid/BackgroundGrid";
+import { HomeButton } from "./components/home-button/HomeButton";
 import { MainCircle } from "./components/main-circle/MainCircle";
 import { useMainCircle } from "./components/main-circle/useMainCircle";
 import { Navigation } from "./components/navigation/Navigation";
+import { useThemeTransition } from "./components/navigation/useThemeTransition";
 import { ScenePanel } from "./components/scene-panel/ScenePanel";
 import { resolveMainCircleSceneEndpoint } from "./motion/sceneCircleGeometry";
 import { useSlideshowCoordinator } from "./motion/useSlideshowCoordinator";
@@ -52,6 +54,7 @@ export default function App() {
     const contactCircleRef = useRef<HTMLDivElement>(null);
     const narrowLayout = useNarrowLayout();
     const slideshow = useSlideshowCoordinator();
+    const theme = useThemeTransition(slideshow.reducedMotion, slideshow.busy);
     const previousScenePhaseRef = useRef<ScenePhase | null>(null);
     const previousSettledVersionRef = useRef(slideshow.settledVersion);
     // Keeps reduced-motion input still while forwarding ordinary wheel intent to the grid owner.
@@ -61,11 +64,14 @@ export default function App() {
             slideshow.reducedMotion ? 0 : durationMs,
         );
     }, [slideshow.reducedMotion]);
-    // Removes any active deformation immediately when reduced motion becomes preferred.
-    useEffect(() => {
-        if (slideshow.reducedMotion) backgroundGridRef.current?.setScrollFeedback(0, 0);
-    }, [slideshow.reducedMotion]);
+    // Reduced motion and non-wheel requests clear partial feedback before the next paint.
+    useLayoutEffect(() => {
+        if (slideshow.reducedMotion || (slideshow.phase === "closing" && slideshow.source !== "wheel")) {
+            backgroundGridRef.current?.setScrollFeedback(0, 0);
+        }
+    }, [slideshow.reducedMotion, slideshow.phase, slideshow.source]);
     const sceneInput = useSceneInput({
+        enabled: !theme.busy,
         activeScrollerRef: activeSceneScrollerRef,
         currentSceneId: slideshow.currentSceneId,
         scrollNavigationEnabled: !narrowLayout,
@@ -94,6 +100,9 @@ export default function App() {
             viewportHeight: window.innerHeight,
             circleWidth,
             narrowLayout,
+            aboutCenter: sceneId === "about" && anchorBounds
+                ? { top: anchorBounds.top + anchorBounds.height / 2, left: anchorBounds.left + anchorBounds.width / 2 }
+                : undefined,
             narrowCenter: anchorBounds ? { top: anchorBounds.top + anchorBounds.height / 2, left: anchorBounds.left + anchorBounds.width / 2 } : undefined,
             experienceCenter: experienceBounds
                 ? {
@@ -135,13 +144,14 @@ export default function App() {
 
     // Converts a named control activation into one direct, non-queued request.
     const requestScene = useCallback((sceneId: SceneId) => {
+        if (theme.busy) return;
         sceneInput.cancelPendingInput();
         slideshow.requestScene({
             kind: "direct",
             destinationSceneId: sceneId,
             source: "navigation",
         });
-    }, [slideshow.requestScene, sceneInput.cancelPendingInput]);
+    }, [slideshow.requestScene, sceneInput.cancelPendingInput, theme.busy]);
 
     useEffect(() => {
         const previousPhase = previousScenePhaseRef.current;
@@ -159,13 +169,23 @@ export default function App() {
 
     return (
         <>
-            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId} />
+            <BackgroundGrid ref={backgroundGridRef} circleGeometry={mainCircle.geometry} circleMaskId={circleFadeMaskId}
+                tearProgress={slideshow.source === "wheel" && (slideshow.phase === "closing" || slideshow.phase === "moving")
+                    && slideshow.tearProgress < 1 ? slideshow.tearProgress : null}
+                tearDirection={slideshow.direction === "backward" ? -1 : 1} />
 
             <main className="slideshow-stage">
                 <div ref={circleMeasureRef} className="slideshow-circle-measure" aria-hidden="true" />
+                <HomeButton
+                    busy={slideshow.busy || theme.busy}
+                    active={slideshow.currentSceneId === "home"}
+                    onHomeRequest={() => requestScene("home")}
+                />
                 <Navigation
+                    lightMode={theme.lightMode}
+                    onThemeToggle={theme.toggleTheme}
                     sceneControl={{
-                        busy: slideshow.busy,
+                        busy: slideshow.busy || theme.busy,
                         currentSceneId: slideshow.currentSceneId,
                         destinationSceneId: slideshow.requestedSceneId,
                         onSceneRequest: requestScene,
@@ -175,6 +195,8 @@ export default function App() {
                 />
 
                 <MainCircle
+                    transitioning={slideshow.busy}
+                    surfaceCovered={slideshow.currentSceneId === "contact"}
                     geometry={mainCircle.geometry}
                     scrollPlacement={mainCircle.scrollPlacement}
                     image={mainCircle.image}
@@ -246,6 +268,7 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="skill-title"
                     overflowRef={activeSceneScrollerRef}
+                    foreground
                 >
                     <Skills
                         circleAnchorRef={skillCircleRef}
@@ -260,6 +283,7 @@ export default function App() {
                     interactive={!slideshow.busy}
                     headingFocusTargetId="contact-title"
                     overflowRef={activeSceneScrollerRef}
+                    foreground
                 >
                     <Contact circleAnchorRef={contactCircleRef} lifecycle={slideshow.lifecycleFor("contact")} />
                 </ScenePanel>

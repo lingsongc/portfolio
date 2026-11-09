@@ -7,12 +7,11 @@ import {
     touchDragIntent, touchVerticalProgress, WHEEL_INTENT_PAUSE_MS, WHEEL_INTENT_THRESHOLD,
 } from "./sceneInputModel";
 
-const WHEEL_FEEDBACK_RESET_MS = 180;
 const WHEEL_FEEDBACK_EVENT_MS = 140;
-const WHEEL_FEEDBACK_HOLD_MS = 60;
 const WHEEL_FEEDBACK_RETURN_MS = 300;
 
 type SceneInputOptions = {
+    enabled?: boolean;
     scrollNavigationEnabled: boolean;
     activeScrollerRef: RefObject<HTMLDivElement | null>;
     currentSceneId: SceneId;
@@ -32,6 +31,7 @@ type TouchGesture = {
 
 // Owns page-level wheel, touch, and keyboard events around the pure input model.
 export function useSceneInput({
+    enabled = true,
     scrollNavigationEnabled,
     activeScrollerRef,
     currentSceneId,
@@ -43,20 +43,18 @@ export function useSceneInput({
     const touchGestureRef = useRef<TouchGesture | null>(null);
     const previousPhaseRef = useRef(phase);
     const intentTimerRef = useRef<number | undefined>(undefined);
-    const commitTimerRef = useRef<number | undefined>(undefined);
     const neutralTimerRef = useRef<number | undefined>(undefined);
 
     // Cancels accumulated browser-event state before a direct request or phase change.
-    const cancelPendingInput = useCallback(() => {
+    const cancelPendingInput = useCallback((clearFeedback = true) => {
         window.clearTimeout(intentTimerRef.current);
-        window.clearTimeout(commitTimerRef.current);
         window.clearTimeout(neutralTimerRef.current);
         intentTimerRef.current = undefined;
-        commitTimerRef.current = undefined;
         neutralTimerRef.current = undefined;
         wheelIntentRef.current = createWheelIntentState();
         touchGestureRef.current = null;
-        onWheelFeedbackChange(0, WHEEL_FEEDBACK_RESET_MS);
+        // Direct controls must clear immediately; only wheel commits retain the painted preview.
+        if (clearFeedback) onWheelFeedbackChange(0, 0);
     }, [onWheelFeedbackChange]);
 
     // Clears pending timers and gesture state when the hook unmounts.
@@ -66,17 +64,17 @@ export function useSceneInput({
     useEffect(() => {
         const previousPhase = previousPhaseRef.current;
         previousPhaseRef.current = phase;
-        if (phase !== "idle" || !scrollNavigationEnabled) cancelPendingInput();
+        if (!enabled || phase !== "idle" || !scrollNavigationEnabled) cancelPendingInput(phase !== "closing");
         else if (previousPhase !== "idle") {
             // A completed transition must observe a quiet interval before accepting momentum.
             wheelIntentRef.current = createWheelIntentState(true, performance.now());
         }
-    }, [cancelPendingInput, phase, scrollNavigationEnabled]);
+    }, [cancelPendingInput, enabled, phase, scrollNavigationEnabled]);
 
     // Converts unowned wheel input into deliberate adjacent-scene requests while idle.
     useEffect(() => {
         // Narrow layouts leave scrolling to section content and use named navigation controls.
-        if (phase !== "idle" || !scrollNavigationEnabled) return;
+        if (!enabled || phase !== "idle" || !scrollNavigationEnabled) return;
 
         const scheduleNeutralRelease = () => {
             window.clearTimeout(neutralTimerRef.current);
@@ -127,12 +125,8 @@ export function useSceneInput({
             }
             window.clearTimeout(intentTimerRef.current);
             const committedDirection = update.committedDirection;
-            onWheelFeedbackChange(committedDirection === "forward" ? 1 : -1, WHEEL_FEEDBACK_EVENT_MS);
-            commitTimerRef.current = window.setTimeout(() => {
-                commitTimerRef.current = undefined;
-                onWheelFeedbackChange(0, WHEEL_FEEDBACK_RESET_MS);
-                requestScene({ kind: "adjacent", direction: committedDirection, source: "wheel" });
-            }, WHEEL_FEEDBACK_EVENT_MS + WHEEL_FEEDBACK_HOLD_MS);
+            // Start closing on the committing notch; the grid captures its painted preview.
+            requestScene({ kind: "adjacent", direction: committedDirection, source: "wheel" });
         };
 
         window.addEventListener("wheel", handleWheel, { passive: false });
@@ -140,14 +134,13 @@ export function useSceneInput({
         return () => {
             window.removeEventListener("wheel", handleWheel);
             window.clearTimeout(intentTimerRef.current);
-            window.clearTimeout(commitTimerRef.current);
             window.clearTimeout(neutralTimerRef.current);
         };
-    }, [activeScrollerRef, currentSceneId, onWheelFeedbackChange, phase, requestScene, scrollNavigationEnabled]);
+    }, [activeScrollerRef, currentSceneId, enabled, onWheelFeedbackChange, phase, requestScene, scrollNavigationEnabled]);
 
     // Tracks one vertical touch gesture and commits its scene request on release.
     useEffect(() => {
-        if (phase !== "idle" || !scrollNavigationEnabled) return;
+        if (!enabled || phase !== "idle" || !scrollNavigationEnabled) return;
         const handleTouchStart = (event: TouchEvent) => {
             if (event.touches.length !== 1 || isInteractiveInputTarget(event.target)) {
                 touchGestureRef.current = null;
@@ -203,11 +196,11 @@ export function useSceneInput({
             window.removeEventListener("touchend", handleTouchEnd);
             window.removeEventListener("touchcancel", handleTouchCancel);
         };
-    }, [activeScrollerRef, currentSceneId, phase, requestScene, scrollNavigationEnabled]);
+    }, [activeScrollerRef, currentSceneId, enabled, phase, requestScene, scrollNavigationEnabled]);
 
     // Gives scroll owners first keyboard priority, then requests adjacent scenes.
     useEffect(() => {
-        if (phase !== "idle") return;
+        if (!enabled || phase !== "idle") return;
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.defaultPrevented || event.repeat || isInteractiveInputTarget(event.target)) return;
             const direction = keyboardSceneDirection(event.key);
@@ -225,7 +218,7 @@ export function useSceneInput({
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [activeScrollerRef, cancelPendingInput, phase, requestScene]);
+    }, [activeScrollerRef, cancelPendingInput, enabled, phase, requestScene]);
 
     return { cancelPendingInput };
 }
@@ -236,12 +229,16 @@ function isInteractiveInputTarget(target: EventTarget | null) {
     return target.closest("a, button, input, textarea, select, option, [contenteditable]:not([contenteditable='false']), [role='button'], [role='slider'], [role='listbox']") !== null;
 }
 
-// Orders the target's nested viewport before the active Section viewport.
+// Preserves every nested reading boundary before falling back to the active scene.
 function inputScrollOwners(target: EventTarget | null, activeScroller: HTMLElement | null) {
-    const nestedOwner = target instanceof Element ? target.closest<HTMLElement>("[data-scene-scroll-owner]") : null;
-    return nestedOwner && nestedOwner !== activeScroller
-        ? [nestedOwner, ...(activeScroller ? [activeScroller] : [])]
-        : activeScroller ? [activeScroller] : [];
+    const owners: HTMLElement[] = [];
+    let owner = target instanceof Element ? target.closest<HTMLElement>("[data-scene-scroll-owner]") : null;
+    while (owner && owner !== activeScroller) {
+        owners.push(owner);
+        owner = owner.parentElement?.closest<HTMLElement>("[data-scene-scroll-owner]") ?? null;
+    }
+    if (activeScroller) owners.push(activeScroller);
+    return owners;
 }
 
 // Returns the first viewport that can still move in the requested direction.

@@ -75,7 +75,7 @@ export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircl
             aria-labelledby="project-title"
         >
             <h2 id="project-title" className="project-title" tabIndex={-1}>
-                <span className="project-title-text">Projects</span>
+                <span className="project-title-text reveal-slide" data-reveal-open={transitionState === "visible"}>Projects</span>
             </h2>
             {narrowLayout ? (
                 <>
@@ -110,7 +110,7 @@ export function Projects({ circleAnchorRef, narrowLayout, lifecycle, onMainCircl
                 href={activeProject.href}
                 aria-label={`View ${activeProject.name} project details`}
             >
-                <span className="project-detail-label">View Project</span>
+                <span>View Project</span>
                 <IconArrowUpRight aria-hidden="true" />
             </a>
         </section>

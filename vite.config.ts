@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 // Change this one width to move every homepage narrow-layout breakpoint together.
 const narrowLayoutWidth = "56rem";
 
-// Configures the homepage and project pages as separate build entries.
+// Configures the homepage, project pages, and GitHub Pages fallback as separate build entries.
 export default defineConfig({
     plugins: [react()],
     css: {
@@ -23,6 +23,7 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: "index.html",
+                notFound: "404.html",
                 modulo: "projects/modulo/index.html",
                 pneurelief: "projects/pneurelief/index.html",
             },

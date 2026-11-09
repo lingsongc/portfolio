@@ -1,17 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-    createScrollTearRevealPaths,
+    createTearEdgePath,
     createWarpedGridPaths,
-    easeOutScrollProgress,
-    scrollFeedbackDisplacementX,
-    scrollRevealEdgeOffset,
     warpGridPoint,
     type GridCircle,
-    type GridScrollFeedback,
 } from "./backgroundGridGeometry";
 
+import { createGridTear } from "./backgroundGridTearGeometry";
+
 const circle: GridCircle = { x: 0, y: 0, radius: 10 };
-const forwardFeedback: GridScrollFeedback = { height: 900, progress: 0.5, width: 1440 };
 
 // Verifies grid path generation and the radial warp calculations.
 describe("background grid geometry", () => {
@@ -24,6 +21,16 @@ describe("background grid geometry", () => {
         const coordinates = pathCoordinates(firstPath);
 
         expect(coordinates.every(([x]) => x === -48)).toBe(true);
+    });
+
+    it("places exactly one vertical line at the center of every viewport", () => {
+        for (const width of [390, 901, 1440, 1500]) {
+            const paths = createWarpedGridPaths(width, 900, null);
+            const verticals = paths.map(pathCoordinates).filter(points => points.every(([x]) => x === points[0][0]));
+            expect(verticals.filter(points => points[0][0] === width / 2)).toHaveLength(1);
+            const anchors = verticals.map(points => points[0][0]);
+            expect(anchors.slice(1).every((x, index) => x - anchors[index] === 48)).toBe(true);
+        }
     });
 
     it("leaves points outside the warp falloff unchanged", () => {
@@ -50,92 +57,44 @@ describe("background grid geometry", () => {
         expect(paths.every((path) => !path.includes("NaN") && !path.includes("Infinity"))).toBe(true);
     });
 
-    it("keeps vertical coordinates unchanged when scroll feedback is active", () => {
-        const [, restingY] = warpGridPoint(680, 850, null);
-        const [, feedbackY] = warpGridPoint(680, 850, null, forwardFeedback);
-
-        expect(feedbackY).toBe(restingY);
+    it("splits rows crossed by the tear instead of bridging the cavity", () => {
+        const tear = createGridTear(1440, 900, 1);
+        const resting = createWarpedGridPaths(1440, 900, null);
+        const tearing = createWarpedGridPaths(1440, 900, null, 48, tear);
+        expect(tearing.some((path) => (path.match(/M/g) ?? []).length === 2)).toBe(true);
+        expect(tearing[0]).toBe(resting[0]);
+        expect(createTearEdgePath(tear, null).match(/M/g)).toHaveLength(2);
+        expect(createTearEdgePath(createGridTear(1440, 900, 0), null)).toBe("");
     });
 
-    it("anchors forward and backward feedback to opposite viewport edges", () => {
-        expect(scrollFeedbackDisplacementX(710, 875, forwardFeedback)).not.toBe(0);
-        expect(scrollFeedbackDisplacementX(680, 50, forwardFeedback)).toBe(0);
-        expect(scrollFeedbackDisplacementX(710, 25, { ...forwardFeedback, progress: -0.5 })).not.toBe(0);
-        expect(scrollFeedbackDisplacementX(680, 850, { ...forwardFeedback, progress: -0.5 })).toBe(0);
-    });
-
-    it("caps the tear height at fifteen percent of the viewport", () => {
-        const completeFeedback = { ...forwardFeedback, progress: 1 };
-
-        expect(scrollFeedbackDisplacementX(720, 764, completeFeedback)).toBe(0);
-        expect(scrollFeedbackDisplacementX(720, 766, completeFeedback)).not.toBe(0);
-    });
-
-    it("preserves the equilateral base width while curving both sides inward", () => {
-        const completeFeedback = { ...forwardFeedback, progress: 1 };
-
-        expect(scrollFeedbackDisplacementX(797, 900, completeFeedback)).not.toBe(0);
-        expect(scrollFeedbackDisplacementX(798, 900, completeFeedback)).toBe(0);
-        expect(scrollFeedbackDisplacementX(729, 833, completeFeedback)).not.toBe(0);
-        expect(scrollFeedbackDisplacementX(730, 833, completeFeedback)).toBe(0);
-    });
-
-    it("separates aggressive grid crumpling from the restrained red reveal", () => {
-        const completeFeedback = { ...forwardFeedback, progress: 1 };
-        const gridOffsets: number[] = [];
-        const revealOffsets: number[] = [];
-
-        for (let y = 766; y <= 900; y += 8) {
-            const depth = y - 765;
-            const localHalfWidth = 135
-                / Math.sqrt(3)
-                * Math.pow(depth / 135, 3);
-            const gridDisplacement = scrollFeedbackDisplacementX(720, y, completeFeedback);
-            const revealDisplacement = scrollRevealEdgeOffset(1, y, completeFeedback);
-
-            gridOffsets.push(Math.abs(gridDisplacement - localHalfWidth) / localHalfWidth);
-            revealOffsets.push(Math.abs(revealDisplacement - localHalfWidth) / localHalfWidth);
+    it("keeps both torn lips on the exact top or bottom boundary as a preview returns", () => {
+        for (const height of [900, 901, 844]) {
+            const resting = createWarpedGridPaths(1440, height, null);
+            const centerIndex = resting.findIndex(path => pathCoordinates(path).every(([x]) => x === 720));
+            for (const direction of [-1, 1] as const) {
+                for (const preview of [0.6, 0.2, 0.001]) {
+                    const tear = createGridTear(1440, height, preview * direction);
+                    const paths = createWarpedGridPaths(1440, height, null, 48, tear);
+                    const edgeY = direction === 1 ? height : 0;
+                    const edgePoints = pathCoordinates(paths[centerIndex]).filter(([, y]) => y === edgeY);
+                    expect(edgePoints).toHaveLength(2);
+                    expect(edgePoints[0][0]).toBeLessThan(720);
+                    expect(edgePoints[1][0]).toBeGreaterThan(720);
+                }
+            }
         }
-
-        expect(Math.max(...gridOffsets)).toBeGreaterThan(0.75);
-        expect(Math.max(...gridOffsets)).toBeLessThanOrEqual(2);
-        expect(Math.max(...revealOffsets)).toBeGreaterThan(0.03);
-        expect(Math.max(...revealOffsets)).toBeLessThanOrEqual(0.2);
     });
 
-    it("front-loads visual growth while preserving the complete cap", () => {
-        expect(easeOutScrollProgress(1 / 3)).toBeCloseTo(5 / 9);
-        expect(easeOutScrollProgress(2 / 3)).toBeCloseTo(8 / 9);
-        expect(easeOutScrollProgress(1)).toBe(1);
-    });
-
-    it("allows only a small horizontal stretch beyond complete progress", () => {
-        const complete = scrollFeedbackDisplacementX(720, 900, { ...forwardFeedback, progress: 1 });
-        const stretched = scrollFeedbackDisplacementX(720, 900, { ...forwardFeedback, progress: 1.04 });
-
-        expect(stretched).toBeGreaterThan(complete);
-        expect(stretched).toBeCloseTo(complete * 1.04);
-    });
-
-    it("builds the red reveal inside the same capped tear boundary", () => {
-        expect(createScrollTearRevealPaths(1440, 900, 0)).toEqual({
-            fill: "",
-            leftSeam: "",
-            rightSeam: "",
-        });
-        const tearPaths = createScrollTearRevealPaths(1440, 900, 1);
-        expect(createScrollTearRevealPaths(1440, 900, 1)).toEqual(tearPaths);
-        const coordinates = pathCoordinates(tearPaths.fill);
-        const xValues = coordinates.map(([x]) => x);
-        const yValues = coordinates.map(([, y]) => y);
-
-        expect(Math.min(...xValues)).toBeLessThan(720);
-        expect(Math.max(...xValues)).toBeGreaterThan(720);
-        expect(Math.min(...yValues)).toBe(765);
-        expect(Math.max(...yValues)).toBe(900);
-        expect(pathCoordinates(tearPaths.leftSeam).map(([, y]) => y)).toEqual(
-            pathCoordinates(tearPaths.rightSeam).map(([, y]) => y),
-        );
+    it("keeps both directions finite across viewport sizes and the full tear", () => {
+        for (const [width, height] of [[1440, 900], [390, 844], [900, 400]]) {
+            for (const direction of [-1, 1] as const) {
+                for (const progress of [0, 0.1, 0.5, 0.9, 1]) {
+                    const tear = createGridTear(width, height, 0, progress, direction);
+                    const paths = createWarpedGridPaths(width, height, null, 48, tear);
+                    expect(paths.every((path) => !/NaN|Infinity/.test(path))).toBe(true);
+                }
+            }
+        }
     });
 
 });

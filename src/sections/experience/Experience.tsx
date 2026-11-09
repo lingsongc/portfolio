@@ -68,7 +68,7 @@ export function Experience({ circleAnchorRef, circleGeometry, circleFadeMaskId, 
         >
             <div className="experience-copy">
                 <header className="experience-header">
-                    <div className="experience-header-content">
+                    <div className="experience-header-content reveal-slide" data-reveal-open={contentVisible}>
                         <h2 id="experience-title" className="experience-title" tabIndex={-1}>
                             {(["experience", "education"] as const).map((type) => (
                                 <span className="experience-title-option" key={type}>
@@ -108,7 +108,8 @@ export function Experience({ circleAnchorRef, circleGeometry, circleFadeMaskId, 
                 
                 <div className="experience-content-region">
                     <article
-                        className="experience-text"
+                        className="experience-text reveal-clip"
+                        data-reveal-open={contentVisible}
                         data-scene-scroll-owner
                         tabIndex={contentVisible ? 0 : -1}
                         aria-label={`${activeEvent.title} details`}

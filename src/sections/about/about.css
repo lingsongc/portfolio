@@ -1,10 +1,16 @@
 /* about */
 
-:root { --about-circle-size: 160vh; }
+:root {
+    --about-circle-size: 160vh;
+    --about-content-gap: clamp(1.5rem, 3vw, 3rem);
+    /* Let the visible arc yield to the text and navigation, without another breakpoint. */
+    --about-circle-arc: min(64vh, max(0px, calc(100vw - min(42rem, 48vw) - var(--navigation-link-size) - var(--navigation-rail-inset) - 2 * var(--about-content-gap))));
+    /* Compensate for half the arc's contraction to keep the subject in the exposed photo. */
+    --about-image-transform: translate(calc(21% + (64vh - var(--about-circle-arc)) / 2), -20%) scale(1.15);
+}
 
 .about-container {
-    --about-circle-arc: 64vh;
-
+    position: relative;
     grid-template-columns:
         var(--about-circle-arc)
         minmax(0, 1fr)
@@ -17,17 +23,9 @@
 .about-text {
     display: grid;
     grid-column: 2;
-    width: min(42rem, 48vw);
+    width: min(42rem, calc(100% - 2 * var(--about-content-gap)));
+    min-width: 0;
     gap: clamp(1.5rem, 3vw, 2.5rem);
-    visibility: hidden;
-    clip-path: inset(0 50%);
-    transition: clip-path var(--scene-visual-duration) ease, visibility 0s linear var(--scene-visual-duration);
-}
-
-.about-content-visible .about-text {
-    visibility: visible;
-    clip-path: inset(0);
-    transition-delay: 0s;
 }
 
 .about-description {
@@ -64,7 +62,18 @@
     font-size: var(--text-body);
 }
 
-.about-circle-anchor { display: none; }
+/* App measures this section-owned endpoint for both wide and narrow compositions. */
+.about-circle-anchor {
+    /* Wide text may scroll, but its measured image endpoint stays fixed to the viewport. */
+    position: fixed;
+    top: 50dvh;
+    left: calc(var(--about-circle-arc) - var(--about-circle-size) / 2);
+    /* A point anchor cannot enlarge the active scene's native scroll boundary. */
+    width: 0;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
 
 @media (--narrow-layout) {
     :root {
@@ -104,11 +113,4 @@
     .about-resume-link { margin-top: auto; }
 
     .about-statistic-amount { font-size: clamp(2.5rem, 12vw, 5rem); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .about-text {
-        clip-path: inset(0);
-        transition: none;
-    }
 }
