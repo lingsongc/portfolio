@@ -46,6 +46,7 @@
 /* The theme button selects this palette; preference persistence remains deferred. */
 :root[data-theme="light"] {
     color-scheme: light;
+    --colour-circle-void: #fff;
     --colour-circle-transition: #fff;
     --colour-background: #f5f3fa;
     --colour-surface: #e9e3f1;
