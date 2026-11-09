@@ -27,7 +27,7 @@ main {
 
 ::selection {
     background-color: var(--colour-logo);
-    color: var(--colour-text);
+    color: var(--colour-text-on-dark);
 }
 
 h1,

@@ -64,7 +64,8 @@
 
 /* App measures this section-owned endpoint for both wide and narrow compositions. */
 .about-circle-anchor {
-    position: absolute;
+    /* Wide text may scroll, but its measured image endpoint stays fixed to the viewport. */
+    position: fixed;
     top: 50dvh;
     left: calc(var(--about-circle-arc) - var(--about-circle-size) / 2);
     /* A point anchor cannot enlarge the active scene's native scroll boundary. */

@@ -22,7 +22,9 @@ export function useSlideshowCoordinator() {
     const phaseFrameRef = useRef(0);
     const travelFrameRef = useRef(0);
 
+    // Updates event handlers' state immediately while scheduling the matching React render.
     const commit = useCallback((next: CoordinatorState) => { stateRef.current = next; setState(next); }, []);
+    // Stops active clocks and resolves the destination when the environment changes.
     const settleRequestedScene = useCallback((refreshLayout = false) => {
         const current = stateRef.current;
         if (current.phase === "idle" && !refreshLayout) return false;
@@ -32,6 +34,7 @@ export function useSlideshowCoordinator() {
         return true;
     }, [commit]);
 
+    // Accepts one idle request and resolves reduced-motion navigation without running phase clocks.
     const requestScene = useCallback((request: SceneRequest): SceneRequestResult => {
         const current = stateRef.current;
         const update = requestSceneTransition(current, request);

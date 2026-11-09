@@ -328,7 +328,7 @@
     stroke-width: var(--icon-stroke-width);
 }
 
-.project-detail-label { display: none; }
+.project-container .project-detail-label { display: none; }
 
 @media (--narrow-layout) {
     :root { --project-circle-size: min(82vw, 30rem); }

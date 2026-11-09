@@ -144,6 +144,7 @@ export function transientRailMarkerProgress(fromSceneId: SceneId, toSceneId: Sce
     });
 }
 
+// Keeps visual marker progress within the requested interval.
 function clamp(value: number, minimum: number, maximum: number) {
     return Math.min(Math.max(value, minimum), maximum);
 }
