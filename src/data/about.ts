@@ -35,8 +35,8 @@ export const homeDetails: HomeDetails = {
 }
 
 const aboutStatistics: AboutStatistics[] = [
-    { id: "years", amount: 5, detail: "Years of Experience" },
-    { id: "projects", amount: 5, detail: "Projects Completed" }
+    { id: "years", amount: 3, detail: "Years of Experience" },
+    { id: "projects", amount: 2, detail: "Projects Completed" }
 ]
 
 export const aboutDetails: AboutDetails = {
