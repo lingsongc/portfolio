@@ -60,7 +60,7 @@ export function useThemeTransition(reducedMotion: boolean, sceneBusy: boolean) {
             const animation = root.animate({
                 clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`],
             }, {
-                duration: 500,
+                duration: 400,
                 easing: "ease-in-out",
                 fill: "both",
                 pseudoElement: "::view-transition-new(root)",

@@ -211,7 +211,7 @@
     position: absolute;
     width: 3rem;
     height: 3rem;
-    transition: transform 180ms ease;
+    transition: transform 200ms ease;
 }
 
 .navigation-theme-outline {
@@ -226,7 +226,10 @@
 
 .navigation-theme-surface { fill: var(--colour-background); }
 
-.navigation-theme-icon { position: relative; }
+.navigation-theme-icon {
+    position: relative;
+    transition: color 200ms ease;
+}
 
 .navigation-theme-button:focus-visible { outline: none; }
 
@@ -268,7 +271,7 @@
     border-radius: 50%;
     background-color: var(--colour-background);
     content: "";
-    transition: background-color 180ms ease, border-radius 180ms ease, transform 180ms ease;
+    transition: background-color 200ms ease, border-radius 200ms ease, transform 200ms ease;
 }
 
 .navigation-link::before {
@@ -280,7 +283,7 @@
 }
 
 .navigation-link-travelling::before {
-    transition: background-color calc(var(--scene-travel-duration) * 0.08) linear, border-radius 180ms ease, transform 180ms ease;
+    transition: border-radius 200ms ease, transform 200ms ease;
 }
 
 .navigation-link-requested::before {
@@ -313,7 +316,7 @@
 }
 
 :is(.navigation-home-ready, .navigation-effects-ready) .navigation-label {
-    --reveal-duration: 180ms;
+    --reveal-duration: 200ms;
     visibility: visible;
 }
 
@@ -346,7 +349,8 @@
 
 @media (prefers-reduced-motion: reduce) {
     .navigation-link::before,
-    .navigation-theme-star {
+    .navigation-theme-star,
+    .navigation-theme-icon {
         transition: none;
     }
 
@@ -440,7 +444,7 @@
 
 @media (--narrow-layout) and (prefers-reduced-motion: no-preference) {
     .navigation-controlled .navigation-label {
-        --reveal-duration: 180ms;
+        --reveal-duration: 200ms;
         /* The label's opacity fade accompanies its shared clip and inner slide. */
         transition: clip-path var(--reveal-duration) ease, opacity var(--reveal-duration) ease;
     }

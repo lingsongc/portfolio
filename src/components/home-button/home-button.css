@@ -19,7 +19,7 @@
     display: block;
     width: 3rem;
     height: auto;
-    transition: transform 180ms ease;
+    transition: transform 200ms ease;
 }
 
 .home-button:focus-visible { outline: none; }
