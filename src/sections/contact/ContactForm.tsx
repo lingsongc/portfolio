@@ -1,5 +1,8 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { IconArrowUpRight } from "@tabler/icons-react";
+import { useCallback, useEffect, useReducer, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { IconArrowUpRight, IconCheck, IconLoader2 } from "@tabler/icons-react";
+import { ContactVerification } from "./ContactVerification";
+import { ScenePanelOverlay } from "../../components/scene-panel/ScenePanel";
+import { contactVerificationGate, emptyVerificationGate } from "./contactVerificationModel";
 
 // Upper bounds for each field; 254 is the longest valid email address.
 const nameMaxLength = 100;
@@ -8,15 +11,42 @@ const commentsMaxLength = 2000;
 
 type ContactFormValues = { name: string; email: string; comments: string };
 type ContactFormField = keyof ContactFormValues;
+type ContactFormProps = { active: boolean };
 
 const emptyValues: ContactFormValues = { name: "", email: "", comments: "" };
 
 // Previews the contact form locally without navigating or delivering a message.
-export function ContactForm() {
+export function ContactForm({ active }: ContactFormProps) {
     const [values, setValues] = useState(emptyValues);
     const [invalidField, setInvalidField] = useState<ContactFormField | null>(null);
     const [previewed, setPreviewed] = useState(false);
-    const canSend = Object.values(values).every((value) => value.trim() !== "");
+    const [verification, dispatchVerification] = useReducer(contactVerificationGate, emptyVerificationGate);
+    const sendButtonRef = useRef<HTMLButtonElement>(null);
+    const [verificationAttempt, setVerificationAttempt] = useState(0);
+    const canSend = active && !verification.requested && Object.values(values).every((value) => value.trim() !== "");
+    const sendLabel = verification.requested ? "Sending..." : previewed ? "Sent!" : "Send";
+    const SendIcon = verification.requested ? IconLoader2 : previewed ? IconCheck : IconArrowUpRight;
+
+    const receiveToken = useCallback((token: string | null) => dispatchVerification({ type: "token", token }), []);
+
+    // A background result can finish a preview only while this Send request is pending.
+    useEffect(() => {
+        if (!active) {
+            dispatchVerification({ type: "cancel" });
+            return;
+        }
+        if (!verification.requested || !verification.token) return;
+        dispatchVerification({ type: "cancel" });
+        setValues(emptyValues);
+        setInvalidField(null);
+        setPreviewed(true);
+        setVerificationAttempt((current) => current + 1);
+    }, [active, verification.requested, verification.token]);
+
+    // Later background results may be cached, but cancellation always clears Send intent.
+    const cancelVerification = () => {
+        dispatchVerification({ type: "cancel" });
+    };
 
     // Clears stale validation and preview feedback when its source field changes.
     const updateField = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -25,6 +55,7 @@ export function ContactForm() {
         setValues((current) => ({ ...current, [field]: value }));
         if (invalidField === field) setInvalidField(null);
         setPreviewed(false);
+        if (verification.requested) dispatchVerification({ type: "cancel" });
     };
 
     // Validates the local preview without delivering data or navigating away.
@@ -37,12 +68,11 @@ export function ContactForm() {
             email.focus();
             return;
         }
-        setValues(emptyValues);
-        setInvalidField(null);
-        setPreviewed(true);
+        dispatchVerification({ type: "request" });
     };
 
     return (
+        <>
         <div className="contact-content">
             <h2 id="contact-title" tabIndex={-1}>Contact</h2>
             <form className="contact-form" onSubmit={previewMessage} aria-labelledby="contact-title" noValidate data-scene-scroll-owner>
@@ -69,14 +99,19 @@ export function ContactForm() {
                         {values.comments.length}/{commentsMaxLength}
                     </span>
                 </div>
-                <button className="action-button action-button-pill contact-form-send" type="submit" disabled={!canSend}>
-                    Send
-                    <IconArrowUpRight aria-hidden="true" />
+                <button ref={sendButtonRef} className="action-button action-button-pill contact-form-send" type="submit" disabled={!canSend} aria-busy={verification.requested}>
+                    <span>{sendLabel}</span>
+                    <SendIcon className={verification.requested ? "contact-form-spinner" : undefined} aria-hidden="true" />
                 </button>
                 <p className="visually-hidden" role="status">
                     {previewed ? "Preview only. No message was sent." : ""}
                 </p>
             </form>
         </div>
+        <ScenePanelOverlay>
+            {active && <ContactVerification key={verificationAttempt} requested={verification.requested && !verification.token}
+                onTokenChange={receiveToken} onCancel={cancelVerification} returnFocusRef={sendButtonRef} />}
+        </ScenePanelOverlay>
+        </>
     );
 }

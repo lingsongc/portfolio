@@ -45,7 +45,7 @@ export function NotFound() {
                 </h1>
                 <p className="not-found-message">This page seems to have drifted out of orbit.</p>
                 <a className="action-button action-button-pill not-found-home" href="/#home">
-                    Back to Home
+                    <span>Back to Home</span>
                     <IconArrowUpRight aria-hidden="true" />
                 </a>
             </main>

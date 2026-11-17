@@ -88,7 +88,7 @@ export function Contact({ circleAnchorRef, lifecycle }: ContactProps) {
                     ))}
                 </nav>
             </div>
-            <ContactForm />
+            <ContactForm active={lifecycle.active && lifecycle.phase === "idle"} />
             </div>
         </section>
     );

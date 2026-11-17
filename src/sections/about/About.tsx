@@ -56,7 +56,7 @@ export function About({ circleAnchorRef, narrowLayout, lifecycle, onMainCircleIm
                     ))}
                 </ul>
                 <a className="action-button action-button-pill about-resume-link" href="/about/resume.pdf" target="_blank" rel="noopener noreferrer">
-                    View Resume
+                    <span>View Resume</span>
                     <IconArrowUpRight aria-hidden="true" />
                 </a>
             </div>
