@@ -43,4 +43,4 @@
 }
 
 .not-found-message { max-width: 28rem; color: var(--colour-text-muted); }
-.not-found-home { font-size: var(--text-body); }
+.not-found-home { width: min(22rem, 100%); font-size: var(--text-body); }

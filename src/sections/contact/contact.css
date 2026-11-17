@@ -144,6 +144,76 @@ textarea.contact-form-field::-webkit-scrollbar-thumb {
     font-variant-numeric: tabular-nums;
 }
 
+/* A closed dialog keeps the background widget mounted without showing a form row. */
+.contact-verification {
+    position: fixed;
+    inset: max(2rem, env(safe-area-inset-top)) 0 auto;
+    width: min(26rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 4rem);
+    margin: 0 auto;
+    padding: 1.5rem;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: 1.5rem;
+    background: var(--colour-surface);
+    color: var(--colour-text);
+    font: 500 0.9375rem / 1.5 var(--font-text);
+    text-align: center;
+    pointer-events: auto;
+}
+
+.contact-verification:not([open]) {
+    display: block;
+    height: 0;
+    padding-block: 0;
+    overflow: hidden;
+    border: 0;
+    pointer-events: none;
+}
+
+.contact-verification[open] { display: grid; gap: 1rem; }
+.contact-verification::backdrop { background: rgb(0 0 0 / 65%); }
+.contact-verification h3 { font: 700 calc(var(--text-body) * 1.25) / 1.4 var(--font-title); }
+.contact-verification h3:focus { outline: none; }
+.contact-verification p { color: var(--colour-text-muted); }
+.contact-verification-description { display: grid; place-items: center; min-height: 3em; }
+/* Remove iframe baseline space so prompt and error states reserve exactly the same row. */
+.contact-verification-widget { width: 100%; height: 65px; line-height: 0; }
+.contact-verification-actions { display: flex; justify-content: center; gap: 0.75rem; }
+
+.contact-verification-action {
+    flex: 1;
+    min-width: 0;
+    max-width: 12rem;
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+}
+
+@media (--narrow-layout) {
+    .contact-verification {
+        inset: auto 0 0;
+        width: 100%;
+        max-width: none;
+        max-height: calc(100dvh - 1rem);
+        padding: 1.5rem max(1rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+        border-bottom: 0;
+        border-radius: 1.5rem 1.5rem 0 0;
+    }
+
+    .contact-verification[open] { animation: contact-verification-enter 200ms ease-out; }
+    .contact-verification-widget { max-width: 22rem; justify-self: center; }
+}
+
+@keyframes contact-verification-enter {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .contact-verification[open] { animation: none; }
+}
+
 .contact-form-send {
     width: 43%;
     min-width: 8rem;
@@ -161,6 +231,12 @@ textarea.contact-form-field::-webkit-scrollbar-thumb {
 }
 
 .contact-form-send:disabled::before { transform: translateY(-101%); }
+
+.contact-form-spinner { animation: contact-form-spin 800ms linear infinite; }
+
+@keyframes contact-form-spin {
+    to { transform: rotate(1turn); }
+}
 
 .contact-blob-layer,
 .contact-link-layer {
@@ -345,6 +421,7 @@ textarea.contact-form-field::-webkit-scrollbar-thumb {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .contact-form-spinner { animation: none; }
     .contact-blob-layer { filter: none; }
     .contact-blob-layer,
     .contact-link-layer,
