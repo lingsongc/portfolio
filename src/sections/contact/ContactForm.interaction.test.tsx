@@ -18,6 +18,7 @@ let callbacks: WidgetCallbacks;
 // Mount the actual form with controlled Cloudflare callbacks for each isolated interaction.
 beforeEach(async () => {
     vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: true }), { status: 201 })));
     // jsdom has no top layer; keep modal opening observable without mocking React components.
     Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
         configurable: true,
@@ -74,7 +75,7 @@ describe("contact verification interaction", () => {
         expect(field("name").value).toBe("Test visitor");
         expect(field("email").value).toBe("visitor@example.com");
         expect(field("comments").value).toBe("Keep this message after cancellation.");
-        expect(container.textContent).not.toContain("Preview only. No message was sent.");
+        expect(fetch).not.toHaveBeenCalled();
         expect(dialog().open).toBe(false);
         expect(button("Send").disabled).toBe(false);
     });
@@ -90,12 +91,51 @@ describe("contact verification interaction", () => {
         expect(field("name").value).toBe("");
         expect(field("email").value).toBe("");
         expect(field("comments").value).toBe("");
-        expect(container.textContent).toContain("Preview only. No message was sent.");
+        expect(container.textContent).toContain("Message sent.");
         expect(dialog().open).toBe(false);
         expect(button("Sent!").disabled).toBe(true);
         expect(button("Sent!").getAttribute("aria-busy")).toBe("false");
         await fillForm();
         expect(button("Send").disabled).toBe(false);
+    });
+
+    it("waits for database confirmation and sends one verified request", async () => {
+        let complete!: (response: Response) => void;
+        vi.mocked(fetch).mockReturnValue(new Promise((resolve) => { complete = resolve; }));
+        await fillForm();
+        await act(async () => callbacks.callback("verified-token"));
+        await clickButton("Send");
+        expect(button("Sending...").disabled).toBe(true);
+        expect(field("comments").value).toBe("Keep this message after cancellation.");
+        await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+        expect(fetch).toHaveBeenCalledTimes(1);
+        expect(fetch).toHaveBeenCalledWith("https://portfolio-contact-api.lingsong-c4.workers.dev/contact", expect.objectContaining({
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "Test visitor", email: "visitor@example.com", comments: "Keep this message after cancellation.", turnstileToken: "verified-token" }),
+        }));
+        await act(async () => complete(new Response(JSON.stringify({ success: true }), { status: 201 })));
+        expect(button("Sent!")).toBeDefined();
+        expect(field("comments").value).toBe("");
+    });
+
+    it.each(["server", "network", "malformed", "unconfirmed"])("preserves the draft after a %s failure and permits a fresh verified retry", async (failure) => {
+        if (failure === "network") vi.mocked(fetch).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+        else vi.mocked(fetch).mockResolvedValueOnce(new Response(
+            failure === "malformed" ? "not JSON" : JSON.stringify({ success: false }),
+            { status: failure === "server" ? 503 : 200 },
+        ));
+        await fillForm();
+        await act(async () => callbacks.callback("first-token"));
+        await clickButton("Send");
+        expect(field("comments").value).toBe("Keep this message after cancellation.");
+        expect(button("Send").disabled).toBe(false);
+        expect(container.querySelector("#contact-form-error")?.textContent).toContain("Couldn't send your message");
+        await clickButton("Send");
+        expect(fetch).toHaveBeenCalledTimes(1);
+        await act(async () => callbacks.callback("fresh-token"));
+        expect(fetch).toHaveBeenCalledTimes(2);
+        expect(button("Sent!")).toBeDefined();
     });
 
     it("removes an open dialog on scene departure without clearing the draft", async () => {
@@ -108,7 +148,7 @@ describe("contact verification interaction", () => {
         expect(container.querySelector("dialog")).toBeNull();
         await act(async () => previousCallbacks.callback("late-token"));
         expect(field("comments").value).toBe("Keep this message after cancellation.");
-        expect(container.textContent).not.toContain("Preview only. No message was sent.");
+        expect(fetch).not.toHaveBeenCalled();
     });
 });
 
